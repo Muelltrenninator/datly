@@ -1,0 +1,32 @@
+name: datly_client
+description: Client for the Datly project.
+publish_to: none
+
+environment:
+  sdk: ^3.10.1
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  auto_route: ^11.0.0
+  shared_preferences: ^2.5.3
+  http: ^1.6.0
+  image: ^4.5.4
+  blurhash_dart: ^1.2.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  auto_route_generator: ^10.4.0
+  build_runner: ^2.10.4
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+  assets:
+    - assets/icon.png

@@ -1,0 +1,16 @@
+name: datly
+description: A lightweight, self-hosted data collection tool intended for training data.
+publish_to: none
+repository: https://github.com/JHubi1/datly
+
+environment:
+  sdk: ^3.9.2
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
+  gitbaker: ^0.1.2
+
+workspace:
+  - packages/datly_server
+  - packages/datly_client
