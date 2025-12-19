@@ -694,8 +694,8 @@ class $LoginCodesTable extends LoginCodes
     aliasedName,
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 6,
-      maxTextLength: 6,
+      minTextLength: 8,
+      maxTextLength: 8,
     ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
@@ -1095,7 +1095,7 @@ class $SubmissionsTable extends Submissions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (username) ON UPDATE SET DEFAULT ON DELETE SET DEFAULT',
+      'REFERENCES users (username) ON UPDATE SET DEFAULT ON DELETE CASCADE',
     ),
   );
   @override
@@ -1650,7 +1650,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         'users',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [TableUpdate('submissions', kind: UpdateKind.update)],
+      result: [TableUpdate('submissions', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(

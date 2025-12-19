@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart';
 import 'package:mime/mime.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
-import 'package:shelf_limiter/shelf_limiter.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:tracer/tracer.dart';
 
@@ -29,26 +27,9 @@ const devEnv = !bool.fromEnvironment("dart.vm.product");
 late final HttpServer server;
 late final AppDatabase db;
 final _router = Router()
-  ..mount(
-    "/api",
-    Pipeline()
-        .addMiddleware(
-          shelfLimiter(
-            RateLimiterOptions(
-              maxRequests: 10,
-              windowSize: Duration(seconds: 20),
-              onRateLimitExceeded: (r) => Response(
-                429,
-                body: jsonEncode({
-                  "error": "Too many requests, please try again later.",
-                }),
-                headers: {"Content-Type": "application/json"},
-              ),
-            ),
-          ),
-        )
-        .addHandler(apiRouter.call),
-  )
+  ..mount("/api", apiPipeline)
+  ..get("/legal/privacy", legalHandler)
+  ..get("/legal/terms", legalHandler)
   ..mount("/", fileHandler);
 
 Response fileHandler(Request req) {
@@ -67,6 +48,19 @@ Response fileHandler(Request req) {
     // https://docs.flutter.dev/platform-integration/web/wasm#serve-the-built-output-with-an-http-server
     "Cross-Origin-Embedder-Policy": "require-corp",
     "Cross-Origin-Opener-Policy": "same-origin",
+  };
+  final response = Response.ok(contents, headers: headers);
+  return req.method == "HEAD" ? response.change(body: null) : response;
+}
+
+Response legalHandler(Request req) {
+  final path = req.url.path.replaceAll("..", "").split("/").last;
+  final file = File("legal/$path.md");
+  if (!file.existsSync()) return Response.notFound("Document not found");
+
+  final contents = file.readAsStringSync();
+  final headers = {
+    HttpHeaders.contentTypeHeader: "text/markdown; charset=utf-8",
   };
   final response = Response.ok(contents, headers: headers);
   return req.method == "HEAD" ? response.change(body: null) : response;
@@ -180,7 +174,8 @@ void main(List<String> args) async {
                     lc.user.equals(adminUser) &
                     lc.expiresAt.isBiggerOrEqualValue(DateTime.now()),
               ))
-              .getSingleOrNull())
+              .get())
+          .firstOrNull
           ?.code;
   if (code == null) {
     final admin = await (db.select(

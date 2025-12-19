@@ -6,7 +6,7 @@ import 'server.dart';
 
 String _codeCharSpace = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 String generateCode() => List.generate(
-  6,
+  8,
   (index) => _codeCharSpace[Random.secure().nextInt(_codeCharSpace.length)],
 ).join();
 

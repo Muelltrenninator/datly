@@ -10,6 +10,7 @@ void define(Router router) {
   final assetsDirectory = Directory("${dataDirectory.path}/assets")
     ..createSync(recursive: true);
   router.mount("/assets", (req) {
+    // MARK: [GET|HEAD] /assets/<asset>
     final path = req.url.path.replaceAll("..", "");
     if (!RegExp(r"[0-9a-zA-Z]{32}\.(?:jpg|png)").hasMatch(path)) {
       return Response.badRequest(

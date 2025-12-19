@@ -25,7 +25,7 @@ class Users extends Table {
 }
 
 class LoginCodes extends Table {
-  TextColumn get code => text().withLength(min: 6, max: 6)();
+  TextColumn get code => text().withLength(min: 8, max: 8)();
   TextColumn get user => text().references(
     Users,
     #username,
@@ -58,7 +58,7 @@ class Submissions extends Table {
   TextColumn get user => text().nullable().references(
     Users,
     #username,
-    onDelete: KeyAction.setDefault,
+    onDelete: KeyAction.cascade,
     onUpdate: KeyAction.setDefault,
   )();
   TextColumn get status => textEnum<SubmissionStatus>().withDefault(

@@ -10,6 +10,7 @@ RUN dart compile exe bin/server.dart -o bin/server
 
 FROM scratch
 COPY --from=build /runtime/ /
+COPY --from=build /app/packages/datly_server/bin/legal/ /app/bin/legal/
 COPY --from=build /app/packages/datly_server/bin/public/ /app/bin/public/
 COPY --from=build /app/packages/datly_server/bin/sqlite/ /app/bin/sqlite/
 COPY --from=build /app/packages/datly_server/bin/server /app/bin/

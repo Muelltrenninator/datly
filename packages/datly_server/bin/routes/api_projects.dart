@@ -1,11 +1,16 @@
 import 'dart:convert';
 
+import 'package:archive/archive.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:image/image.dart' as img;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:uuid/uuid.dart';
+
+// parent package
+// ignore: depend_on_referenced_packages, directives_ordering
+import 'package:datly/generated/gitbaker.g.dart';
 
 import '../database/database.dart';
 import '../helpers.dart';
@@ -15,18 +20,21 @@ import 'api.dart';
 void define(Router router) {
   router
     ..get(
-      "/projects/list",
+      "/projects/list", // MARK: [GET] /projects/list
       apiAuthWall((req, auth) async {
         final projects = await db.select(db.projects).get();
-        projects.removeWhere((p) => !auth!.user.projects.contains(p.id));
+        projects.removeWhere((p) {
+          if (auth?.user.role == UserRole.admin) return false;
+          return !auth!.user.projects.contains(p.id);
+        });
         return Response.ok(
-          projects.map((u) => u.toJson()).toList(),
+          jsonEncode(projects.map((u) => u.toJson()).toList()),
           headers: {"Content-Type": "application/json"},
         );
       }),
     )
     ..get(
-      "/projects/<id>",
+      "/projects/<id>", // MARK: [GET] /projects/<id>
       apiAuthWall((req, auth) async {
         final project =
             await (db.select(db.projects)..where(
@@ -44,7 +52,7 @@ void define(Router router) {
       }),
     )
     ..post(
-      "/projects/<id>",
+      "/projects/<id>", // MARK: [POST] /projects/<id>
       apiAuthWall((req, _) async {
         final project =
             await (db.select(db.projects)..where(
@@ -79,7 +87,7 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..put(
-      "/projects",
+      "/projects", // MARK: [PUT] /projects
       apiAuthWall((req, _) async {
         if (jsonDecode(await req.readAsString()) case {
           "title": String title,
@@ -103,7 +111,7 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..delete(
-      "/projects/<id>",
+      "/projects/<id>", // MARK: [DELETE] /projects/<id>
       apiAuthWall((req, _) async {
         final project =
             await (db.select(db.projects)..where(
@@ -121,7 +129,7 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..get(
-      "/projects/<id>/submissions",
+      "/projects/<id>/submissions", // MARK: [GET] /projects/<id>/submissions
       apiAuthWall((req, _) async {
         final project =
             await (db.select(db.projects)..where(
@@ -132,9 +140,14 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        final submissions = await (db.select(
-          db.submissions,
-        )..where((s) => s.projectId.equals(project.id))).get();
+        final submissions =
+            await (db.select(db.submissions)
+                  ..where((s) => s.projectId.equals(project.id))
+                  ..orderBy([
+                    (s) => OrderingTerm.desc(s.submittedAt),
+                    (s) => OrderingTerm.desc(s.id),
+                  ]))
+                .get();
 
         return Response.ok(
           jsonEncode(submissions.map((s) => s.toJson()).toList()),
@@ -143,7 +156,7 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..get(
-      "/projects/<id>/submissions/live",
+      "/projects/<id>/submissions/dump", // MARK: [GET] /projects/<id>/submissions/dump
       apiAuthWall((req, _) async {
         final project =
             await (db.select(db.projects)..where(
@@ -154,9 +167,86 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        final submissions = (db.select(
-          db.submissions,
-        )..where((s) => s.projectId.equals(project.id))).watch();
+        final includePendingReviews =
+            req.url.queryParameters["includePendingReviews"] == "true";
+
+        final submissions =
+            await (db.select(db.submissions)
+                  ..where(
+                    (s) =>
+                        s.projectId.equals(project.id) &
+                        (includePendingReviews
+                            ? const Constant(true)
+                            : s.status.equals(SubmissionStatus.accepted.name)),
+                  )
+                  ..orderBy([
+                    (s) => OrderingTerm.desc(s.submittedAt),
+                    (s) => OrderingTerm.desc(s.id),
+                  ]))
+                .get();
+
+        final archive = Archive()
+          ..addFile(
+            ArchiveFile.string(
+              "manifest.json",
+              JsonEncoder.withIndent(" " * 4).convert({
+                "datly": GitBaker.currentBranch.commits.last.hash,
+                "generatedAt": DateTime.now().millisecondsSinceEpoch,
+                "project": project.toJson(),
+                "submissions": submissions.map((s) => s.toJson()).toList(),
+              }),
+            ),
+          )
+          ..addFile(
+            ArchiveFile.string(
+              "data.csv",
+              "asset,tags\n${submissions.map((s) => "${s.assetId != null && s.assetMimeType != null ? assetFile(s.assetId!, s.assetMimeType!).path.split("/").last : ""},").join("\n")}",
+            ),
+          )
+          ..addFile(ArchiveFile.directory("data/"));
+        for (var submission in submissions) {
+          if (submission.assetId != null && submission.assetMimeType != null) {
+            final asset = assetFile(
+              submission.assetId!,
+              submission.assetMimeType!,
+            );
+            if (await asset.exists()) {
+              archive.addFile(
+                ArchiveFile.bytes(
+                  "data/${asset.path.split("/").last}",
+                  await asset.readAsBytes(),
+                ),
+              );
+            }
+          }
+        }
+
+        return Response.ok(
+          ZipEncoder().encodeBytes(archive),
+          headers: {"Content-Type": "application/zip"},
+        );
+      }, minimumRole: UserRole.admin),
+    )
+    ..get(
+      "/projects/<id>/submissions/live", // MARK: [GET] /projects/<id>/submissions/live
+      apiAuthWall((req, _) async {
+        final project =
+            await (db.select(db.projects)..where(
+                  (u) => u.id.equals(int.tryParse(req.params["id"]!) ?? -1),
+                ))
+                .getSingleOrNull();
+        if (project == null) {
+          return Response.notFound(jsonEncode({"error": "Project not found"}));
+        }
+
+        final submissions =
+            (db.select(db.submissions)
+                  ..where((s) => s.projectId.equals(project.id))
+                  ..orderBy([
+                    (s) => OrderingTerm.desc(s.submittedAt),
+                    (s) => OrderingTerm.desc(s.id),
+                  ]))
+                .watch();
 
         return Response.ok(
           submissions.map(
@@ -170,7 +260,7 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..put(
-      "/projects/<id>/submissions",
+      "/projects/<id>/submissions", // MARK: [PUT] /projects/<id>/submissions
       apiAuthWall((req, auth) async {
         if (req.headers["content-type"] == null ||
             !req.headers["content-type"]!.startsWith("multipart/")) {
@@ -222,14 +312,22 @@ void define(Router router) {
             headers: {"Content-Type": "application/json"},
           );
         }
+        image.exif.clear();
 
         if (image.width != 224 || image.height != 224) {
           // return Response.badRequest(
           //   body: jsonEncode({"error": "Image must be 224x224 pixels"}),
           //   headers: {"Content-Type": "application/json"},
           // );
+          final size = image.width < image.height ? image.width : image.height;
           image = img.resize(
-            image,
+            img.copyCrop(
+              image,
+              x: (image.width - size) ~/ 2,
+              y: (image.height - size) ~/ 2,
+              width: size,
+              height: size,
+            ),
             width: 224,
             height: 224,
             interpolation: img.Interpolation.cubic,
@@ -258,7 +356,7 @@ void define(Router router) {
       }),
     )
     ..post(
-      "/projects/<id>/submissions/<submissionId>",
+      "/projects/<id>/submissions/<submissionId>", // MARK: [POST] /projects/<id>/submissions/<submissionId>
       apiAuthWall((req, auth) async {
         final project =
             await (db.select(db.projects)..where(
@@ -308,8 +406,8 @@ void define(Router router) {
           if (status != null &&
               SubmissionStatus.values.byName(status) ==
                   SubmissionStatus.censored &&
-              submission.assetId != null &&
-              submission.assetMimeType != null) {
+              (submission.assetId != null ||
+                  submission.assetMimeType != null)) {
             final asset = assetFile(
               submission.assetId!,
               submission.assetMimeType!,
@@ -336,7 +434,7 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..delete(
-      "/projects/<id>/submissions/<submissionId>",
+      "/projects/<id>/submissions/<submissionId>", // MARK: [DELETE] /projects/<id>/submissions/<submissionId>
       apiAuthWall((req, auth) async {
         final project =
             await (db.select(db.projects)..where(
@@ -363,11 +461,19 @@ void define(Router router) {
         }
 
         if (submission.user != auth!.user.username &&
-            auth.user.role != UserRole.admin) {
+            auth.user.role.index < UserRole.admin.index) {
           return Response.forbidden(
             jsonEncode({"error": "Insufficient permissions"}),
             headers: {"Content-Type": "application/json"},
           );
+        }
+
+        if (submission.assetId != null && submission.assetMimeType != null) {
+          final asset = assetFile(
+            submission.assetId!,
+            submission.assetMimeType!,
+          );
+          if (await asset.exists()) await asset.delete();
         }
 
         await (db.delete(

@@ -19,6 +19,7 @@ dependencies:
   sqlite3: ^2.9.3
   image: ^4.5.4
   blurhash_dart: ^1.2.1
+  archive: ^4.0.7
 
 dev_dependencies:
   lints: ^6.0.0

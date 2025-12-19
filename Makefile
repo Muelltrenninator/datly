@@ -32,6 +32,7 @@ deps:
 	$(DART) pub get
 
 build-client:
+	dart run gitbaker
 	cd $(CLIENT_DIR) && $(FLUTTER) build web --release --no-web-resources-cdn --csp --wasm
 
 copy-assets:

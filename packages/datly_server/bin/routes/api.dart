@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
+import 'package:shelf_limiter/shelf_limiter.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../database/database.dart';
 import '../server.dart';
-
 import 'api_assets.dart' as api_assets;
 import 'api_projects.dart' as api_projects;
 import 'api_users.dart' as api_user;
@@ -17,6 +17,23 @@ final apiRouter = Router(
     headers: {"Content-Type": "application/json"},
   ),
 );
+Handler get apiPipeline => Pipeline()
+    .addMiddleware(
+      shelfLimiter(
+        RateLimiterOptions(
+          maxRequests: 20,
+          windowSize: Duration(seconds: 20),
+          onRateLimitExceeded: (r) => Response(
+            429,
+            body: jsonEncode({
+              "error": "Too many requests, please try again later.",
+            }),
+            headers: {"Content-Type": "application/json"},
+          ),
+        ),
+      ),
+    )
+    .addHandler(apiRouter.call);
 
 void defineApiRouter() {
   api_assets.define(apiRouter);
@@ -31,7 +48,7 @@ Future<Object?> _apiAuthInternal(
   UserRole minimumRole = UserRole.user,
 }) async {
   var token = req.headers["authorization"];
-  if ((!(token?.startsWith("Token ") ?? false) || token!.length != 12)) {
+  if ((!(token?.startsWith("Token ") ?? false) || token!.length != (6 + 8))) {
     if (minimumRole == UserRole.guest) {
       return null;
     }

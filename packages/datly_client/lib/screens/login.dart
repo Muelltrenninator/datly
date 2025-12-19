@@ -1,6 +1,10 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:markdown_widget/markdown_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../widgets/title_bar.dart';
@@ -13,26 +17,39 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
+  late final AnimationController sizeAnimationController;
   final TextEditingController tokenController = TextEditingController();
   final FocusNode tokenFocusNode = FocusNode();
+  final List<String> disallowedTokens = [];
 
   @override
   void initState() {
     super.initState();
-    tokenController.addListener(() => setState(() {}));
+    tokenController.addListener(() {
+      if (!disallowedTokens.contains(tokenController.text)) {
+        submitErrorText = null;
+      }
+      if (mounted) setState(() {});
+    });
     AuthManager.instance.initializeCompleter.future.then((_) {
       if (AuthManager.instance.authToken != null && mounted) {
-        context.router.canPop()
-            ? context.router.pop()
-            : context.router.replacePath("/");
+        context.router.replacePath("/");
       }
     });
+
+    sizeAnimationController = AnimationController(
+      vsync: this,
+      duration: Durations.extralong4,
+    )..forward();
   }
 
   @override
   void dispose() {
     tokenController.dispose();
+    tokenFocusNode.dispose();
+    sizeAnimationController.dispose();
     super.dispose();
   }
 
@@ -41,60 +58,226 @@ class _LoginScreenState extends State<LoginScreen> {
   void submit() async {
     submitErrorText = null;
     final String token = tokenController.text;
-    if (token.length != 6) {
+    if (token.length != 8) {
       tokenFocusNode.requestFocus();
       return;
     }
 
     submitLoading = true;
-    setState(() {});
+    if (mounted) setState(() {});
 
     await AuthManager.instance.fetchAuthenticatedUser(token: token);
 
     submitLoading = false;
-    submitErrorText = "Invalid token.";
+    submitErrorText = "Unknown authorization token.";
+    disallowedTokens.add(token);
     if (mounted) setState(() {});
+
+    Future.delayed(Duration(seconds: 3)).then((_) {
+      disallowedTokens.remove(token);
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: TitleBarTitle(),
-        centerTitle: true,
-      ),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 124),
-          child: TextField(
-            enabled: !submitLoading,
-            onSubmitted: (_) => submit(),
-            controller: tokenController,
-            focusNode: tokenFocusNode,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp("[0-9A-Za-z]")),
-              TextInputFormatter.withFunction(
-                (oldValue, newValue) =>
-                    newValue.copyWith(text: newValue.text.toUpperCase()),
-              ),
-            ],
-            maxLength: 6,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              errorText: submitErrorText,
-              suffixIcon: Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: IconButton(
-                  disabledColor: Theme.of(context).disabledColor,
-                  onPressed: tokenController.text.length == 6 ? submit : null,
-                  icon: Icon(Icons.chevron_right),
+          constraints: BoxConstraints(maxWidth: 360),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Transform.scale(scale: 2, child: TitleBarTitle()),
+              SizedBox(height: 24),
+              Card.filled(
+                child: SizeTransition(
+                  sizeFactor: CurveTween(
+                    curve: Curves.easeInOutCubicEmphasized,
+                  ).animate(sizeAnimationController),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 20,
+                      bottom: 12,
+                    ),
+                    child: TextField(
+                      enabled: !submitLoading,
+                      autofocus: true,
+                      onSubmitted: (_) => submit(),
+                      controller: tokenController,
+                      focusNode: tokenFocusNode,
+                      autocorrect: false,
+                      autofillHints: [],
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp("[0-9A-Za-z]"),
+                        ),
+                        TextInputFormatter.withFunction(
+                          (oldValue, newValue) => newValue.copyWith(
+                            text: newValue.text.toUpperCase(),
+                          ),
+                        ),
+                      ],
+                      maxLength: 8,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Access Token",
+                        errorText: submitErrorText,
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: IconButton(
+                            disabledColor: Theme.of(context).disabledColor,
+                            onPressed:
+                                tokenController.text.length == 8 &&
+                                    !disallowedTokens.contains(
+                                      tokenController.text,
+                                    ) &&
+                                    !submitLoading
+                                ? submit
+                                : null,
+                            icon: Icon(Icons.chevron_right),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              SizedBox(height: 8),
+              Builder(
+                builder: (context) => Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: "New here? "),
+                      TextSpan(
+                        text: "Request a token.",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () =>
+                              launchUrl(Uri.parse("mailto:me@jhubi1.com")),
+                      ),
+                      TextSpan(text: "\n"),
+                      TextSpan(
+                        text: "Privacy Policy",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => showMarkdownDialog(
+                            context: context,
+                            origin: Uri.parse(
+                              "${ApiManager.baseUri.replace(path: "")}/legal/privacy",
+                            ),
+                          ),
+                      ),
+                      TextSpan(text: " • "),
+                      TextSpan(
+                        text: "Terms of Service",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => showMarkdownDialog(
+                            context: context,
+                            origin: Uri.parse(
+                              "${ApiManager.baseUri.replace(path: "")}/legal/terms",
+                            ),
+                          ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                  style: DefaultTextStyle.of(context).style.copyWith(
+                    fontSize: 12,
+                    color: Theme.of(context).disabledColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
+class MarkdownDialog extends StatefulWidget {
+  final Uri origin;
+
+  const MarkdownDialog({super.key, required this.origin});
+
+  @override
+  State<MarkdownDialog> createState() => _MarkdownDialogState();
+}
+
+class _MarkdownDialogState extends State<MarkdownDialog> {
+  String? data;
+  bool error = false;
+
+  @override
+  void initState() {
+    super.initState();
+    http.get(widget.origin).then((response) {
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        data = response.body;
+      } else {
+        error = true;
+      }
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      contentPadding: EdgeInsets.symmetric(vertical: 16),
+      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
+      content: AnimatedSize(
+        duration: Durations.medium1,
+        curve: Curves.easeInOutCubicEmphasized,
+        child: !error
+            ? data != null
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24),
+                        child: MarkdownBlock(
+                          data: data!,
+                          config: Theme.brightnessOf(context) == Brightness.dark
+                              ? MarkdownConfig.darkConfig
+                              : MarkdownConfig.defaultConfig,
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: EdgeInsets.only(top: 32, bottom: 32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [CircularProgressIndicator()],
+                      ),
+                    )
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  "Failed to load document.",
+                  style: DefaultTextStyle.of(
+                    context,
+                  ).style.copyWith(color: ColorScheme.of(context).error),
+                ),
+              ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+        ),
+      ],
+    );
+  }
+}
+
+Future<void> showMarkdownDialog({
+  required BuildContext context,
+  required Uri origin,
+}) async => showDialog<void>(
+  context: context,
+  builder: (_) => MarkdownDialog(origin: origin),
+);

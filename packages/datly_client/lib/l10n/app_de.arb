@@ -1,0 +1,20 @@
+{
+    "@@locale": "de",
+    "retry": "Erneut Versuchen",
+    "delete": "Löschen",
+    "cameraNotFound": "Keine Kamera Gefunden",
+    "cameraErrorPermission": "Der Zugriff auf die Kamera wurde verweigert.",
+    "cameraErrorUnavailable": "Keine Kamera auf diesem Gerät verfügbar.",
+    "selectCamera": "Kamera Auswählen",
+    "selectCameraDescriptionBack": "Rückkamera",
+    "selectCameraDescriptionFront": "Frontkamera",
+    "selectCameraDescriptionExternal": "Externe Kamera",
+    "selectProject": "Projekt Auswählen",
+    "noSubmissions": "Noch keine Einsendungen.",
+    "submissionStatusPending": "Ausstehend",
+    "submissionStatusAccepted": "Akzeptiert",
+    "submissionStatusRejected": "Abgelehnt",
+    "submissionStatusCensored": "Zensiert",
+    "submissionDeleteTitle": "Einsendung Löschen",
+    "submissionDeleteMessage": "Möchtest du diese Einsendung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+}

@@ -1,0 +1,88 @@
+{
+    "@@locale": "en",
+    "retry": "Retry",
+    "@retry": {
+        "description": "Button text to retry accessing the camera. This string is formatted in MLA title case.",
+        "context": "global"
+    },
+    "delete": "Delete",
+    "@delete": {
+        "description": "Button text to delete an item. This string is formatted in MLA title case.",
+        "context": "global"
+    },
+    "cameraNotFound": "No Camera Found",
+    "@cameraNotFound": {
+        "description": "Shown when no camera device is found on the system or the permission is denied. This string is formatted in MLA title case.",
+        "context": "upload:error"
+    },
+    "cameraErrorPermission": "Access to the camera was denied.",
+    "@cameraErrorPermission": {
+        "description": "Explains that access to the camera was denied by the user.",
+        "context": "upload:error"
+    },
+    "cameraErrorUnavailable": "No camera available on this device.",
+    "@cameraErrorUnavailable": {
+        "description": "Explains that no camera is available on the device.",
+        "context": "upload:error"
+    },
+    "selectCamera": "Select Camera",
+    "@selectCamera": {
+        "description": "Title for the camera selection dialog. This string is formatted in MLA title case.",
+        "context": "upload:cameraSelection"
+    },
+    "selectCameraDescriptionBack": "Back Camera",
+    "@selectCameraDescriptionBack": {
+        "description": "The word 'Back' used to describe a camera facing away from the user. This string is formatted in MLA title case.",
+        "context": "upload:cameraSelection"
+    },
+    "selectCameraDescriptionFront": "Front Camera",
+    "@selectCameraDescriptionFront": {
+        "description": "The word 'Front' used to describe a camera facing towards the user. This string is formatted in MLA title case.",
+        "context": "upload:cameraSelection"
+    },
+    "selectCameraDescriptionExternal": "External Camera",
+    "@selectCameraDescriptionExternal": {
+        "description": "The word 'External' used to describe an external camera. This string is formatted in MLA title case.",
+        "context": "upload:cameraSelection"
+    },
+    "selectProject": "Select Project",
+    "@selectProject": {
+        "description": "Title for the project selection dialog. ",
+        "context": "upload:projectSelection"
+    },
+    "noSubmissions": "No submissions yet.",
+    "@noSubmissions": {
+        "description": "Shown when there are no submissions available for the selected project.",
+        "context": "submissions"
+    },
+    "submissionStatusPending": "Pending",
+    "@submissionStatusPending": {
+        "description": "The status 'Pending' for a submission. This string is formatted in MLA title case.",
+        "context": "submissions:status"
+    },
+    "submissionStatusAccepted": "Accepted",
+    "@submissionStatusAccepted": {
+        "description": "The status 'Accepted' for a submission. This string is formatted in MLA title case.",
+        "context": "submissions:status"
+    },
+    "submissionStatusRejected": "Rejected",
+    "@submissionStatusRejected": {
+        "description": "The status 'Rejected' for a submission. This string is formatted in MLA title case.",
+        "context": "submissions:status"
+    },
+    "submissionStatusCensored": "Censored",
+    "@submissionStatusCensored": {
+        "description": "The status 'Censored' for a submission. This string is formatted in MLA title case.",
+        "context": "submissions:status"
+    },
+    "submissionDeleteTitle": "Delete Submission",
+    "@submissionDeleteTitle": {
+        "description": "Title for the dialog to confirm deletion of a submission. This string is formatted in MLA title case.",
+        "context": "submissions:delete"
+    },
+    "submissionDeleteMessage": "Are you sure you want to delete this submission? This action cannot be undone.",
+    "@submissionDeleteMessage": {
+        "description": "Message asking the user to confirm deletion of a submission.",
+        "context": "submissions:delete"
+    }
+}
