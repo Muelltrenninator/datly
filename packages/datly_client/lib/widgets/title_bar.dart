@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:datly/generated/gitbaker.g.dart';
 
 import '../api.dart';
+import '../l10n/app_localizations.dart';
 import '../main.gr.dart';
 
 class TitleBarTitle extends StatelessWidget {
@@ -45,99 +46,104 @@ class TitleBarTitle extends StatelessWidget {
 }
 
 class TitleBar extends StatelessWidget implements PreferredSizeWidget {
-  const TitleBar({super.key});
+  final Color? backgroundColor;
+  const TitleBar({super.key, this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
     precacheImage(AssetImage("assets/icon.png"), context);
     final username = AuthManager.instance.authenticatedUser?.username;
-    return AppBar(
-      automaticallyImplyLeading: false,
-      title: TitleBarTitle(onTap: () => context.navigateToPath("/")),
-      actions: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: Semantics(
-            button: true,
-            label:
-                "Account overview${username != null ? " for $username" : ""}",
-            child: Tooltip(
-              message: username ?? "Account",
-              child: InkWell(
-                onTap: () =>
-                    context.navigateTo(SubmissionsRoute(user: username)),
-                borderRadius: BorderRadius.circular(100),
-                child: Padding(
-                  padding: EdgeInsetsGeometry.all(1),
-                  child: AuthManager.instance.authenticatedUser?.avatar(
-                    context,
+    return GestureDetector(
+      child: AppBar(
+        automaticallyImplyLeading: false,
+        title: TitleBarTitle(onTap: () => context.navigateToPath("/")),
+        backgroundColor: backgroundColor,
+        actions: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Semantics(
+              button: true,
+              label:
+                  "${AppLocalizations.of(context).accountOverview}${username != null ? " ${AppLocalizations.of(context).accountOverviewFor(username)}" : ""}",
+              child: Tooltip(
+                message: username ?? "Account",
+                child: InkWell(
+                  onTap: () =>
+                      context.navigateTo(SubmissionsRoute(user: username)),
+                  borderRadius: BorderRadius.circular(100),
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.all(1),
+                    child: AuthManager.instance.authenticatedUser?.avatar(
+                      context,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        IconButton(
-          onPressed: () => showAboutDialog(
-            context: context,
-            applicationName: "Datly",
-            applicationVersion:
-                "${GitBaker.currentBranch.name}"
-                        "@${GitBaker.currentBranch.commits.last.hashAbbreviated} "
-                        "${GitBaker.workspace.isNotEmpty ? "(${gitBakerWorkspaceFormat(GitBaker.workspace)})" : ""}"
-                    .trim(),
-            applicationIcon: Image.asset(
-              "assets/icon.png",
-              width: 72,
-              height: 72,
-              isAntiAlias: true,
-              filterQuality: FilterQuality.high,
+          IconButton(
+            onPressed: () => showAboutDialog(
+              context: context,
+              applicationName: "Datly",
+              applicationVersion:
+                  "${GitBaker.currentBranch.name}"
+                          "@${GitBaker.currentBranch.commits.last.hashAbbreviated} "
+                          "${GitBaker.workspace.isNotEmpty ? "(${gitBakerWorkspaceFormat(GitBaker.workspace)})" : ""}"
+                      .trim(),
+              applicationIcon: Image.asset(
+                "assets/icon.png",
+                width: 72,
+                height: 72,
+                isAntiAlias: true,
+                filterQuality: FilterQuality.high,
+              ),
+              applicationLegalese: "© 2025 JHubi1. All rights reserved.",
+              children: [
+                SizedBox(height: 24),
+                ListTile(
+                  onTap: () => launchUrl(
+                    Uri.parse("https://github.com/Mulltrenninator"),
+                  ),
+                  leading: Icon(Icons.open_in_new),
+                  title: Text(AppLocalizations.of(context).aboutAppLearnMore),
+                ),
+                ListTile(
+                  onTap: () => AuthManager.instance.logout(),
+                  leading: Icon(Icons.logout),
+                  title: Text(AppLocalizations.of(context).aboutAppLogout),
+                ),
+              ],
             ),
-            applicationLegalese: "© 2025 JHubi1. All rights reserved.",
-            children: [
-              SizedBox(height: 24),
-              ListTile(
-                onTap: () =>
-                    launchUrl(Uri.parse("https://github.com/Mulltrenninator")),
-                leading: Icon(Icons.open_in_new),
-                title: Text("Learn More"),
-              ),
-              ListTile(
-                onTap: () => AuthManager.instance.logout(),
-                leading: Icon(Icons.logout),
-                title: Text("Logout"),
-              ),
-            ],
+            icon: Icon(Icons.info_outline),
+            tooltip: "About",
           ),
-          icon: Icon(Icons.info_outline),
-          tooltip: "About",
-        ),
-        if (AuthManager.instance.authenticatedUserIsAdmin)
-          MenuAnchor(
-            menuChildren: [
-              MenuItemButton(
-                onPressed: () => context.navigateTo(ListUsersRoute()),
-                leadingIcon: Icon(Icons.group),
-                child: Text("Users"),
-              ),
-              MenuItemButton(
-                onPressed: () => context.navigateTo(ListProjectsRoute()),
-                leadingIcon: Icon(Icons.widgets),
-                child: Text("Projects"),
-              ),
-            ],
-            builder: (_, controller, _) {
-              return IconButton(
-                onPressed: controller.isOpen
-                    ? controller.close
-                    : controller.open,
-                icon: Icon(Icons.admin_panel_settings_outlined),
-                tooltip: "Admin Menu",
-              );
-            },
-          ),
-        SizedBox(width: 8),
-      ],
+          if (AuthManager.instance.authenticatedUserIsAdmin)
+            MenuAnchor(
+              menuChildren: [
+                MenuItemButton(
+                  onPressed: () => context.navigateTo(ListUsersRoute()),
+                  leadingIcon: Icon(Icons.group),
+                  child: Text("Users"),
+                ),
+                MenuItemButton(
+                  onPressed: () => context.navigateTo(ListProjectsRoute()),
+                  leadingIcon: Icon(Icons.widgets),
+                  child: Text("Projects"),
+                ),
+              ],
+              builder: (_, controller, _) {
+                return IconButton(
+                  onPressed: controller.isOpen
+                      ? controller.close
+                      : controller.open,
+                  icon: Icon(Icons.admin_panel_settings_outlined),
+                  tooltip: "Admin Menu",
+                );
+              },
+            ),
+          SizedBox(width: 8),
+        ],
+      ),
     );
   }
 

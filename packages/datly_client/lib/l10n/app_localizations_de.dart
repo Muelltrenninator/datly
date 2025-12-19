@@ -61,4 +61,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get submissionDeleteMessage =>
       'Möchtest du diese Einsendung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get accountOverview => 'Account-Übersicht';
+
+  @override
+  String accountOverviewFor(String username) {
+    return 'für $username';
+  }
+
+  @override
+  String get aboutAppLearnMore => 'Mehr Erfahren';
+
+  @override
+  String get aboutAppLogout => 'Abmelden';
 }

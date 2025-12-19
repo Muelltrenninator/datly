@@ -59,4 +59,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get submissionDeleteMessage =>
       'Are you sure you want to delete this submission? This action cannot be undone.';
+
+  @override
+  String get accountOverview => 'Account overview';
+
+  @override
+  String accountOverviewFor(String username) {
+    return 'for $username';
+  }
+
+  @override
+  String get aboutAppLearnMore => 'Learn More';
+
+  @override
+  String get aboutAppLogout => 'Logout';
 }

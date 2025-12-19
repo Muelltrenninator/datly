@@ -84,5 +84,31 @@
     "@submissionDeleteMessage": {
         "description": "Message asking the user to confirm deletion of a submission.",
         "context": "submissions:delete"
+    },
+    "accountOverview": "Account overview",
+    "@accountOverview": {
+        "description": "Accessibility label for the account overview section.",
+        "context": "about"
+    },
+    "accountOverviewFor": "for {username}",
+    "@accountOverviewFor": {
+        "description": "Accessibility label for the account overview section including the username. This must match the `accountOverview` string.",
+        "context": "about",
+        "placeholders": {
+            "username": {
+                "type": "String",
+                "example": "johndoe"
+            }
+        }
+    },
+    "aboutAppLearnMore": "Learn More",
+    "@aboutAppLearnMore": {
+        "description": "Label for a button that leads to more information about the app. This string is formatted in MLA title case.",
+        "context": "about"
+    },
+    "aboutAppLogout": "Logout",
+    "@aboutAppLogout": {
+        "description": "Label for a button that logs the user out of the app. This string is formatted in MLA title case.",
+        "context": "about"
     }
 }

@@ -4,8 +4,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web/web.dart' as web;
 
 import 'api.dart';
 import 'l10n/app_localizations.dart';
@@ -82,6 +84,7 @@ Future<void> camerasInitialize() async {
   cameras = Completer();
   cameras.complete(
     await availableCameras().onError((e, _) {
+      if (kDebugMode) print(e);
       switch (e) {
         case CameraException c when c.code == "CameraAccessDenied":
           camerasPermissionDenied = true;
@@ -121,10 +124,11 @@ class _MainAppState extends State<MainApp> {
         "Poppins",
       ], await DefaultAssetBundle.of(context).loadString("assets/OFL.txt"));
     });
-
     AuthManager.instance
       ..addListener(onUpdate)
       ..initialize();
+
+    if (kIsWeb) web.document.getElementById("loaderContainer")?.remove();
   }
 
   @override
@@ -152,13 +156,73 @@ class _MainAppState extends State<MainApp> {
 }
 
 @RoutePage()
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: TitleBar(), body: AutoRouter());
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  late final ValueNotifier<bool> _immersiveMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _immersiveMode = ValueNotifier(prefs.getBool("immersiveMode") ?? false);
+    _immersiveMode.addListener(onUpdate);
   }
+
+  @override
+  void dispose() {
+    _immersiveMode.removeListener(onUpdate);
+    super.dispose();
+  }
+
+  void onUpdate() {
+    if (_immersiveMode.value == true) {
+      prefs.setBool("immersiveMode", true);
+    } else {
+      prefs.remove("immersiveMode");
+    }
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) => Shortcuts(
+    shortcuts: {
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.alt,
+        LogicalKeyboardKey.keyI,
+      ): ImmersiveModeIntent(),
+      LogicalKeySet(LogicalKeyboardKey.altGraph, LogicalKeyboardKey.keyI):
+          ImmersiveModeIntent(),
+    },
+    child: Actions(
+      actions: {ImmersiveModeIntent: ImmersiveModeAction(_immersiveMode)},
+      child: Scaffold(
+        appBar: TitleBar(
+          backgroundColor: _immersiveMode.value ? Colors.transparent : null,
+        ),
+        extendBodyBehindAppBar: _immersiveMode.value,
+        body: AutoRouter(),
+      ),
+    ),
+  );
+}
+
+class ImmersiveModeIntent extends Intent {
+  const ImmersiveModeIntent();
+}
+
+class ImmersiveModeAction extends Action<ImmersiveModeIntent> {
+  final ValueNotifier<bool> enabledNotifier;
+  ImmersiveModeAction(this.enabledNotifier);
+
+  @override
+  void invoke(covariant ImmersiveModeIntent intent) =>
+      enabledNotifier.value = !enabledNotifier.value;
 }
 
 extension OnColor on Color {

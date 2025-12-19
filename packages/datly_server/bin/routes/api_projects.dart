@@ -200,10 +200,10 @@ void define(Router router) {
           ..addFile(
             ArchiveFile.string(
               "data.csv",
-              "asset,tags\n${submissions.map((s) => "${s.assetId != null && s.assetMimeType != null ? assetFile(s.assetId!, s.assetMimeType!).path.split("/").last : ""},").join("\n")}",
+              "images,labels\n${submissions.map((s) => "${s.assetId != null && s.assetMimeType != null ? assetFile(s.assetId!, s.assetMimeType!).path.split("/").last : ""},").join("\n")}",
             ),
           )
-          ..addFile(ArchiveFile.directory("data/"));
+          ..addFile(ArchiveFile.directory("images/"));
         for (var submission in submissions) {
           if (submission.assetId != null && submission.assetMimeType != null) {
             final asset = assetFile(
@@ -213,7 +213,7 @@ void define(Router router) {
             if (await asset.exists()) {
               archive.addFile(
                 ArchiveFile.bytes(
-                  "data/${asset.path.split("/").last}",
+                  "images/${asset.path.split("/").last}",
                   await asset.readAsBytes(),
                 ),
               );

@@ -102,8 +102,10 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
           )
           .then((value) {
             if (value.statusCode != 200 ||
-                value.headers["content-type"] !=
-                    "application/jsonl; charset=utf-8") {
+                !(value.headers["content-type"]?.startsWith(
+                      "application/jsonl",
+                    ) ??
+                    false)) {
               error = true;
               if (mounted) setState(() {});
               return;

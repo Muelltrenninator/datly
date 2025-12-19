@@ -199,6 +199,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete this submission? This action cannot be undone.'**
   String get submissionDeleteMessage;
+
+  /// Accessibility label for the account overview section.
+  ///
+  /// In en, this message translates to:
+  /// **'Account overview'**
+  String get accountOverview;
+
+  /// Accessibility label for the account overview section including the username. This must match the `accountOverview` string.
+  ///
+  /// In en, this message translates to:
+  /// **'for {username}'**
+  String accountOverviewFor(String username);
+
+  /// Label for a button that leads to more information about the app. This string is formatted in MLA title case.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn More'**
+  String get aboutAppLearnMore;
+
+  /// Label for a button that logs the user out of the app. This string is formatted in MLA title case.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get aboutAppLogout;
 }
 
 class _AppLocalizationsDelegate

@@ -100,16 +100,19 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 
   Future<void> fetchProjects() async {
     if (AuthManager.instance.authenticatedUser == null) return;
-    final projects = AuthManager.instance.authenticatedUser!.projects;
-    this.projects = projects;
-    for (final project in projects) {
-      await ProjectRegistry.instance.get(project);
+    projects = AuthManager.instance.authenticatedUser!.projects;
+    for (final project in AuthManager.instance.authenticatedUser!.projects) {
+      final res = await ProjectRegistry.instance.get(project);
+      if (res == null) {
+        projects.remove(project);
+      }
     }
     if (mounted) setState(() {});
 
+    if (projects.isEmpty) return;
     projectIndex ??= 0;
     projectIndexCache = await ProjectRegistry.instance.get(
-      this.projects[projectIndex!],
+      projects[projectIndex!],
     );
   }
 
@@ -121,6 +124,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
           !error
               ? controller != null && controller!.value.isInitialized
                     ? Center(
+                        heightFactor: 1.5,
                         child: Card.outlined(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
@@ -208,7 +212,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                         ),
                       ),
                       constraints: BoxConstraints(
-                        maxWidth: MediaQuery.sizeOf(context).width * 0.4,
+                        maxWidth: MediaQuery.sizeOf(context).width * 0.6,
                       ),
                       child: AnimatedSize(
                         duration: Durations.medium1,
@@ -289,11 +293,13 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                   }
 
                   void onPressedSelect() async {
-                    final List<ProjectData> projectData = await Future.wait(
-                      projects.map(
-                        (e) async => (await ProjectRegistry.instance.get(e))!,
-                      ),
-                    );
+                    final List<ProjectData> projectData =
+                        (await Future.wait<ProjectData?>(
+                          projects.map(
+                            (e) async =>
+                                (await ProjectRegistry.instance.get(e)),
+                          ),
+                        )).whereType<ProjectData>().toList();
 
                     if (!context.mounted) return;
                     final selection = await showRadioDialog(
@@ -386,16 +392,22 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                           child: iconSwitch,
                         ),
                       ),
-                      SizedBox(height: 4),
-                      FloatingActionButton(
-                        onPressed: onPressedSelect,
-                        child: iconSelect,
-                      ),
-                      SizedBox(height: 8),
-                      FloatingActionButton.large(
-                        onPressed: onPressedCamera,
-                        child: iconCamera,
-                      ),
+                      if (projects.isNotEmpty) ...[
+                        SizedBox(height: 4),
+                        FloatingActionButton(
+                          onPressed: projects.isNotEmpty
+                              ? onPressedSelect
+                              : null,
+                          child: iconSelect,
+                        ),
+                        SizedBox(height: 8),
+                        FloatingActionButton.large(
+                          onPressed: projects.isNotEmpty
+                              ? onPressedCamera
+                              : null,
+                          child: iconCamera,
+                        ),
+                      ],
                     ],
                   );
                 },

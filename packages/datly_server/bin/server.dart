@@ -137,12 +137,7 @@ void main(List<String> args) async {
 
   final ip = InternetAddress.anyIPv4;
   final port = 33552;
-  final server = await serve(
-    handler,
-    ip,
-    port,
-    poweredByHeader: "Datly Server",
-  );
+  server = await serve(handler, ip, port, poweredByHeader: "Datly Server");
 
   t.info("Server listening on port ${server.port}");
 

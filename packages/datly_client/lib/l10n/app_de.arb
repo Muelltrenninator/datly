@@ -16,5 +16,9 @@
     "submissionStatusRejected": "Abgelehnt",
     "submissionStatusCensored": "Zensiert",
     "submissionDeleteTitle": "Einsendung Löschen",
-    "submissionDeleteMessage": "Möchtest du diese Einsendung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+    "submissionDeleteMessage": "Möchtest du diese Einsendung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "accountOverview": "Account-Übersicht",
+    "accountOverviewFor": "für {username}",
+    "aboutAppLearnMore": "Mehr Erfahren",
+    "aboutAppLogout": "Abmelden"
 }

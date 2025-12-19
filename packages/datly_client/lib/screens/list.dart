@@ -71,7 +71,10 @@ class _ListScreenState extends State<ListScreen> {
           .then((value) {
             if (value == null ||
                 value.statusCode != 200 ||
-                value.headers["content-type"] != "application/json") {
+                !(value.headers["content-type"]?.startsWith(
+                      "application/json",
+                    ) ??
+                    false)) {
               error = true;
               if (mounted) setState(() {});
               return;
@@ -184,8 +187,10 @@ class _ListScreenState extends State<ListScreen> {
                 final allProjectsResponse = await allProjectsFuture;
                 if (allProjectsResponse == null ||
                     allProjectsResponse.statusCode != 200 ||
-                    allProjectsResponse.headers["content-type"] !=
-                        "application/json") {
+                    !(allProjectsResponse.headers["content-type"]?.startsWith(
+                          "application/json",
+                        ) ??
+                        false)) {
                   return;
                 }
                 final allProjects =
@@ -208,6 +213,7 @@ class _ListScreenState extends State<ListScreen> {
                           items: allProjects,
                           titleGenerator: (item) => item.title,
                           subtitleGenerator: (item) => item.description,
+                          allowEmptySelection: true,
                         )
                         ..sort((a, b) => a.id.compareTo(b.id));
                   input["projects"] = selectedProjects
@@ -273,7 +279,19 @@ class _ListScreenState extends State<ListScreen> {
                                 try {
                                   data = jsonDecode(response!.body) as List;
                                 } catch (_) {
-                                  return SizedBox();
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 32),
+                                    child: Text(
+                                      "Failed to parse server response.",
+                                      style: DefaultTextStyle.of(context).style
+                                          .copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).disabledColor,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                    ),
+                                  );
                                 }
 
                                 if (data.isEmpty) {
@@ -398,7 +416,10 @@ class _ListWidgetState extends State<ListWidget> {
         );
         if (allProjectsResponse == null ||
             allProjectsResponse.statusCode != 200 ||
-            allProjectsResponse.headers["content-type"] != "application/json") {
+            !(allProjectsResponse.headers["content-type"]?.startsWith(
+                  "application/json",
+                ) ??
+                false)) {
           return;
         }
 
@@ -468,6 +489,36 @@ class _ListWidgetState extends State<ListWidget> {
                               project?.description ?? "–",
                               maxLines: 5,
                             ),
+                            deleteIcon: Icon(Icons.edit),
+                            onDeleted:
+                                AuthManager.instance.authenticatedUserIsAdmin
+                                ? () async {
+                                    final newDescription = await showPromptDialog(
+                                      context: context,
+                                      title: "Set Description",
+                                      content: project?.description,
+                                      placeholder:
+                                          "Training data for a model to detect…",
+                                      maxLength: 256,
+                                      maxLines: 4,
+                                    );
+                                    if (newDescription != null &&
+                                        newDescription !=
+                                            project?.description) {
+                                      await AuthManager.instance.fetch(
+                                        http.Request("POST", uri)
+                                          ..headers["Content-Type"] =
+                                              "application/json"
+                                          ..body = jsonEncode({
+                                            "title": null,
+                                            "description": newDescription,
+                                          }),
+                                      );
+                                      project?.description = newDescription;
+                                      if (mounted) setState(() {});
+                                    }
+                                  }
+                                : null,
                           ),
                           Chip(
                             avatar: Icon(Icons.event),
