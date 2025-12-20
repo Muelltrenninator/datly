@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-19T20:18:52
+/// Last generated: 2025-12-20T13:02:38
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -405,7 +405,7 @@ final class GitBaker {
   /// List of uncommitted changes in the working tree of the repository.
   static final List<WorkspaceEntry> workspace = List.unmodifiable([
     WorkspaceEntryChange._(
-      "Dockerfile",
+      "lib/generated/gitbaker.g.dart",
       status: WorkspaceEntryStatus._fromLetters(".", "M"),
       submoduleState: WorkspaceEntrySubmoduleState._(
         commitChanged: false,
@@ -414,70 +414,7 @@ final class GitBaker {
       ),
     ),
     WorkspaceEntryChange._(
-      "Makefile",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/.vscode/settings.json",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/api.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/main.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/main.gr.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/screens/login.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/screens/upload.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/widgets/title_bar.dart",
+      "packages/datly_client/lib/screens/list.dart",
       status: WorkspaceEntryStatus._fromLetters(".", "M"),
       submoduleState: WorkspaceEntrySubmoduleState._(
         commitChanged: false,
@@ -495,61 +432,7 @@ final class GitBaker {
       ),
     ),
     WorkspaceEntryChange._(
-      "packages/datly_server/bin/database/database.g.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/database/tables.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/helpers.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/routes/api.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/routes/api_assets.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
       "packages/datly_server/bin/routes/api_projects.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/routes/api_users.dart",
       status: WorkspaceEntryStatus._fromLetters(".", "M"),
       submoduleState: WorkspaceEntrySubmoduleState._(
         commitChanged: false,
@@ -566,49 +449,7 @@ final class GitBaker {
         hasUntrackedChanges: false,
       ),
     ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/pubspec.yaml",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryUntracked._("devtools_options.yaml"),
-    WorkspaceEntryUntracked._("lib/"),
-    WorkspaceEntryUntracked._("packages/datly_client/assets/OFL.txt"),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/assets/fonts/GoogleSansCode-Bold.ttf",
-    ),
-    WorkspaceEntryUntracked._("packages/datly_client/l10n.yaml"),
-    WorkspaceEntryUntracked._("packages/datly_client/lib/l10n/"),
-    WorkspaceEntryUntracked._("packages/datly_client/lib/registry.dart"),
-    WorkspaceEntryUntracked._("packages/datly_client/lib/screens/list.dart"),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/lib/screens/submissions.dart",
-    ),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/lib/widgets/confirmation_dialog.dart",
-    ),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/lib/widgets/hero_text_flight_shuttle_builder.dart",
-    ),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/lib/widgets/multi_prompt_dialog.dart",
-    ),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/lib/widgets/multiple_choice_dialog.dart",
-    ),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/lib/widgets/prompt_dialog.dart",
-    ),
-    WorkspaceEntryUntracked._(
-      "packages/datly_client/lib/widgets/radio_dialog.dart",
-    ),
-    WorkspaceEntryUntracked._("packages/datly_client/untranslated.json"),
-    WorkspaceEntryUntracked._("packages/datly_server/.vscode/launch.json"),
-    WorkspaceEntryUntracked._("packages/datly_server/bin/legal/"),
+    WorkspaceEntryUntracked._("packages/datly_server/data - Kopie/"),
   ]);
 
   /// All branches in the repository.
@@ -619,10 +460,14 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 1,
+      revision: 3,
       ahead: 0,
       behind: 0,
-      commits: ["d3fc80a5a531432f9c0cd5a65eb25d80edafe792"],
+      commits: [
+        "d3fc80a5a531432f9c0cd5a65eb25d80edafe792",
+        "fb6ec8688784ded2a3004e5dd6a6ef9803586a88",
+        "fb70d43e9828bec90402da217381172ed4ab8c15",
+      ],
     ),
   ];
 
@@ -650,6 +495,24 @@ final class GitBaker {
       hashAbbreviated: "d3fc80a",
       message: "Initial commit",
       date: DateTime.parse("2025-12-12T21:13:09.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "fb6ec8688784ded2a3004e5dd6a6ef9803586a88",
+      hashAbbreviated: "fb6ec86",
+      message: "Various functions and features",
+      date: DateTime.parse("2025-12-19T19:19:39.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "fb70d43e9828bec90402da217381172ed4ab8c15",
+      hashAbbreviated: "fb70d43",
+      message: "Improved UI, various changes",
+      date: DateTime.parse("2025-12-19T22:59:51.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

@@ -75,8 +75,8 @@ void shutdown([String signal = "Signal"]) async {
   await server.close();
   t.debug("Server closed successfully");
 
-  db.customStatement("PRAGMA optimize");
-  db.customStatement("PRAGMA wal_checkpoint");
+  await db.customStatement("PRAGMA optimize");
+  await db.customStatement("PRAGMA wal_checkpoint");
   t.debug("Database optimized successfully");
 
   await db.close();

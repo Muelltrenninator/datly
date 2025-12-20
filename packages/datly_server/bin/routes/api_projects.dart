@@ -296,7 +296,7 @@ void define(Router router) {
           );
         }
 
-        final part = await multipart.parts.first;
+        final part = (await multipart.parts.toList()).first;
         var mime = part.headers["content-type"] ?? "application/octet-stream";
         final uuid = Uuid().v4().replaceAll("-", "");
 

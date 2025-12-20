@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:js_interop';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:web/web.dart' as web;
 
 import '../api.dart';
 import '../main.dart';
@@ -210,6 +212,9 @@ class _ListScreenState extends State<ListScreen> {
                           title: "Assign Projects",
                           description:
                               "Select the projects to assign to this user.",
+                          initialValue: allProjects.length == 1
+                              ? allProjects
+                              : null,
                           items: allProjects,
                           titleGenerator: (item) => item.title,
                           subtitleGenerator: (item) => item.description,
@@ -706,19 +711,38 @@ class _ListWidgetState extends State<ListWidget> {
                                 ),
                               ),
                             );
-                            await FilePicker.platform.saveFile(
-                              fileName: "datly-project_${project!.id}-dump.zip",
-                              type: FileType.custom,
-                              allowedExtensions: ["zip"],
-                              bytes: response?.bodyBytes,
-                              lockParentWindow: true,
-                            );
+
+                            // DOWNLOAD
+
+                            if (kIsWeb) {
+                              final blobParts =
+                                  ([response!.bodyBytes] as dynamic)
+                                      as JSArray<web.BlobPart>;
+                              final blob = web.Blob(
+                                blobParts,
+                                web.BlobPropertyBag(type: "application/zip"),
+                              );
+                              final url = web.URL.createObjectURL(blob);
+
+                              final anchor = web.HTMLAnchorElement()
+                                ..href = url
+                                ..download =
+                                    "datly-project_${project!.id}-dump.zip";
+
+                              web.document.body?.append(anchor);
+                              anchor.click();
+                              anchor.remove();
+
+                              web.URL.revokeObjectURL(url);
+                            } else {
+                              throw UnimplementedError();
+                            }
                           },
                         ),
                       ActionChip(
                         backgroundColor: colorScheme.error,
                         avatar: Icon(
-                          Icons.delete,
+                          Icons.delete_outlined,
                           color: showDeleteButton
                               ? colorScheme.onError
                               : theme.disabledColor,
