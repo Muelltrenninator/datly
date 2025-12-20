@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-20T13:02:38
+/// Last generated: 2025-12-20T13:23:05
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -413,43 +413,6 @@ final class GitBaker {
         hasUntrackedChanges: false,
       ),
     ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/screens/list.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/pubspec.yaml",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/routes/api_projects.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/server.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryUntracked._("packages/datly_server/data - Kopie/"),
   ]);
 
   /// All branches in the repository.
@@ -460,13 +423,14 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 3,
+      revision: 4,
       ahead: 0,
       behind: 0,
       commits: [
         "d3fc80a5a531432f9c0cd5a65eb25d80edafe792",
         "fb6ec8688784ded2a3004e5dd6a6ef9803586a88",
         "fb70d43e9828bec90402da217381172ed4ab8c15",
+        "947a8a4800c91224567a8d58b43c97e7ec8d75ab",
       ],
     ),
   ];
@@ -513,6 +477,15 @@ final class GitBaker {
       hashAbbreviated: "fb70d43",
       message: "Improved UI, various changes",
       date: DateTime.parse("2025-12-19T22:59:51.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "947a8a4800c91224567a8d58b43c97e7ec8d75ab",
+      hashAbbreviated: "947a8a4",
+      message: "Removed `file_picker`, fixed upload behind proxy",
+      date: DateTime.parse("2025-12-20T12:22:39.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",
