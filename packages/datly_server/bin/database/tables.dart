@@ -6,14 +6,14 @@ import 'database.dart';
 
 class Projects extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text().withLength(min: 3, max: 32)();
+  TextColumn get title => text()();
   TextColumn get description => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
 class Users extends Table {
   TextColumn get username => text().withLength(min: 3, max: 16)();
-  TextColumn get email => text().withLength(min: 5, max: 64)();
+  TextColumn get email => text()();
   DateTimeColumn get joinedAt => dateTime().withDefault(currentDateAndTime)();
   TextColumn get projects =>
       text().map(ListConverter<int>()).withDefault(const Constant("[]"))();
@@ -26,12 +26,14 @@ class Users extends Table {
 
 class LoginCodes extends Table {
   TextColumn get code => text().withLength(min: 8, max: 8)();
+  @ReferenceName('loginCodeOfUser')
   TextColumn get user => text().references(
     Users,
     #username,
     onDelete: KeyAction.cascade,
     onUpdate: KeyAction.cascade,
   )();
+  @ReferenceName('loginCodeCreatedBy')
   TextColumn get createdBy => text().nullable().references(
     Users,
     #username,

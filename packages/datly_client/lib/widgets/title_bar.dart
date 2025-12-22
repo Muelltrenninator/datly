@@ -23,6 +23,7 @@ class TitleBarTitle extends StatelessWidget {
       child: Hero(
         tag: "TitleBarTitle",
         child: Material(
+          color: Colors.transparent,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

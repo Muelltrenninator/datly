@@ -44,10 +44,7 @@ class AuthManager extends ChangeNotifier {
     );
 
     final body = response?.body;
-    if (response != null &&
-        response.statusCode == 200 &&
-        body != null &&
-        body != "{}") {
+    if (response != null && response.statusCode == 200 && body != null) {
       final valueBefore = _authenticatedUser;
       _authenticatedUser = UserData.fromJson(jsonDecode(body));
       UserRegistry.instance.add(

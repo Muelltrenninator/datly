@@ -6,6 +6,7 @@ import 'package:shelf_limiter/shelf_limiter.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../database/database.dart';
+import '../helpers.dart';
 import '../server.dart';
 import 'api_assets.dart' as api_assets;
 import 'api_projects.dart' as api_projects;
@@ -18,21 +19,46 @@ final apiRouter = Router(
   ),
 );
 Handler get apiPipeline => Pipeline()
-    .addMiddleware(
-      shelfLimiter(
+    .addMiddleware((innerHandler) {
+      final limiter = shelfLimiter(
         RateLimiterOptions(
-          maxRequests: 20,
-          windowSize: Duration(seconds: 20),
-          onRateLimitExceeded: (r) => Response(
-            429,
+          maxRequests: 5,
+          windowSize: Duration(seconds: 10),
+          clientIdentifierExtractor: (request) =>
+              identifierFromRequest(request)!,
+          onRateLimitExceeded: (request) {
+            t.warn(
+              "Rate limit exceeded for: ${identifierFromRequest(request)} (unauthenticated)",
+            );
+            return Response(
+              429,
+              body: jsonEncode({
+                "error": "Too many requests, please try again later",
+              }),
+              headers: {"Content-Type": "application/json"},
+            );
+          },
+        ),
+      );
+      return (request) async {
+        if (identifierFromRequest(request) == null) {
+          return Response(
+            400,
             body: jsonEncode({
-              "error": "Too many requests, please try again later.",
+              "error": "Cannot identify client for rate limiting",
             }),
             headers: {"Content-Type": "application/json"},
-          ),
-        ),
-      ),
-    )
+          );
+        }
+
+        final response = await innerHandler(request);
+        if (response.statusCode == 401) {
+          return limiter.call((_) => response).call(request);
+        } else {
+          return response;
+        }
+      };
+    })
     .addHandler(apiRouter.call);
 
 void defineApiRouter() {
@@ -49,9 +75,6 @@ Future<Object?> _apiAuthInternal(
 }) async {
   var token = req.headers["authorization"];
   if ((!(token?.startsWith("Token ") ?? false) || token!.length != (6 + 8))) {
-    if (minimumRole == UserRole.guest) {
-      return null;
-    }
     return Response.unauthorized(
       jsonEncode({"error": "Invalid or missing authorization token"}),
       headers: {"Content-Type": "application/json"},
@@ -77,7 +100,7 @@ Future<Object?> _apiAuthInternal(
     db.users,
   )..where((u) => u.username.equals(code.user))).getSingle();
   if (user.role.index < minimumRole.index) {
-    return Response.unauthorized(
+    return Response.forbidden(
       jsonEncode({"error": "Insufficient permissions"}),
       headers: {"Content-Type": "application/json"},
     );

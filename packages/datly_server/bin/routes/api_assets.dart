@@ -8,8 +8,8 @@ import '../server.dart';
 
 void define(Router router) {
   final assetsDirectory = Directory("${dataDirectory.path}/assets")
-    ..createSync(recursive: true);
-  router.mount("/assets", (req) {
+    ..create(recursive: true);
+  router.mount("/assets", (req) async {
     // MARK: [GET|HEAD] /assets/<asset>
     final path = req.url.path.replaceAll("..", "");
     if (!RegExp(r"[0-9a-zA-Z]{32}\.(?:jpg|png)").hasMatch(path)) {
@@ -20,14 +20,14 @@ void define(Router router) {
     }
 
     var file = File("${assetsDirectory.path}/$path");
-    if (!file.existsSync()) {
+    if (!(await file.exists())) {
       return Response.notFound(
         "Asset not found",
         headers: {"Content-Type": "text/plain"},
       );
     }
 
-    final contents = file.readAsBytesSync();
+    final contents = await file.readAsBytes();
     final headers = {
       HttpHeaders.contentTypeHeader:
           lookupMimeType(file.path) ?? "application/octet-stream",

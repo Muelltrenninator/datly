@@ -31,6 +31,7 @@ class _StatusModalState extends State<StatusModal> {
   String? _failureDetails;
   void _onComplete(bool success) async {
     if (!mounted) return;
+    await Future.delayed(Durations.short2);
 
     if (success) _isSuccess = true;
     setState(() {});
@@ -89,11 +90,16 @@ class _StatusModalState extends State<StatusModal> {
                   SizedBox.square(
                     dimension: 48,
                     child: AnimatedSwitcher(
-                      duration: Durations.medium3,
+                      duration: Durations.medium4,
                       switchInCurve: Curves.easeInOutCubicEmphasized,
-                      switchOutCurve: Curves.easeInOutCubicEmphasized,
-                      transitionBuilder: (child, animation) =>
-                          FadeTransition(opacity: animation, child: child),
+                      switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+                      transitionBuilder: (child, animation) => SlideTransition(
+                        position: Tween(
+                          begin: Offset(0, 0.05),
+                          end: Offset(0, 0),
+                        ).animate(animation),
+                        child: FadeTransition(opacity: animation, child: child),
+                      ),
                       child: !widget.completer.isCompleted
                           ? CircularProgressIndicator(padding: EdgeInsets.zero)
                           : _isSuccess

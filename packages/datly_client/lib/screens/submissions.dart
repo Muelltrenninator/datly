@@ -36,7 +36,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   String? stateValueProject;
 
   http.Client? client;
-  http.StreamedResponse? liveResponse;
+  Stream<List>? stream;
   bool error = false;
 
   ProjectData? effectiveProjectData;
@@ -64,13 +64,13 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   @override
   void dispose() {
     client?.close();
-    liveResponse = null;
+    stream = null;
     super.dispose();
   }
 
   void fetch() {
     client?.close();
-    liveResponse = null;
+    stream = null;
     effectiveProjectData = null;
     effectiveUserData = null;
     if (mounted) setState(() {});
@@ -111,7 +111,17 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
               return;
             }
 
-            liveResponse = value;
+            stream = value.stream
+                .transform(Utf8Decoder())
+                .map((e) => jsonDecode(e) as List)
+                .handleError((_) {
+                  error = true;
+                  if (mounted) setState(() {});
+                });
+            if (mounted) setState(() {});
+          })
+          .catchError((_, _) {
+            error = true;
             if (mounted) setState(() {});
           });
     } catch (_) {
@@ -142,72 +152,62 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
     return Stack(
       children: [
         !error
-            ? liveResponse != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 24, right: 24),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 8),
-                            StreamBuilder(
-                              stream: liveResponse!.stream,
-                              builder: (context, snapshot) {
-                                List data;
-                                try {
-                                  final text = Utf8Decoder().convert(
-                                    snapshot.data ?? [],
-                                  );
-                                  data = jsonDecode(text) as List;
-                                } catch (_) {
-                                  return SizedBox();
-                                }
+            ? stream != null
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 24,
+                          right: 24,
+                          top: 8,
+                          bottom: 24,
+                        ),
+                        child: StreamBuilder(
+                          stream: stream,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Icon(Icons.error_outline, size: 48),
+                              );
+                            } else if (!snapshot.hasData) {
+                              return Center(child: CircularProgressIndicator());
+                            }
 
-                                if (data.isEmpty) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 32),
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      ).noSubmissions,
-                                      style: DefaultTextStyle.of(context).style
-                                          .copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).disabledColor,
-                                            fontStyle: FontStyle.italic,
-                                          ),
+                            List data = snapshot.data ?? [];
+                            if (data.isEmpty) {
+                              return Text(
+                                AppLocalizations.of(context).noSubmissions,
+                                style: DefaultTextStyle.of(context).style
+                                    .copyWith(
+                                      color: Theme.of(context).disabledColor,
+                                      fontStyle: FontStyle.italic,
                                     ),
-                                  );
-                                }
+                              );
+                            }
 
-                                return SizedBox(
-                                  width: double.infinity,
-                                  child: Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: List.generate(
-                                      data.length,
-                                      (i) => SubmissionWidget(
-                                        data: SubmissionData.fromJson(data[i]),
-                                      ),
-                                    ),
+                            return SizedBox(
+                              width: double.infinity,
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: List.generate(
+                                  data.length,
+                                  (i) => SubmissionWidget(
+                                    data: SubmissionData.fromJson(data[i]),
                                   ),
-                                );
-                              },
-                            ),
-                            SizedBox(height: 24),
-                          ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     )
                   : Center(child: CircularProgressIndicator())
             : Center(child: Icon(Icons.error_outline, size: 48)),
-        if (AuthManager.instance.authenticatedUserIsAdmin &&
-            effectiveUserData != null)
+        if (AuthManager.instance.authenticatedUserIsAdmin)
           Align(
             alignment: Alignment.topRight,
             child: Padding(
-              padding: const EdgeInsets.only(right: 24),
+              padding: const EdgeInsets.only(top: 2, right: 12),
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 512),
                 child: SubmissionTargetWidget(
@@ -423,7 +423,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                               );
                               if (selection != widget.data.status) {
                                 await AuthManager.instance.fetch(
-                                  http.Request("POST", uri)
+                                  http.Request("PUT", uri)
                                     ..headers["Content-Type"] =
                                         "application/json"
                                     ..body = jsonEncode({"status": selection}),
@@ -507,7 +507,7 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      value: 1,
+      // value: 1,
       duration: Durations.medium1,
       vsync: this,
     );
@@ -526,7 +526,7 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
       curve: Curves.easeInOutCubicEmphasized,
       reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
     );
-    return Card.filled(
+    return Card.outlined(
       margin: EdgeInsets.zero,
       child: IntrinsicWidth(
         child: Column(
@@ -535,13 +535,9 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                if (_controller.isCompleted) {
-                  _controller.reverse();
-                } else {
-                  _controller.forward();
-                }
-              },
+              onTap: () => _controller.isCompleted
+                  ? _controller.reverse()
+                  : _controller.forward(),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -554,35 +550,56 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
                     SizedBox(width: 8),
                     Text(
                       "Admin View",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color:
-                            widget.effectiveProject == null &&
-                                widget.effectiveUserData != null
-                            ? widget.effectiveUserData!.roleColor()
-                            : null,
-                      ),
+                      style: TextTheme.of(context).titleMedium,
                     ),
                   ],
                 ),
               ),
             ),
-            SizeTransition(
-              axis: Axis.horizontal,
-              sizeFactor: animation,
-              axisAlignment: -1,
-              child: SizeTransition(
-                axis: Axis.vertical,
-                sizeFactor: animation,
-                axisAlignment: 1,
-                child: ListWidget(
-                  data:
-                      (widget.effectiveProjectData ??
-                              widget.effectiveUserData! as dynamic)
-                          .toJson(),
-                  isProject: widget.effectiveProject != null,
-                  onDelete: () => context.navigateTo(MainRoute()),
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+              child: ColoredBox(
+                color: ColorScheme.of(context).surfaceContainerHighest,
+                child: SizeTransition(
+                  axis: Axis.horizontal,
+                  sizeFactor: animation,
+                  axisAlignment: -1,
+                  child: SizeTransition(
+                    axis: Axis.vertical,
+                    sizeFactor: animation,
+                    axisAlignment: 1,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Divider(height: 1),
+                        (widget.effectiveProject == null ||
+                                    widget.effectiveProjectData != null) &&
+                                (widget.effectiveProject != null ||
+                                    widget.effectiveUserData != null)
+                            ? ListWidget(
+                                data:
+                                    (widget.effectiveProject != null
+                                            ? widget.effectiveProjectData!
+                                            : widget.effectiveUserData!
+                                                  as dynamic)
+                                        .toJson(),
+                                isProject: widget.effectiveProject != null,
+                                onDelete: () => context.navigateTo(MainRoute()),
+                              )
+                            : Padding(
+                                padding: EdgeInsets.only(
+                                  left: 52,
+                                  top: 32,
+                                  bottom: 32,
+                                ),
+                                child: CircularProgressIndicator(),
+                              ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

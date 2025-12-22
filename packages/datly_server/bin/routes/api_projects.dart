@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';
@@ -51,8 +52,8 @@ void define(Router router) {
         );
       }),
     )
-    ..post(
-      "/projects/<id>", // MARK: [POST] /projects/<id>
+    ..put(
+      "/projects/<id>", // MARK: [PUT] /projects/<id>
       apiAuthWall((req, _) async {
         final project =
             await (db.select(db.projects)..where(
@@ -86,8 +87,8 @@ void define(Router router) {
         }
       }, minimumRole: UserRole.admin),
     )
-    ..put(
-      "/projects", // MARK: [PUT] /projects
+    ..post(
+      "/projects", // MARK: [POST] /projects
       apiAuthWall((req, _) async {
         if (jsonDecode(await req.readAsString()) case {
           "title": String title,
@@ -259,8 +260,8 @@ void define(Router router) {
         );
       }, minimumRole: UserRole.admin),
     )
-    ..put(
-      "/projects/<id>/submissions", // MARK: [PUT] /projects/<id>/submissions
+    ..post(
+      "/projects/<id>/submissions", // MARK: [POST] /projects/<id>/submissions
       apiAuthWall((req, auth) async {
         if (req.headers["content-type"] == null ||
             !req.headers["content-type"]!.startsWith("multipart/")) {
@@ -288,22 +289,34 @@ void define(Router router) {
           );
         }
 
-        final multipart = req.multipart();
+        MultipartRequest? multipart;
+        try {
+          multipart = req.multipart();
+        } catch (_) {}
         if (multipart == null) {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid multipart data"}),
+            body: jsonEncode({"error": "Invalid multipart request"}),
             headers: {"Content-Type": "application/json"},
           );
         }
 
-        final part = (await multipart.parts.toList()).first;
-        var mime = part.headers["content-type"] ?? "application/octet-stream";
-        final uuid = Uuid().v4().replaceAll("-", "");
+        late final Multipart part;
+        String mime;
+        try {
+          part = (await multipart.parts.toList()).first;
+          mime = part.headers["content-type"] ?? "application/octet-stream";
+        } catch (e) {
+          return Response.badRequest(
+            body: jsonEncode({"error": "Invalid multipart data: $e"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
 
         if (!["image/png", "image/jpeg"].contains(mime)) {
           mime = "image/png";
         }
 
+        final uuid = Uuid().v4().replaceAll("-", "");
         final file = assetFile(uuid, mime);
         var image = img.decodeImage(await part.readBytes());
         if (image == null) {
@@ -315,10 +328,6 @@ void define(Router router) {
         image.exif.clear();
 
         if (image.width != 224 || image.height != 224) {
-          // return Response.badRequest(
-          //   body: jsonEncode({"error": "Image must be 224x224 pixels"}),
-          //   headers: {"Content-Type": "application/json"},
-          // );
           final size = image.width < image.height ? image.width : image.height;
           image = img.resize(
             img.copyCrop(
@@ -355,8 +364,8 @@ void define(Router router) {
         return Response(201, headers: {"Content-Type": "application/json"});
       }),
     )
-    ..post(
-      "/projects/<id>/submissions/<submissionId>", // MARK: [POST] /projects/<id>/submissions/<submissionId>
+    ..put(
+      "/projects/<id>/submissions/<submissionId>", // MARK: [PUT] /projects/<id>/submissions/<submissionId>
       apiAuthWall((req, auth) async {
         final project =
             await (db.select(db.projects)..where(

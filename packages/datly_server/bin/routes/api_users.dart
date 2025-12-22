@@ -13,17 +13,11 @@ void define(Router router) {
     ..get(
       "/users/whoami", // MARK: [GET] /users/whoami
       apiAuthWall((req, auth) {
-        if (auth == null) {
-          return Response.ok(
-            jsonEncode({}),
-            headers: {"Content-Type": "application/json"},
-          );
-        }
         return Response.ok(
-          jsonEncode(auth.user.toJson()..addAll({"code": auth.code.toJson()})),
+          jsonEncode(auth!.user.toJson()..addAll({"code": auth.code.toJson()})),
           headers: {"Content-Type": "application/json"},
         );
-      }, minimumRole: UserRole.guest),
+      }),
     )
     ..get(
       "/users/list", // MARK: [GET] /users/list
@@ -63,8 +57,8 @@ void define(Router router) {
         }
       }),
     )
-    ..put(
-      "/users/<username>", // MARK: [PUT] /users/<username>
+    ..post(
+      "/users/<username>", // MARK: [POST] /users/<username>
       apiAuthWall((req, _) async {
         final username = req.params["username"]!;
         if (!RegExp(r"^[a-zA-Z0-9_]{3,16}$").hasMatch(username)) {
@@ -135,8 +129,8 @@ void define(Router router) {
         }
       }, minimumRole: UserRole.admin),
     )
-    ..post(
-      "/users/<username>", // MARK: [POST] /users/<username>
+    ..put(
+      "/users/<username>", // MARK: [PUT] /users/<username>
       apiAuthWall((req, _) async {
         final user =
             await (db.select(db.users)
@@ -249,8 +243,8 @@ void define(Router router) {
         );
       }, minimumRole: UserRole.admin),
     )
-    ..put(
-      "/users/<username>/loginCode", // MARK: [PUT] /users/<username>/loginCode
+    ..post(
+      "/users/<username>/loginCode", // MARK: [POST] /users/<username>/loginCode
       apiAuthWall((req, auth) async {
         final user =
             await (db.select(db.users)

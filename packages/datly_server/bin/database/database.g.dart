@@ -1962,6 +1962,40 @@ final class $$UsersTableReferences
     extends BaseReferences<_$AppDatabase, $UsersTable, User> {
   $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
+  static MultiTypedResultKey<$LoginCodesTable, List<LoginCode>>
+  _loginCodeOfUserTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.loginCodes,
+    aliasName: $_aliasNameGenerator(db.users.username, db.loginCodes.user),
+  );
+
+  $$LoginCodesTableProcessedTableManager get loginCodeOfUser {
+    final manager = $$LoginCodesTableTableManager($_db, $_db.loginCodes).filter(
+      (f) => f.user.username.sqlEquals($_itemColumn<String>('username')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_loginCodeOfUserTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$LoginCodesTable, List<LoginCode>>
+  _loginCodeCreatedByTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.loginCodes,
+    aliasName: $_aliasNameGenerator(db.users.username, db.loginCodes.createdBy),
+  );
+
+  $$LoginCodesTableProcessedTableManager get loginCodeCreatedBy {
+    final manager = $$LoginCodesTableTableManager($_db, $_db.loginCodes).filter(
+      (f) => f.createdBy.username.sqlEquals($_itemColumn<String>('username')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_loginCodeCreatedByTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$SubmissionsTable, List<Submission>>
   _submissionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.submissions,
@@ -2015,6 +2049,56 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
         column: $table.role,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  Expression<bool> loginCodeOfUser(
+    Expression<bool> Function($$LoginCodesTableFilterComposer f) f,
+  ) {
+    final $$LoginCodesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.username,
+      referencedTable: $db.loginCodes,
+      getReferencedColumn: (t) => t.user,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LoginCodesTableFilterComposer(
+            $db: $db,
+            $table: $db.loginCodes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> loginCodeCreatedBy(
+    Expression<bool> Function($$LoginCodesTableFilterComposer f) f,
+  ) {
+    final $$LoginCodesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.username,
+      referencedTable: $db.loginCodes,
+      getReferencedColumn: (t) => t.createdBy,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LoginCodesTableFilterComposer(
+            $db: $db,
+            $table: $db.loginCodes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> submissionsRefs(
     Expression<bool> Function($$SubmissionsTableFilterComposer f) f,
@@ -2101,6 +2185,56 @@ class $$UsersTableAnnotationComposer
   GeneratedColumnWithTypeConverter<UserRole, String> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
 
+  Expression<T> loginCodeOfUser<T extends Object>(
+    Expression<T> Function($$LoginCodesTableAnnotationComposer a) f,
+  ) {
+    final $$LoginCodesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.username,
+      referencedTable: $db.loginCodes,
+      getReferencedColumn: (t) => t.user,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LoginCodesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.loginCodes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> loginCodeCreatedBy<T extends Object>(
+    Expression<T> Function($$LoginCodesTableAnnotationComposer a) f,
+  ) {
+    final $$LoginCodesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.username,
+      referencedTable: $db.loginCodes,
+      getReferencedColumn: (t) => t.createdBy,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LoginCodesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.loginCodes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> submissionsRefs<T extends Object>(
     Expression<T> Function($$SubmissionsTableAnnotationComposer a) f,
   ) {
@@ -2140,7 +2274,11 @@ class $$UsersTableTableManager
           $$UsersTableUpdateCompanionBuilder,
           (User, $$UsersTableReferences),
           User,
-          PrefetchHooks Function({bool submissionsRefs})
+          PrefetchHooks Function({
+            bool loginCodeOfUser,
+            bool loginCodeCreatedBy,
+            bool submissionsRefs,
+          })
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
     : super(
@@ -2191,28 +2329,81 @@ class $$UsersTableTableManager
                     (e.readTable(table), $$UsersTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({submissionsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (submissionsRefs) db.submissions],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (submissionsRefs)
-                    await $_getPrefetchedData<User, $UsersTable, Submission>(
-                      currentTable: table,
-                      referencedTable: $$UsersTableReferences
-                          ._submissionsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$UsersTableReferences(db, table, p0).submissionsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.user == item.username),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({
+                loginCodeOfUser = false,
+                loginCodeCreatedBy = false,
+                submissionsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (loginCodeOfUser) db.loginCodes,
+                    if (loginCodeCreatedBy) db.loginCodes,
+                    if (submissionsRefs) db.submissions,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (loginCodeOfUser)
+                        await $_getPrefetchedData<User, $UsersTable, LoginCode>(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._loginCodeOfUserTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).loginCodeOfUser,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.user == item.username,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (loginCodeCreatedBy)
+                        await $_getPrefetchedData<User, $UsersTable, LoginCode>(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._loginCodeCreatedByTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).loginCodeCreatedBy,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.createdBy == item.username,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (submissionsRefs)
+                        await $_getPrefetchedData<
+                          User,
+                          $UsersTable,
+                          Submission
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._submissionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).submissionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.user == item.username,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2229,7 +2420,11 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableUpdateCompanionBuilder,
       (User, $$UsersTableReferences),
       User,
-      PrefetchHooks Function({bool submissionsRefs})
+      PrefetchHooks Function({
+        bool loginCodeOfUser,
+        bool loginCodeCreatedBy,
+        bool submissionsRefs,
+      })
     >;
 typedef $$LoginCodesTableCreateCompanionBuilder =
     LoginCodesCompanion Function({

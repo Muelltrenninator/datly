@@ -199,7 +199,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     final project = await ProjectRegistry.instance.get(projects[projectIndex!]);
     response = await AuthManager.instance.fetch(
       http.MultipartRequest(
-          "PUT",
+          "POST",
           Uri.parse(
             "${ApiManager.baseUri}/projects/${project!.id}/submissions",
           ),

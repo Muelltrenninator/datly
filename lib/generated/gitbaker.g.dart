@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-20T13:26:56
+/// Last generated: 2025-12-22T19:46:37
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 5,
+      revision: 6,
       ahead: 0,
       behind: 0,
       commits: [
@@ -432,6 +432,7 @@ final class GitBaker {
         "fb70d43e9828bec90402da217381172ed4ab8c15",
         "947a8a4800c91224567a8d58b43c97e7ec8d75ab",
         "abdb24f78f0c236c0ffd3956a87597166f480780",
+        "1fb0fc9ef5c23d317426f6e4d387fa05949e74fc",
       ],
     ),
   ];
@@ -496,6 +497,15 @@ final class GitBaker {
       hashAbbreviated: "abdb24f",
       message: "Fixed theme",
       date: DateTime.parse("2025-12-20T12:26:36.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "1fb0fc9ef5c23d317426f6e4d387fa05949e74fc",
+      hashAbbreviated: "1fb0fc9",
+      message: "Fixed router, improved registry, more improvements",
+      date: DateTime.parse("2025-12-22T18:45:57.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

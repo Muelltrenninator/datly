@@ -127,7 +127,7 @@ class _ListScreenState extends State<ListScreen> {
 
                 final response = await AuthManager.instance.fetch(
                   http.Request(
-                      "PUT",
+                      "POST",
                       Uri.parse("${ApiManager.baseUri}/projects"),
                     )
                     ..headers["Content-Type"] = "application/json"
@@ -229,7 +229,7 @@ class _ListScreenState extends State<ListScreen> {
                 final username = input.remove("username");
                 final response = await AuthManager.instance.fetch(
                   http.Request(
-                      "PUT",
+                      "POST",
                       Uri.parse("${ApiManager.baseUri}/users/$username"),
                     )
                     ..headers["Content-Type"] = "application/json"
@@ -239,7 +239,7 @@ class _ListScreenState extends State<ListScreen> {
                   fetch();
                   final response = await AuthManager.instance.fetch(
                     http.Request(
-                      "PUT",
+                      "POST",
                       Uri.parse(
                         "${ApiManager.baseUri}/users/$username/loginCode",
                       ),
@@ -272,68 +272,52 @@ class _ListScreenState extends State<ListScreen> {
       children: [
         !error
             ? response != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 24, right: 24),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 8),
-                            Builder(
-                              builder: (context) {
-                                List data;
-                                try {
-                                  data = jsonDecode(response!.body) as List;
-                                } catch (_) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 32),
-                                    child: Text(
-                                      "Failed to parse server response.",
-                                      style: DefaultTextStyle.of(context).style
-                                          .copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).disabledColor,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                    ),
-                                  );
-                                }
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 24,
+                          right: 24,
+                          top: 8,
+                          bottom: 24,
+                        ),
+                        child: Builder(
+                          builder: (context) {
+                            List data;
+                            try {
+                              data = jsonDecode(response!.body) as List;
+                            } catch (_) {
+                              return Center(
+                                child: Icon(Icons.error_outline, size: 48),
+                              );
+                            }
 
-                                if (data.isEmpty) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 32),
-                                    child: Text(
-                                      "No data.",
-                                      style: DefaultTextStyle.of(context).style
-                                          .copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).disabledColor,
-                                            fontStyle: FontStyle.italic,
-                                          ),
+                            if (data.isEmpty) {
+                              return Text(
+                                "No data.",
+                                style: DefaultTextStyle.of(context).style
+                                    .copyWith(
+                                      color: Theme.of(context).disabledColor,
+                                      fontStyle: FontStyle.italic,
                                     ),
-                                  );
-                                }
+                              );
+                            }
 
-                                return SizedBox(
-                                  width: double.infinity,
-                                  child: Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: List.generate(
-                                      data.length,
-                                      (i) => ListWidget(
-                                        data: data[i],
-                                        isProject: widget.isProjects,
-                                        onDelete: fetch,
-                                      ),
-                                    ),
+                            return SizedBox(
+                              width: double.infinity,
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: List.generate(
+                                  data.length,
+                                  (i) => ListWidget(
+                                    data: data[i],
+                                    isProject: widget.isProjects,
+                                    onDelete: fetch,
                                   ),
-                                );
-                              },
-                            ),
-                            SizedBox(height: 24),
-                          ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     )
@@ -343,12 +327,12 @@ class _ListScreenState extends State<ListScreen> {
           Align(
             alignment: Alignment.topRight,
             child: Padding(
-              padding: const EdgeInsets.only(right: 24),
+              padding: const EdgeInsets.only(top: 2, right: 12),
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 512),
                 child: MenuAnchor(
                   menuChildren: adminOptions,
-                  builder: (context, controller, _) => Card.filled(
+                  builder: (context, controller, _) => Card.outlined(
                     margin: EdgeInsets.zero,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
@@ -364,10 +348,7 @@ class _ListScreenState extends State<ListScreen> {
                             SizedBox(width: 8),
                             Text(
                               "Options",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: TextTheme.of(context).titleMedium,
                             ),
                           ],
                         ),
@@ -511,7 +492,7 @@ class _ListWidgetState extends State<ListWidget> {
                                         newDescription !=
                                             project?.description) {
                                       await AuthManager.instance.fetch(
-                                        http.Request("POST", uri)
+                                        http.Request("PUT", uri)
                                           ..headers["Content-Type"] =
                                               "application/json"
                                           ..body = jsonEncode({
@@ -575,7 +556,7 @@ class _ListWidgetState extends State<ListWidget> {
                                     if (newEmail != null &&
                                         newEmail != user?.email) {
                                       await AuthManager.instance.fetch(
-                                        http.Request("POST", uri)
+                                        http.Request("PUT", uri)
                                           ..headers["Content-Type"] =
                                               "application/json"
                                           ..body = jsonEncode({
@@ -612,17 +593,16 @@ class _ListWidgetState extends State<ListWidget> {
                             label: Text(
                               user?.projects.isNotEmpty ?? false
                                   ? userAssignedProjects.isNotEmpty
-                                        ? user?.projects
-                                                  .map((e) {
-                                                    if (userAssignedProjects
-                                                        .where((p) => p.id == e)
-                                                        .isEmpty) {
-                                                      return "#$e";
-                                                    }
-                                                    return "“${userAssignedProjects.singleWhere((p) => p.id == e).title}”";
-                                                  })
-                                                  .join(", ") ??
-                                              "–"
+                                        ? user!.projects
+                                              .map((e) {
+                                                if (userAssignedProjects
+                                                    .where((p) => p.id == e)
+                                                    .isEmpty) {
+                                                  return "#$e";
+                                                }
+                                                return "“${userAssignedProjects.singleWhere((p) => p.id == e).title}”";
+                                              })
+                                              .join(", ")
                                         : "–"
                                   : "No projects assigned",
                               style: user?.projects.isEmpty ?? true
@@ -659,7 +639,7 @@ class _ListWidgetState extends State<ListWidget> {
                                         newProjects.map((p) => p.id) !=
                                             user?.projects) {
                                       await AuthManager.instance.fetch(
-                                        http.Request("POST", uri)
+                                        http.Request("PUT", uri)
                                           ..headers["Content-Type"] =
                                               "application/json"
                                           ..body = jsonEncode({
@@ -793,7 +773,7 @@ class _ListWidgetState extends State<ListWidget> {
                           label: Text("Add"),
                           onPressed: () async {
                             final response = await AuthManager.instance.fetch(
-                              http.Request("PUT", Uri.parse("$uri/loginCode")),
+                              http.Request("POST", Uri.parse("$uri/loginCode")),
                             );
                             if (response == null ||
                                 response.statusCode != 200) {

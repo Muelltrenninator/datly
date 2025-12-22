@@ -54,6 +54,6 @@ class AppDatabase extends _$AppDatabase {
   );
 }
 
-enum UserRole { guest, user, admin }
+enum UserRole { user, admin }
 
 enum SubmissionStatus { pending, accepted, rejected, censored }

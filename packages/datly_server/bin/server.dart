@@ -32,15 +32,15 @@ final _router = Router()
   ..get("/legal/terms", legalHandler)
   ..mount("/", fileHandler);
 
-Response fileHandler(Request req) {
+Future<Response> fileHandler(Request req) async {
   final path = req.url.path == ""
       ? "index.html"
       : req.url.path.replaceAll("..", "");
 
   var file = File("public/$path");
-  if (!file.existsSync()) file = File("public/index.html");
+  if (!(await file.exists())) file = File("public/index.html");
 
-  final contents = file.readAsBytesSync();
+  final contents = await file.readAsBytes();
   final headers = {
     HttpHeaders.contentTypeHeader:
         lookupMimeType(file.path) ?? "application/octet-stream",
@@ -53,12 +53,12 @@ Response fileHandler(Request req) {
   return req.method == "HEAD" ? response.change(body: null) : response;
 }
 
-Response legalHandler(Request req) {
+Future<Response> legalHandler(Request req) async {
   final path = req.url.path.replaceAll("..", "").split("/").last;
   final file = File("legal/$path.md");
-  if (!file.existsSync()) return Response.notFound("Document not found");
+  if (!(await file.exists())) return Response.notFound("Document not found");
 
-  final contents = file.readAsStringSync();
+  final contents = await file.readAsString();
   final headers = {
     HttpHeaders.contentTypeHeader: "text/markdown; charset=utf-8",
   };
@@ -72,17 +72,29 @@ void shutdown([String signal = "Signal"]) async {
   processingShutdown = true;
   t.info("Received $signal -> Shutting down");
 
-  await server.close();
-  t.debug("Server closed successfully");
+  try {
+    await server.close();
+    t.debug("Server closed successfully");
+  } catch (e) {
+    t.error("Error closing server: $e");
+  }
 
-  await db.customStatement("PRAGMA optimize");
-  await db.customStatement("PRAGMA wal_checkpoint");
-  t.debug("Database optimized successfully");
+  try {
+    await db.customStatement("PRAGMA optimize");
+    await db.customStatement("PRAGMA wal_checkpoint");
+    t.debug("Database optimized successfully");
+  } catch (e) {
+    t.error("Error optimizing database: $e");
+  }
 
-  await db.close();
-  t.debug("Database connection closed successfully");
+  try {
+    await db.close();
+    t.debug("Database connection closed successfully");
+  } catch (e) {
+    t.error("Error closing database: $e");
+  }
 
-  t.info("Shutdown complete, bye!");
+  t.info("Shutdown complete, bye 👋");
   exit(0);
 }
 
