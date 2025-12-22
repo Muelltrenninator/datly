@@ -29,45 +29,34 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: ListProjectsRoute.page, path: "projects"),
       ],
     ),
-    AutoRoute(page: LoginRoute.page, path: "/login"),
+    AutoRoute(
+      page: LoginRoute.page,
+      path: "/login",
+      guards: [ReverseAuthenticationGuard()],
+    ),
     AutoRoute(page: ErrorRoute.page, path: "*"),
   ];
-
-  // @override
-  // List<AutoRouteGuard> get guards => [LogGuard()];
 }
 
 class AuthenticationGuard extends AutoRouteGuard {
   @override
-  void onNavigation(NavigationResolver resolver, StackRouter router) async {
-    await AuthManager.instance.initializeCompleter.future;
+  void onNavigation(NavigationResolver resolver, StackRouter router) {
     if (AuthManager.instance.authenticatedUser != null) {
       resolver.next(true);
     } else {
-      resolver.next(false);
-      router.replaceAll([const LoginRoute()]);
+      resolver.redirectUntil(LoginRoute());
     }
   }
 }
 
-class LogGuard extends AutoRouteGuard {
+class ReverseAuthenticationGuard extends AutoRouteGuard {
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) {
-    print(
-      "[${DateTime.now().toUtc().toIso8601String()}] ${router.currentPath} (${router.current.name}) -> ${resolver.route.path} (${resolver.route.name})",
-    );
-    print(
-      StackTrace.current
-          .toString()
-          .split("\n")
-          .map(
-            (e) =>
-                (" " * "[${DateTime.now().toUtc().toIso8601String()}]".length) +
-                e,
-          )
-          .join("\n"),
-    );
-    resolver.next(true);
+    if (AuthManager.instance.authenticatedUser == null) {
+      resolver.next(true);
+    } else {
+      resolver.redirectUntil(MainRoute());
+    }
   }
 }
 
@@ -102,6 +91,7 @@ Future<void> main() async {
   prefs = await SharedPreferencesWithCache.create(
     cacheOptions: const SharedPreferencesWithCacheOptions(),
   );
+  await AuthManager.instance.initialize();
 
   runApp(const MainApp());
 }
@@ -114,6 +104,8 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+  final _appRouter = AppRouter();
+
   @override
   void initState() {
     super.initState();
@@ -124,21 +116,8 @@ class _MainAppState extends State<MainApp> {
         "Poppins",
       ], await DefaultAssetBundle.of(context).loadString("assets/OFL.txt"));
     });
-    AuthManager.instance
-      ..addListener(onUpdate)
-      ..initialize();
 
     if (kIsWeb) web.document.getElementById("loaderContainer")?.remove();
-  }
-
-  @override
-  void dispose() {
-    AuthManager.instance.removeListener(onUpdate);
-    super.dispose();
-  }
-
-  void onUpdate() {
-    if (mounted) setState(() {});
   }
 
   @override
@@ -150,7 +129,9 @@ class _MainAppState extends State<MainApp> {
       themeMode: ThemeMode.system,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: AppRouter().config(),
+      routerConfig: _appRouter.config(
+        reevaluateListenable: AuthManager.instance,
+      ),
     );
   }
 }
@@ -212,17 +193,14 @@ class _MainScreenState extends State<MainScreen> {
   );
 }
 
-class ImmersiveModeIntent extends Intent {
-  const ImmersiveModeIntent();
-}
+class ImmersiveModeIntent extends Intent {}
 
 class ImmersiveModeAction extends Action<ImmersiveModeIntent> {
   final ValueNotifier<bool> enabledNotifier;
   ImmersiveModeAction(this.enabledNotifier);
 
   @override
-  void invoke(covariant ImmersiveModeIntent intent) =>
-      enabledNotifier.value = !enabledNotifier.value;
+  void invoke(_) => enabledNotifier.value = !enabledNotifier.value;
 }
 
 extension OnColor on Color {

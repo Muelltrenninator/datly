@@ -33,12 +33,6 @@ class _LoginScreenState extends State<LoginScreen>
       }
       if (mounted) setState(() {});
     });
-    AuthManager.instance.initializeCompleter.future.then((_) {
-      if (AuthManager.instance.authToken != null && mounted) {
-        context.router.replacePath("/");
-      }
-    });
-
     sizeAnimationController = AnimationController(
       vsync: this,
       duration: Durations.extralong4,

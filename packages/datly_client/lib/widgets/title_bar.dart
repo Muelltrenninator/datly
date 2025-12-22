@@ -56,7 +56,7 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
     return GestureDetector(
       child: AppBar(
         automaticallyImplyLeading: false,
-        title: TitleBarTitle(onTap: () => context.navigateToPath("/")),
+        title: TitleBarTitle(onTap: () => context.navigateTo(MainRoute())),
         backgroundColor: backgroundColor,
         actions: [
           Padding(
@@ -108,7 +108,10 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
                   title: Text(AppLocalizations.of(context).aboutAppLearnMore),
                 ),
                 ListTile(
-                  onTap: () => AuthManager.instance.logout(),
+                  onTap: () async {
+                    await context.navigateTo(MainRoute());
+                    await AuthManager.instance.logout();
+                  },
                   leading: Icon(Icons.logout),
                   title: Text(AppLocalizations.of(context).aboutAppLogout),
                 ),

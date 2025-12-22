@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
@@ -9,6 +13,7 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../registry.dart';
 import '../widgets/radio_dialog.dart';
+import '../widgets/status_modal.dart';
 
 @RoutePage()
 class UploadPage extends StatefulWidget {
@@ -116,133 +121,218 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     );
   }
 
+  void switchCamera() async {
+    final availableCameras = await cameras.future;
+
+    if (!mounted) return;
+    final selection = await showRadioDialog(
+      context: context,
+      title: AppLocalizations.of(context).selectCamera,
+      initialValue: availableCameras[cameraIndex],
+      items: availableCameras,
+      titleGenerator: (item) => item.name,
+      subtitleGenerator: (item) =>
+          "${switch (item.lensDirection) {
+            CameraLensDirection.back => AppLocalizations.of(context).selectCameraDescriptionBack,
+            CameraLensDirection.front => AppLocalizations.of(context).selectCameraDescriptionFront,
+            CameraLensDirection.external => AppLocalizations.of(context).selectCameraDescriptionExternal,
+          }} (${item.sensorOrientation}°)",
+      iconGenerator: (item) => Icon(switch (item.lensDirection) {
+        CameraLensDirection.back => Icons.camera_rear,
+        CameraLensDirection.front => Icons.camera_front,
+        CameraLensDirection.external => Icons.outbond_outlined,
+      }),
+    );
+    if (selection == null) return;
+
+    cameraIndex = availableCameras.indexOf(selection);
+    prefs.setInt("camera", cameraIndex);
+    controller?.dispose();
+    controller = null;
+
+    if (mounted) setState(() {});
+    await _initializeCameraController(selection);
+  }
+
+  void switchProject() async {
+    final List<ProjectData> projectData = (await Future.wait<ProjectData?>(
+      projects.map((e) async => (await ProjectRegistry.instance.get(e))),
+    )).whereType<ProjectData>().toList();
+
+    if (!mounted) return;
+    final selection = await showRadioDialog(
+      context: context,
+      title: AppLocalizations.of(context).selectProject,
+      initialValue: projectIndex != null ? projectData[projectIndex!] : null,
+      items: projectData,
+      titleGenerator: (item) => item.title,
+      subtitleGenerator: (item) => item.description,
+    );
+    if (selection == null) return;
+
+    projectIndex = projectData.indexOf(selection);
+    projectIndexCache = selection;
+    if (mounted) setState(() {});
+  }
+
+  void submit() async {
+    final completer = Completer<void>();
+    http.Response? response;
+    showStatusModal(
+      context: context,
+      completer: completer,
+      failureDetailsGenerator: () {
+        try {
+          if (jsonDecode(response!.body) case {"error": String errorMessage}) {
+            return errorMessage;
+          }
+        } catch (_) {}
+        return "Status code: ${response?.statusCode ?? "<unavailable>"}\n${response?.body}"
+            .trim();
+      },
+    );
+
+    final imageRaw = await controller!.takePicture();
+    await controller!.pausePreview();
+    var image = img.decodeImage(await imageRaw.readAsBytes())!;
+
+    final project = await ProjectRegistry.instance.get(projects[projectIndex!]);
+    response = await AuthManager.instance.fetch(
+      http.MultipartRequest(
+          "PUT",
+          Uri.parse(
+            "${ApiManager.baseUri}/projects/${project!.id}/submissions",
+          ),
+        )
+        ..files.add(
+          http.MultipartFile.fromBytes(
+            "",
+            img.encodePng(image),
+            contentType: http.MediaType.parse("image/png"),
+          ),
+        ),
+    );
+
+    await controller!.resumePreview();
+    response != null && response.statusCode == 201
+        ? completer.complete()
+        : completer.completeError("Upload failed");
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    Widget previewWidget() => Card.outlined(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(aspectRatio: 1, child: CameraPreview(controller!)),
+      ),
+    );
+    Widget errorWidget() => ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.sizeOf(context).width * 0.5,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.device_unknown, size: 48),
+          SizedBox(height: 8),
+          Text(
+            AppLocalizations.of(context).cameraNotFound,
+            style: TextTheme.of(context).headlineSmall!.copyWith(height: 1),
+          ),
+          Text(
+            camerasPermissionDenied
+                ? AppLocalizations.of(context).cameraErrorPermission
+                : AppLocalizations.of(context).cameraErrorUnavailable,
+            maxLines: 3,
+          ),
+          SizedBox(height: 16),
+          (camerasPermissionDenied ? FilledButton.icon : OutlinedButton.icon)
+              .call(
+                onPressed: () async {
+                  controller?.dispose();
+                  controller = null;
+                  error = false;
+                  if (mounted) setState(() {});
+
+                  await camerasInitialize();
+                  await loadStoredCamera();
+                },
+                label: Text(AppLocalizations.of(context).retry),
+                icon: Icon(Icons.refresh),
+              ),
+        ],
+      ),
+    );
+    Widget projectWidget() => Align(
+      alignment: Alignment.bottomLeft,
+      child: AnimatedSwitcher(
+        duration: Durations.medium1,
+        switchInCurve: Curves.easeInOutCubicEmphasized,
+        switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+        transitionBuilder: (child, animation) => SlideTransition(
+          position: (Tween<Offset>(
+            begin: Offset(0, 1.1),
+            end: Offset(0, 0),
+          )).animate(animation),
+          child: child,
+        ),
+        child:
+            controller != null &&
+                projectIndex != null &&
+                projectIndexCache != null
+            ? Container(
+                key: ValueKey("container"),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: ColorScheme.of(context).surface,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width * 0.6,
+                ),
+                child: AnimatedSize(
+                  duration: Durations.medium1,
+                  curve: Curves.easeInOutCubicEmphasized,
+                  alignment: Alignment.bottomLeft,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        projectIndexCache!.title,
+                        style: TextTheme.of(context).titleMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (projectIndexCache!.description?.isNotEmpty ?? false)
+                        Text(
+                          projectIndexCache!.description!,
+                          style: TextTheme.of(context).bodySmall,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
+      ),
+    );
+
+    final scaffold = Scaffold(
       body: Stack(
         children: [
           !error
               ? controller != null && controller!.value.isInitialized
-                    ? Center(
-                        heightFactor: 1.5,
-                        child: Card.outlined(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: CameraPreview(controller!),
-                            ),
-                          ),
-                        ),
-                      )
+                    ? Center(heightFactor: 1.15, child: previewWidget())
                     : Center(child: CircularProgressIndicator())
               : noCamera
-              ? Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.sizeOf(context).width * 0.5,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.device_unknown, size: 48),
-                        SizedBox(height: 8),
-                        Text(
-                          AppLocalizations.of(context).cameraNotFound,
-                          style: TextTheme.of(
-                            context,
-                          ).headlineSmall!.copyWith(height: 1),
-                        ),
-                        Text(
-                          camerasPermissionDenied
-                              ? AppLocalizations.of(
-                                  context,
-                                ).cameraErrorPermission
-                              : AppLocalizations.of(
-                                  context,
-                                ).cameraErrorUnavailable,
-                          maxLines: 3,
-                        ),
-                        SizedBox(height: 16),
-                        (camerasPermissionDenied
-                                ? FilledButton.icon
-                                : OutlinedButton.icon)
-                            .call(
-                              onPressed: () async {
-                                controller?.dispose();
-                                controller = null;
-                                error = false;
-                                if (mounted) setState(() {});
-
-                                await camerasInitialize();
-                                await loadStoredCamera();
-                              },
-                              label: Text(AppLocalizations.of(context).retry),
-                              icon: Icon(Icons.refresh),
-                            ),
-                      ],
-                    ),
-                  ),
-                )
+              ? Center(child: errorWidget())
               : Center(child: Icon(Icons.error_outline, size: 48)),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: AnimatedSwitcher(
-              duration: Durations.medium1,
-              switchInCurve: Curves.easeInOutCubicEmphasized,
-              switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-              transitionBuilder: (child, animation) => SlideTransition(
-                position: (Tween<Offset>(
-                  begin: Offset(0, 1.1),
-                  end: Offset(0, 0),
-                )).animate(animation),
-                child: child,
-              ),
-              child:
-                  controller != null &&
-                      projectIndex != null &&
-                      projectIndexCache != null
-                  ? Container(
-                      key: ValueKey("container"),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: ColorScheme.of(context).surface,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.sizeOf(context).width * 0.6,
-                      ),
-                      child: AnimatedSize(
-                        duration: Durations.medium1,
-                        curve: Curves.easeInOutCubicEmphasized,
-                        alignment: Alignment.bottomLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              projectIndexCache!.title,
-                              style: TextTheme.of(context).titleMedium,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (projectIndexCache!.description?.isNotEmpty ??
-                                false)
-                              Text(
-                                projectIndexCache!.description!,
-                                style: TextTheme.of(context).bodySmall,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-          ),
+          projectWidget(),
         ],
       ),
       floatingActionButton: AnimatedSwitcher(
@@ -257,163 +347,60 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
           child: child,
         ),
         child: controller != null
-            ? LayoutBuilder(
-                builder: (_, constraints) {
-                  void onPressedSwitch() async {
-                    final availableCameras = await cameras.future;
-
-                    if (!context.mounted) return;
-                    final selection = await showRadioDialog(
-                      context: context,
-                      title: AppLocalizations.of(context).selectCamera,
-                      initialValue: availableCameras[cameraIndex],
-                      items: availableCameras,
-                      titleGenerator: (item) => item.name,
-                      subtitleGenerator: (item) =>
-                          "${switch (item.lensDirection) {
-                            CameraLensDirection.back => AppLocalizations.of(context).selectCameraDescriptionBack,
-                            CameraLensDirection.front => AppLocalizations.of(context).selectCameraDescriptionFront,
-                            CameraLensDirection.external => AppLocalizations.of(context).selectCameraDescriptionExternal,
-                          }} (${item.sensorOrientation}°)",
-                      iconGenerator: (item) =>
-                          Icon(switch (item.lensDirection) {
-                            CameraLensDirection.back => Icons.camera_rear,
-                            CameraLensDirection.front => Icons.camera_front,
-                            CameraLensDirection.external =>
-                              Icons.outbond_outlined,
-                          }),
-                    );
-                    if (selection == null) return;
-                    cameraIndex = availableCameras.indexOf(selection);
-                    prefs.setInt("camera", cameraIndex);
-                    controller?.dispose();
-                    controller = null;
-                    if (mounted) setState(() {});
-                    await _initializeCameraController(selection);
-                  }
-
-                  void onPressedSelect() async {
-                    final List<ProjectData> projectData =
-                        (await Future.wait<ProjectData?>(
-                          projects.map(
-                            (e) async =>
-                                (await ProjectRegistry.instance.get(e)),
-                          ),
-                        )).whereType<ProjectData>().toList();
-
-                    if (!context.mounted) return;
-                    final selection = await showRadioDialog(
-                      context: context,
-                      title: AppLocalizations.of(context).selectProject,
-                      initialValue: projectIndex != null
-                          ? projectData[projectIndex!]
-                          : null,
-                      items: projectData,
-                      titleGenerator: (item) => item.title,
-                      subtitleGenerator: (item) => item.description,
-                    );
-                    if (selection == null) return;
-                    projectIndex = projectData.indexOf(selection);
-                    projectIndexCache = selection;
-                    if (mounted) setState(() {});
-                  }
-
-                  void onPressedCamera() async {
-                    showModalBottomSheet(
-                      context: context,
-                      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
-                      isDismissible: false,
-                      requestFocus: true,
-                      builder: (context) => Padding(
-                        padding: EdgeInsets.only(top: 64, bottom: 64),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [CircularProgressIndicator()],
-                        ),
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                    onPressed: switchCamera,
+                    child: AnimatedSwitcher(
+                      duration: Durations.medium1,
+                      switchInCurve: Curves.easeInOutCubicEmphasized,
+                      switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+                      child: Icon(
+                        switch (controller!.description.lensDirection) {
+                          CameraLensDirection.back => Icons.camera_rear,
+                          CameraLensDirection.front => Icons.camera_front,
+                          CameraLensDirection.external => Icons.cameraswitch,
+                        },
                       ),
-                    );
-
-                    final imageRaw = await controller!.takePicture();
-                    await controller!.pausePreview();
-
-                    await Future.delayed(Durations.long1);
-                    var image = img.decodeImage(await imageRaw.readAsBytes())!;
-
-                    final project = await ProjectRegistry.instance.get(
-                      projects[projectIndex!],
-                    );
-                    final response = await AuthManager.instance.fetch(
-                      http.MultipartRequest(
-                          "PUT",
-                          Uri.parse(
-                            "${ApiManager.baseUri}/projects/${project!.id}/submissions",
-                          ),
-                        )
-                        ..files.add(
-                          http.MultipartFile.fromBytes(
-                            "",
-                            img.encodePng(image),
-                            contentType: http.MediaType.parse("image/png"),
-                          ),
-                        ),
-                    );
-                    // TODO: Implement dialog with success feedback
-                    // ignore: unused_local_variable
-                    final success =
-                        response != null && response.statusCode == 201;
-
-                    await Future.delayed(Durations.medium1);
-                    await controller!.resumePreview();
-                    if (context.mounted) context.pop();
-                  }
-
-                  final iconSwitch = Icon(
-                    key: ValueKey(controller!.description.lensDirection),
-                    switch (controller!.description.lensDirection) {
-                      CameraLensDirection.back => Icons.camera_rear,
-                      CameraLensDirection.front => Icons.camera_front,
-                      CameraLensDirection.external => Icons.cameraswitch,
-                    },
-                  );
-                  final iconSelect = Icon(Icons.assignment);
-                  final iconCamera = Icon(Icons.camera);
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                        onPressed: onPressedSwitch,
-                        child: AnimatedSwitcher(
-                          duration: Durations.medium1,
-                          switchInCurve: Curves.easeInOutCubicEmphasized,
-                          switchOutCurve:
-                              Curves.easeInOutCubicEmphasized.flipped,
-                          child: iconSwitch,
-                        ),
-                      ),
-                      if (projects.isNotEmpty) ...[
-                        SizedBox(height: 4),
-                        FloatingActionButton(
-                          onPressed: projects.isNotEmpty
-                              ? onPressedSelect
-                              : null,
-                          child: iconSelect,
-                        ),
-                        SizedBox(height: 8),
-                        FloatingActionButton.large(
-                          onPressed: projects.isNotEmpty
-                              ? onPressedCamera
-                              : null,
-                          child: iconCamera,
-                        ),
-                      ],
-                    ],
-                  );
-                },
+                    ),
+                  ),
+                  if (projects.isNotEmpty) ...[
+                    SizedBox(height: 4),
+                    FloatingActionButton(
+                      onPressed: projects.isNotEmpty ? switchProject : null,
+                      child: Icon(Icons.assignment),
+                    ),
+                    SizedBox(height: 8),
+                    FloatingActionButton.large(
+                      onPressed: projects.isNotEmpty ? submit : null,
+                      child: Icon(Icons.camera),
+                    ),
+                  ],
+                ],
               )
             : null,
       ),
     );
+    return Shortcuts(
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.space): UploadTriggerIntent(),
+      },
+      child: Actions(
+        actions: {UploadTriggerIntent: UploadTriggerAction(submit)},
+        child: scaffold,
+      ),
+    );
   }
+}
+
+class UploadTriggerIntent extends Intent {}
+
+class UploadTriggerAction extends Action<UploadTriggerIntent> {
+  void Function() onUpdate;
+  UploadTriggerAction(this.onUpdate);
+
+  @override
+  void invoke(_) => onUpdate();
 }

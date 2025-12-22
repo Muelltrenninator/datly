@@ -859,22 +859,25 @@ Future<void> showLoginCodeDialog(BuildContext context, String code) {
         bottom: 16,
       ),
       constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            code,
-            style: textTheme.displayLarge?.copyWith(
-              fontFamily: "GoogleSansCode",
-              fontWeight: FontWeight.bold,
-              letterSpacing: 8,
+      content: SizedBox(
+        width: double.infinity,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              code,
+              style: textTheme.displayLarge?.copyWith(
+                fontFamily: "GoogleSansCode",
+                fontWeight: FontWeight.bold,
+                letterSpacing: 6,
+              ),
             ),
-          ),
-          Text(
-            "THIS CODE WILL NOT BE SHOWN AGAIN.",
-            style: textTheme.labelMedium,
-          ),
-        ],
+            Text(
+              "THIS CODE WILL NOT BE SHOWN AGAIN.",
+              style: textTheme.labelMedium,
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

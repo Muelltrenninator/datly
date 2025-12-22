@@ -582,7 +582,7 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
                               widget.effectiveUserData! as dynamic)
                           .toJson(),
                   isProject: widget.effectiveProject != null,
-                  onDelete: () => context.navigateToPath("/"),
+                  onDelete: () => context.navigateTo(MainRoute()),
                 ),
               ),
             ),

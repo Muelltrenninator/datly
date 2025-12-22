@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-20T13:23:05
+/// Last generated: 2025-12-20T13:26:56
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 4,
+      revision: 5,
       ahead: 0,
       behind: 0,
       commits: [
@@ -431,6 +431,7 @@ final class GitBaker {
         "fb6ec8688784ded2a3004e5dd6a6ef9803586a88",
         "fb70d43e9828bec90402da217381172ed4ab8c15",
         "947a8a4800c91224567a8d58b43c97e7ec8d75ab",
+        "abdb24f78f0c236c0ffd3956a87597166f480780",
       ],
     ),
   ];
@@ -486,6 +487,15 @@ final class GitBaker {
       hashAbbreviated: "947a8a4",
       message: "Removed `file_picker`, fixed upload behind proxy",
       date: DateTime.parse("2025-12-20T12:22:39.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "abdb24f78f0c236c0ffd3956a87597166f480780",
+      hashAbbreviated: "abdb24f",
+      message: "Fixed theme",
+      date: DateTime.parse("2025-12-20T12:26:36.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

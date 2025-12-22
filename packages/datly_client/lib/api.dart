@@ -7,13 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 
 import 'main.dart';
+import 'registry.dart';
 import 'widgets/title_bar.dart';
 
 class ApiManager {
-  ApiManager._() {
-    AuthManager.instance.initialize();
-  }
-
+  ApiManager._();
   static final ApiManager _instance = ApiManager._();
   static ApiManager get instance => _instance;
 
@@ -26,10 +24,8 @@ class AuthManager extends ChangeNotifier {
   static final AuthManager _instance = AuthManager._();
   static AuthManager get instance => _instance;
 
-  Completer<void> initializeCompleter = Completer();
   Future<void> initialize() async {
     await _instance.fetchAuthenticatedUser();
-    if (!initializeCompleter.isCompleted) initializeCompleter.complete();
   }
 
   UserData? _authenticatedUser;
@@ -54,6 +50,10 @@ class AuthManager extends ChangeNotifier {
         body != "{}") {
       final valueBefore = _authenticatedUser;
       _authenticatedUser = UserData.fromJson(jsonDecode(body));
+      UserRegistry.instance.add(
+        _authenticatedUser!.username,
+        _authenticatedUser!,
+      );
       if (authToken == null) prefs.setString("token", token!);
       if (valueBefore != _authenticatedUser) notifyListeners();
     }
@@ -102,7 +102,7 @@ class AuthManager extends ChangeNotifier {
     final effectiveToken = token ?? authToken;
     assert(
       effectiveToken != null,
-      "The [AuthManager.fetch] must never be called when there is no auth token set.",
+      "[AuthManager.fetchPrepare] must never be called with no auth token set.",
     );
     return request..headers["Authorization"] = "Token $effectiveToken";
   }

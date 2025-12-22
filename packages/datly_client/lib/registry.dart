@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-
 import 'api.dart';
+
+enum RegistryValueState { loading, available, missing, unavailable }
 
 /// Registry class with asynchronous fetching and caching of data.
 ///
@@ -22,14 +24,15 @@ import 'api.dart';
 ///   StuffData _fromJson(json) => StuffData.fromJson(json);
 /// }
 /// ```
-abstract class _Registry<I extends Object, D extends Object> {
+abstract class _Registry<I extends Object, D extends Object>
+    extends ChangeNotifier {
   _Registry._();
 
-  final Map<I, D> _projects = {};
+  final Map<I, D?> _projects = {};
   final Map<I, Completer<void>> _activeFetches = {};
 
-  Future<D?> get(I identifier) async {
-    if (_projects.containsKey(identifier)) {
+  Future<D?> get(I identifier, {bool noCache = false}) async {
+    if (_projects.containsKey(identifier) && !noCache) {
       return _projects[identifier];
     }
 
@@ -40,6 +43,14 @@ abstract class _Registry<I extends Object, D extends Object> {
 
     final completer = Completer<void>();
     _activeFetches[identifier] = completer;
+    notifyListeners();
+
+    void complete() {
+      if (completer.isCompleted) return;
+      completer.complete();
+      _activeFetches.remove(identifier);
+      notifyListeners();
+    }
 
     try {
       final response = await AuthManager.instance.fetch(
@@ -47,16 +58,47 @@ abstract class _Registry<I extends Object, D extends Object> {
       );
 
       final body = response?.body;
-      if (response != null && response.statusCode == 200 && body != null) {
-        _projects[identifier] = _fromJson(jsonDecode(body));
-        return _fromJson(jsonDecode(body));
+      if (response != null) {
+        if (response.statusCode == 200 && body != null) {
+          final entity = _fromJson(jsonDecode(body));
+          _projects[identifier] = entity;
+          complete();
+          return entity;
+        } else if (response.statusCode == 404) {
+          _projects[identifier] = null;
+          complete();
+          return null;
+        }
       }
-    } finally {
-      completer.complete();
-      _activeFetches.remove(identifier);
-    }
+    } catch (_) {}
 
+    complete();
     return null;
+  }
+
+  void _notifyListeners(Function fn) {
+    fn();
+    notifyListeners();
+  }
+
+  void add(I identifier, D data) =>
+      _notifyListeners(() => _projects[identifier] = data);
+  void addAll(Map<I, D> data) => _notifyListeners(() => _projects.addAll(data));
+
+  void invalidate(I identifier) =>
+      _notifyListeners(() => _projects.remove(identifier));
+  void invalidateAll() => _notifyListeners(() => _projects.clear());
+
+  RegistryValueState state(I identifier) {
+    if (_projects.containsKey(identifier)) {
+      return _projects[identifier] != null
+          ? RegistryValueState.available
+          : RegistryValueState.missing;
+    } else if (_activeFetches.containsKey(identifier)) {
+      return RegistryValueState.loading;
+    } else {
+      return RegistryValueState.unavailable;
+    }
   }
 
   String get _requestMethod => "GET";
