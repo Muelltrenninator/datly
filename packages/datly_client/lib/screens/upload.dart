@@ -232,7 +232,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     );
     Widget errorWidget() => ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: MediaQuery.sizeOf(context).width * 0.5,
+        maxWidth: MediaQuery.sizeOf(context).width * 0.7,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -241,12 +241,14 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
           SizedBox(height: 8),
           Text(
             AppLocalizations.of(context).cameraNotFound,
+            textAlign: TextAlign.center,
             style: TextTheme.of(context).headlineSmall!.copyWith(height: 1),
           ),
           Text(
             camerasPermissionDenied
                 ? AppLocalizations.of(context).cameraErrorPermission
                 : AppLocalizations.of(context).cameraErrorUnavailable,
+            textAlign: TextAlign.center,
             maxLines: 3,
           ),
           SizedBox(height: 16),
@@ -330,7 +332,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
         children: [
           !error
               ? controller != null && controller!.value.isInitialized
-                    ? Center(heightFactor: 1.15, child: previewWidget())
+                    ? Center(heightFactor: 1.2, child: previewWidget())
                     : Center(child: CircularProgressIndicator())
               : noCamera
               ? Center(child: errorWidget())

@@ -847,44 +847,49 @@ Future<void> showLoginCodeDialog(BuildContext context, String code) {
   final textTheme = TextTheme.of(context);
   return showDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      contentPadding: EdgeInsetsGeometry.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: 16,
-      ),
-      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
-      content: SizedBox(
-        width: double.infinity,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              code,
-              style: textTheme.displayLarge?.copyWith(
-                fontFamily: "GoogleSansCode",
-                fontWeight: FontWeight.bold,
-                letterSpacing: 6,
+    builder: (context) {
+      final windowSizeClass = WindowSizeClass.of(context);
+      return AlertDialog(
+        contentPadding: EdgeInsetsGeometry.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 16,
+        ),
+        constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
+        content: SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                code,
+                style: textTheme.displayLarge?.copyWith(
+                  fontFamily: "GoogleSansCode",
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: windowSizeClass > WindowSizeClass.compact
+                      ? 8
+                      : 2,
+                ),
               ),
-            ),
-            Text(
-              "THIS CODE WILL NOT BE SHOWN AGAIN.",
-              style: textTheme.labelMedium,
-            ),
-          ],
+              Text(
+                "THIS CODE WILL NOT BE SHOWN AGAIN.",
+                style: textTheme.labelMedium,
+              ),
+            ],
+          ),
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Clipboard.setData(ClipboardData(text: code)),
-          child: Text(MaterialLocalizations.of(context).copyButtonLabel),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(MaterialLocalizations.of(context).okButtonLabel),
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            onPressed: () => Clipboard.setData(ClipboardData(text: code)),
+            child: Text(MaterialLocalizations.of(context).copyButtonLabel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(MaterialLocalizations.of(context).okButtonLabel),
+          ),
+        ],
+      );
+    },
   );
 }
