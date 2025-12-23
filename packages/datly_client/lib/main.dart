@@ -87,6 +87,7 @@ Future<void> camerasInitialize() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
+  // await BrowserContextMenu.disableContextMenu();
 
   prefs = await SharedPreferencesWithCache.create(
     cacheOptions: const SharedPreferencesWithCacheOptions(),
@@ -124,8 +125,8 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: "Datly",
-      theme: ThemeData(colorScheme: colorSchemeLight).withYear2024(),
-      darkTheme: ThemeData(colorScheme: colorSchemeDark).withYear2024(),
+      theme: ThemeData(colorScheme: colorSchemeLight).modified(),
+      darkTheme: ThemeData(colorScheme: colorSchemeDark).modified(),
       themeMode: ThemeMode.system,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -223,8 +224,48 @@ extension TitleCase on String {
 }
 
 extension on ThemeData {
+  ThemeData modified() => copyWith(
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  ).withYear2024();
   ThemeData withYear2024() => copyWith(
     sliderTheme: sliderTheme.copyWith(year2023: false),
     progressIndicatorTheme: progressIndicatorTheme.copyWith(year2023: false),
   );
+}
+
+/// Implementation of Material You Window Size Classes.
+///
+/// The current implementation is based on the guidelines from Material You
+/// Expressive design documentation.
+/// 
+/// The sizes can be compared using the standard comparison operators (<, >,
+/// <=,  >=). This is useful for adapting layouts based on the current window size
+/// class.
+///
+/// See also:
+/// - https://m3.material.io/foundations/layout/applying-layout/window-size-classes
+enum WindowSizeClass {
+  compact(to: 599),
+  medium(from: 600, to: 839),
+  expanded(from: 840, to: 1199),
+  large(from: 1200, to: 1599),
+  extraLarge(from: 1600);
+
+  final int? from;
+  final int? to;
+  const WindowSizeClass({this.from, this.to});
+
+  factory WindowSizeClass.of(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return WindowSizeClass.values.firstWhere(
+      (sizeClass) =>
+          (sizeClass.from == null || width >= sizeClass.from!) &&
+          (sizeClass.to == null || width <= sizeClass.to!),
+    );
+  }
+
+  bool operator <(WindowSizeClass other) => index < other.index;
+  bool operator >(WindowSizeClass other) => index > other.index;
+  bool operator <=(WindowSizeClass other) => index <= other.index;
+  bool operator >=(WindowSizeClass other) => index >= other.index;
 }

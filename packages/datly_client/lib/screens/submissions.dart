@@ -42,6 +42,8 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   ProjectData? effectiveProjectData;
   UserData? effectiveUserData;
 
+  ValueNotifier<bool> optionLeftAligned = ValueNotifier(false);
+
   int? get effectiveProject =>
       (widget.project != null &&
           widget.project!.isNotEmpty &&
@@ -59,13 +61,19 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   @override
   void initState() {
     super.initState();
+    optionLeftAligned.addListener(opUpdate);
   }
 
   @override
   void dispose() {
+    optionLeftAligned.removeListener(opUpdate);
     client?.close();
     stream = null;
     super.dispose();
+  }
+
+  void opUpdate() {
+    if (mounted) setState(() {});
   }
 
   void fetch() {
@@ -204,10 +212,14 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                   : Center(child: CircularProgressIndicator())
             : Center(child: Icon(Icons.error_outline, size: 48)),
         if (AuthManager.instance.authenticatedUserIsAdmin)
-          Align(
-            alignment: Alignment.topRight,
+          AnimatedAlign(
+            duration: Durations.medium1,
+            curve: Curves.easeInOutCubic,
+            alignment: optionLeftAligned.value
+                ? Alignment.topLeft
+                : Alignment.topRight,
             child: Padding(
-              padding: const EdgeInsets.only(top: 2, right: 12),
+              padding: const EdgeInsets.only(top: 2, left: 12, right: 12),
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 512),
                 child: SubmissionTargetWidget(
@@ -215,6 +227,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                   effectiveProjectData: effectiveProjectData,
                   effectiveUser: effectiveUser,
                   effectiveUserData: effectiveUserData,
+                  optionLeftAligned: optionLeftAligned,
                 ),
               ),
             ),
@@ -253,6 +266,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final windowSizeClass = WindowSizeClass.of(context);
     final image = SizedBox(
       width: 224,
       height: 224,
@@ -301,7 +315,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
             ),
     );
     final card = SizedBox(
-      width: 224,
+      width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
       child: Card.filled(
         margin: EdgeInsets.zero,
         child: Column(
@@ -486,6 +500,7 @@ class SubmissionTargetWidget extends StatefulWidget {
   final ProjectData? effectiveProjectData;
   final String effectiveUser;
   final UserData? effectiveUserData;
+  final ValueNotifier<bool> optionLeftAligned;
 
   const SubmissionTargetWidget({
     super.key,
@@ -493,6 +508,7 @@ class SubmissionTargetWidget extends StatefulWidget {
     required this.effectiveProjectData,
     required this.effectiveUser,
     required this.effectiveUserData,
+    required this.optionLeftAligned,
   });
 
   @override
@@ -506,6 +522,7 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
   @override
   void initState() {
     super.initState();
+    widget.optionLeftAligned.addListener(opUpdate);
     _controller = AnimationController(
       // value: 1,
       duration: Durations.medium1,
@@ -515,8 +532,13 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
 
   @override
   void dispose() {
+    widget.optionLeftAligned.removeListener(opUpdate);
     _controller.dispose();
     super.dispose();
+  }
+
+  void opUpdate() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -531,28 +553,36 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
       child: IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => _controller.isCompleted
-                  ? _controller.reverse()
-                  : _controller.forward(),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    RotationTransition(
-                      turns: Tween(begin: 0.0, end: -0.5).animate(animation),
-                      child: Icon(Icons.expand_more),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      "Admin View",
-                      style: TextTheme.of(context).titleMedium,
-                    ),
-                  ],
+            AnimatedAlign(
+              duration: Durations.medium1,
+              curve: Curves.easeInOutCubic,
+              alignment: widget.optionLeftAligned.value
+                  ? Alignment.topLeft
+                  : Alignment.topRight,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => _controller.isCompleted
+                    ? _controller.reverse()
+                    : _controller.forward(),
+                onLongPress: () => widget.optionLeftAligned.value =
+                    !widget.optionLeftAligned.value,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RotationTransition(
+                        turns: Tween(begin: 0.0, end: -0.5).animate(animation),
+                        child: Icon(Icons.expand_more),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        "Admin View",
+                        style: TextTheme.of(context).titleMedium,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

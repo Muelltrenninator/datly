@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';

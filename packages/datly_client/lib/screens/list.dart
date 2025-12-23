@@ -43,6 +43,7 @@ class ListScreen extends StatefulWidget {
 class _ListScreenState extends State<ListScreen> {
   http.Response? response;
   bool error = false;
+  bool optionLeftAligned = false;
 
   @override
   void initState() {
@@ -159,6 +160,7 @@ class _ListScreenState extends State<ListScreen> {
                       validator: (v) =>
                           v.isEmpty ? "Username cannot be empty." : null,
                       capitalization: TextCapitalization.none,
+                      autofillHints: [],
                     ),
                     "email": MultiPromptPrompt(
                       label: "Email Address",
@@ -167,6 +169,7 @@ class _ListScreenState extends State<ListScreen> {
                           ? "Not a valid email address."
                           : null,
                       keyboardType: TextInputType.emailAddress,
+                      autofillHints: [],
                     ),
                     "role": MultiPromptPrompt(
                       label: "Role",
@@ -268,18 +271,21 @@ class _ListScreenState extends State<ListScreen> {
       ),
     );
 
+    final windowSizeClass = WindowSizeClass.of(context);
     return Stack(
       children: [
         !error
             ? response != null
                   ? SingleChildScrollView(
                       child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 24,
-                          right: 24,
-                          top: 8,
-                          bottom: 24,
-                        ),
+                        padding: windowSizeClass > WindowSizeClass.compact
+                            ? EdgeInsets.only(
+                                left: 24,
+                                right: 24,
+                                top: 8,
+                                bottom: 24,
+                              )
+                            : EdgeInsets.all(8),
                         child: Builder(
                           builder: (context) {
                             List data;
@@ -324,10 +330,14 @@ class _ListScreenState extends State<ListScreen> {
                   : Center(child: CircularProgressIndicator())
             : Center(child: Icon(Icons.error_outline, size: 48)),
         if (AuthManager.instance.authenticatedUserIsAdmin) ...[
-          Align(
-            alignment: Alignment.topRight,
+          AnimatedAlign(
+            duration: Durations.medium1,
+            curve: Curves.easeInOutCubic,
+            alignment: optionLeftAligned
+                ? Alignment.topLeft
+                : Alignment.topRight,
             child: Padding(
-              padding: const EdgeInsets.only(top: 2, right: 12),
+              padding: const EdgeInsets.only(top: 2, left: 12, right: 12),
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 512),
                 child: MenuAnchor(
@@ -339,6 +349,10 @@ class _ListScreenState extends State<ListScreen> {
                       onTap: controller.isOpen
                           ? controller.close
                           : controller.open,
+                      onLongPress: () {
+                        optionLeftAligned = !optionLeftAligned;
+                        if (mounted) setState(() {});
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Row(
@@ -368,7 +382,7 @@ class _ListScreenState extends State<ListScreen> {
 class ListWidget extends StatefulWidget {
   final Map<String, dynamic> data;
   final bool isProject;
-  final void Function() onDelete;
+  final VoidCallback onDelete;
 
   const ListWidget({
     super.key,
@@ -437,6 +451,7 @@ class _ListWidgetState extends State<ListWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final windowSizeClass = WindowSizeClass.of(context);
     final submissionRoute = SubmissionsRoute(
       user: widget.isProject ? null : user!.username,
       project: widget.isProject ? project!.id.toString() : null,
@@ -449,8 +464,8 @@ class _ListWidgetState extends State<ListWidget> {
         ? true
         : AuthManager.instance.authenticatedUser?.username != user?.username;
 
-    final card = ConstrainedBox(
-      constraints: BoxConstraints(minWidth: 224, maxWidth: 224),
+    final card = SizedBox(
+      width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
       child: Card.filled(
         margin: EdgeInsets.zero,
         child: Column(
@@ -552,6 +567,7 @@ class _ListWidgetState extends State<ListWidget> {
                                       content: user?.email,
                                       quickValidator: (e) => validateEmail(e),
                                       keyboardType: TextInputType.emailAddress,
+                                      autofillHints: [],
                                     );
                                     if (newEmail != null &&
                                         newEmail != user?.email) {

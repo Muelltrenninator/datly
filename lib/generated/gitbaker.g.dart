@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-22T19:46:37
+/// Last generated: 2025-12-23T02:04:09
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 6,
+      revision: 8,
       ahead: 0,
       behind: 0,
       commits: [
@@ -433,6 +433,8 @@ final class GitBaker {
         "947a8a4800c91224567a8d58b43c97e7ec8d75ab",
         "abdb24f78f0c236c0ffd3956a87597166f480780",
         "1fb0fc9ef5c23d317426f6e4d387fa05949e74fc",
+        "8c4454beb4675beb5c6c390b9cbca22c8047bb98",
+        "dc68c8f00f219bb20a3db6defb66c78680e23894",
       ],
     ),
   ];
@@ -506,6 +508,24 @@ final class GitBaker {
       hashAbbreviated: "1fb0fc9",
       message: "Fixed router, improved registry, more improvements",
       date: DateTime.parse("2025-12-22T18:45:57.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "8c4454beb4675beb5c6c390b9cbca22c8047bb98",
+      hashAbbreviated: "8c4454b",
+      message: "Fixed DB & HTTP types, updated rate limits, asyncs",
+      date: DateTime.parse("2025-12-22T23:57:58.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "dc68c8f00f219bb20a3db6defb66c78680e23894",
+      hashAbbreviated: "dc68c8f",
+      message: "Fixed WASM asset dump",
+      date: DateTime.parse("2025-12-23T01:03:29.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

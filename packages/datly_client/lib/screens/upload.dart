@@ -224,7 +224,10 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     Widget previewWidget() => Card.outlined(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: AspectRatio(aspectRatio: 1, child: CameraPreview(controller!)),
+        child: AspectRatio(
+          aspectRatio: 1 / 1,
+          child: CameraPreview(controller!),
+        ),
       ),
     );
     Widget errorWidget() => ConstrainedBox(
@@ -398,7 +401,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 class UploadTriggerIntent extends Intent {}
 
 class UploadTriggerAction extends Action<UploadTriggerIntent> {
-  void Function() onUpdate;
+  VoidCallback onUpdate;
   UploadTriggerAction(this.onUpdate);
 
   @override
