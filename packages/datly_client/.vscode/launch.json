@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Web Debug",
+            "name": "Web",
             "type": "dart",
             "request": "launch",
             "program": "lib/main.dart",
@@ -10,6 +10,18 @@
                 "--disable-web-security"
             ],
             "deviceId": "chrome"
-        }
+        },
+        {
+            "name": "Web [WASM]",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "args": [
+                "--wasm",
+                "--web-browser-flag",
+                "--disable-web-security"
+            ],
+            "deviceId": "chrome"
+        },
     ]
 }

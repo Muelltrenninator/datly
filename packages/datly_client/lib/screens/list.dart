@@ -696,7 +696,7 @@ class _ListWidgetState extends State<ListWidget> {
 
                             if (kIsWeb) {
                               final blobParts =
-                                  ([response!.bodyBytes] as dynamic)
+                                  [response!.bodyBytes.toJS].toJS
                                       as JSArray<web.BlobPart>;
                               final blob = web.Blob(
                                 blobParts,
@@ -705,12 +705,12 @@ class _ListWidgetState extends State<ListWidget> {
                               final url = web.URL.createObjectURL(blob);
 
                               final anchor = web.HTMLAnchorElement()
+                                ..style.display = "none"
                                 ..href = url
                                 ..download =
                                     "datly-project_${project!.id}-dump.zip";
-
                               web.document.body?.append(anchor);
-                              anchor.click();
+                              anchor.dispatchEvent(web.MouseEvent("click"));
                               anchor.remove();
 
                               web.URL.revokeObjectURL(url);
