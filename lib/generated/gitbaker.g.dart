@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-23T20:23:11
+/// Last generated: 2025-12-23T20:40:28
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -413,7 +413,6 @@ final class GitBaker {
         hasUntrackedChanges: false,
       ),
     ),
-    WorkspaceEntryUntracked._(".deploy.txt"),
   ]);
 
   /// All branches in the repository.
@@ -424,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 10,
+      revision: 11,
       ahead: 0,
       behind: 0,
       commits: [
@@ -438,6 +437,7 @@ final class GitBaker {
         "dc68c8f00f219bb20a3db6defb66c78680e23894",
         "44f525cf55a430cd396244d47d71190d82af1b41",
         "ec22e94098d9964630481e59571b7599081aa601",
+        "c82b991b8637cc87981827e679eeafa0a3796c32",
       ],
     ),
   ];
@@ -547,6 +547,15 @@ final class GitBaker {
       hashAbbreviated: "ec22e94",
       message: "Updated theme color",
       date: DateTime.parse("2025-12-23T19:20:25.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "c82b991b8637cc87981827e679eeafa0a3796c32",
+      hashAbbreviated: "c82b991",
+      message: "Fixed login code dialog spacing on mobile",
+      date: DateTime.parse("2025-12-23T19:40:03.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",
