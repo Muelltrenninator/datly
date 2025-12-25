@@ -15,6 +15,41 @@ class AppLocalizationsDe extends AppLocalizations {
   String get delete => 'Löschen';
 
   @override
+  String invite(
+    String username,
+    String host,
+    int projectCount,
+    String projects,
+    String code,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      projectCount,
+      locale: localeName,
+      other: 'Du wurdest hinzugefügt zu: $projects',
+      zero: 'Du wurdest noch nicht zu einem Project hinzugefügt',
+    );
+    return 'Hallo $username 👋\nDu bist eingeladen, an einem Crowdsourcing teilzunehmen! Logg dich gleich ein, ein Account wurde schon für dich erstellt:\n\n- $host\n- $_temp0\n- Logincode: `$code` (NICHT TEILEN!)\n\nHilf uns unser Ziel zu verwirklichen. Man sieht sich dort!';
+  }
+
+  @override
+  String get loginUnknown => 'Unbekannter Logincode.';
+
+  @override
+  String get loginCodeLabel => 'Logincode';
+
+  @override
+  String get loginNewHere => 'Neu hier?';
+
+  @override
+  String get loginNewHereRequest => 'Einen Code Anfordern.';
+
+  @override
+  String get loginPrivacyPolicy => 'Datenschutzerklärung';
+
+  @override
+  String get loginTermsOfService => 'Nutzungsbedingungen';
+
+  @override
   String get cameraNotFound => 'Keine Kamera Gefunden';
 
   @override

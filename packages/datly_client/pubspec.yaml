@@ -43,4 +43,5 @@ flutter:
         - asset: assets/fonts/GoogleSansCode-Bold.ttf
   assets:
     - assets/icon.png
+    - assets/banner.png
     - assets/OFL.txt

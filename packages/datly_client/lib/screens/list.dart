@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:web/web.dart' as web;
 
 import '../api.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../main.gr.dart';
 import '../registry.dart';
@@ -229,7 +230,9 @@ class _ListScreenState extends State<ListScreen> {
                       .toList();
                 }
 
+                final user = UserData.fromJson(input);
                 final username = input.remove("username");
+
                 final response = await AuthManager.instance.fetch(
                   http.Request(
                       "POST",
@@ -256,7 +259,7 @@ class _ListScreenState extends State<ListScreen> {
                   if (code == null) return;
 
                   if (!context.mounted) return;
-                  showLoginCodeDialog(context, code);
+                  showLoginCodeDialog(context, code, user);
                 }
               },
               leadingIcon: Icon(Icons.add),
@@ -801,7 +804,7 @@ class _ListWidgetState extends State<ListWidget> {
                             if (code == null) return;
 
                             if (!context.mounted) return;
-                            showLoginCodeDialog(context, code);
+                            showLoginCodeDialog(context, code, user);
                           },
                         ),
                         ActionChip(
@@ -842,7 +845,11 @@ class _ListWidgetState extends State<ListWidget> {
       : Uri.parse("${ApiManager.baseUri}/users/${user!.username}");
 }
 
-Future<void> showLoginCodeDialog(BuildContext context, String code) {
+Future<void> showLoginCodeDialog(
+  BuildContext context,
+  String code,
+  UserData? user,
+) {
   assert(code.length == 8, "Login code must be 8 characters long.");
   final textTheme = TextTheme.of(context);
   return showDialog(
@@ -877,9 +884,48 @@ Future<void> showLoginCodeDialog(BuildContext context, String code) {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Clipboard.setData(ClipboardData(text: code)),
-            child: Text(MaterialLocalizations.of(context).copyButtonLabel),
+          MenuAnchor(
+            menuChildren: [
+              MenuItemButton(
+                onPressed: () => Clipboard.setData(ClipboardData(text: code)),
+                leadingIcon: Icon(Icons.copy),
+                child: Text("Copy code only"),
+              ),
+              MenuItemButton(
+                onPressed: user != null
+                    ? () async {
+                        final projectNames = user.projects.isNotEmpty
+                            ? (await Future.wait(
+                                    user.projects.map(
+                                      (p) => ProjectRegistry.instance.get(p),
+                                    ),
+                                  ))
+                                  .whereType<ProjectData>()
+                                  .map((p) => p.title)
+                                  .join(", ")
+                            : "";
+                        if (!context.mounted) return;
+                        Clipboard.setData(
+                          ClipboardData(
+                            text: AppLocalizations.of(context).invite(
+                              user.username,
+                              Uri.base.origin,
+                              user.projects.length,
+                              projectNames,
+                              code,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
+                leadingIcon: Icon(Icons.copy_all),
+                child: Text("Copy invitation message"),
+              ),
+            ],
+            builder: (context, controller, _) => TextButton(
+              onPressed: controller.isOpen ? controller.close : controller.open,
+              child: Text(MaterialLocalizations.of(context).copyButtonLabel),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

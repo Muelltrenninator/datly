@@ -7,6 +7,8 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/app_localizations_en.dart';
 import '../widgets/title_bar.dart';
 
 @RoutePage()
@@ -63,7 +65,9 @@ class _LoginScreenState extends State<LoginScreen>
     await AuthManager.instance.fetchAuthenticatedUser(token: token);
 
     submitLoading = false;
-    submitErrorText = "Unknown authorization token.";
+    submitErrorText = mounted
+        ? AppLocalizations.of(context).loginUnknown
+        : AppLocalizationsEn().loginUnknown;
     disallowedTokens.add(token);
     if (mounted) setState(() {});
 
@@ -117,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen>
                       maxLength: 8,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: "Access Token",
+                        labelText: AppLocalizations.of(context).loginCodeLabel,
                         errorText: submitErrorText,
                         suffixIcon: Padding(
                           padding: const EdgeInsets.only(right: 4),
@@ -144,9 +148,11 @@ class _LoginScreenState extends State<LoginScreen>
                 builder: (context) => Text.rich(
                   TextSpan(
                     children: [
-                      TextSpan(text: "New here? "),
                       TextSpan(
-                        text: "Request a token.",
+                        text: "${AppLocalizations.of(context).loginNewHere} ",
+                      ),
+                      TextSpan(
+                        text: AppLocalizations.of(context).loginNewHereRequest,
                         style: TextStyle(fontWeight: FontWeight.w600),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () =>
@@ -154,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                       TextSpan(text: "\n"),
                       TextSpan(
-                        text: "Privacy Policy",
+                        text: AppLocalizations.of(context).loginPrivacyPolicy,
                         style: TextStyle(fontWeight: FontWeight.w600),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () => showMarkdownDialog(
@@ -166,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                       TextSpan(text: " • "),
                       TextSpan(
-                        text: "Terms of Service",
+                        text: AppLocalizations.of(context).loginTermsOfService,
                         style: TextStyle(fontWeight: FontWeight.w600),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () => showMarkdownDialog(

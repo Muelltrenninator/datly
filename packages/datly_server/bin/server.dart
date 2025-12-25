@@ -40,7 +40,17 @@ Future<Response> fileHandler(Request req) async {
   var file = File("public/$path");
   if (!(await file.exists())) file = File("public/index.html");
 
-  final contents = await file.readAsBytes();
+  late final Uint8List contents;
+  if (file.path == "public/index.html") {
+    contents = Uint8List.fromList(
+      (await file.readAsString())
+          .replaceAll("{{CANONICAL}}", req.url.replace(path: "").toString())
+          .codeUnits,
+    );
+  } else {
+    contents = await file.readAsBytes();
+  }
+
   final headers = {
     HttpHeaders.contentTypeHeader:
         lookupMimeType(file.path) ?? "application/octet-stream",

@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-23T20:40:28
+/// Last generated: 2025-12-23T21:03:43
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 11,
+      revision: 12,
       ahead: 0,
       behind: 0,
       commits: [
@@ -438,6 +438,7 @@ final class GitBaker {
         "44f525cf55a430cd396244d47d71190d82af1b41",
         "ec22e94098d9964630481e59571b7599081aa601",
         "c82b991b8637cc87981827e679eeafa0a3796c32",
+        "d378e841509795a30205fb89aeec3772a7f39340",
       ],
     ),
   ];
@@ -556,6 +557,15 @@ final class GitBaker {
       hashAbbreviated: "c82b991",
       message: "Fixed login code dialog spacing on mobile",
       date: DateTime.parse("2025-12-23T19:40:03.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "d378e841509795a30205fb89aeec3772a7f39340",
+      hashAbbreviated: "d378e84",
+      message: "Fixed login code dialog spacing on mobile 2",
+      date: DateTime.parse("2025-12-23T20:03:15.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

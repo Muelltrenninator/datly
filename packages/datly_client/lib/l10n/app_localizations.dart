@@ -110,6 +110,54 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
+  /// Invitation message sent to users to invite them to a project on Datly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello {username} 👋\nYou\'re invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}\n- {projectCount, plural, =0{You\'ve not been added to any project yet} other{You\'ve been added to: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!'**
+  String invite(
+    String username,
+    String host,
+    int projectCount,
+    String projects,
+    String code,
+  );
+
+  /// Error message shown when the provided login code is not recognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown login code.'**
+  String get loginUnknown;
+
+  /// Label for the login code input field. This string is formatted in MLA title case.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Code'**
+  String get loginCodeLabel;
+
+  /// Text prompting new users to request a login code.
+  ///
+  /// In en, this message translates to:
+  /// **'New here?'**
+  String get loginNewHere;
+
+  /// Link text for new users to request a login code.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a Code.'**
+  String get loginNewHereRequest;
+
+  /// Link text for the app's privacy policy. This string is formatted in MLA title case.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get loginPrivacyPolicy;
+
+  /// Link text for the app's terms of service. This string is formatted in MLA title case.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get loginTermsOfService;
+
   /// Shown when no camera device is found on the system or the permission is denied. This string is formatted in MLA title case.
   ///
   /// In en, this message translates to:
