@@ -258,6 +258,7 @@ class _RadioDialogState<T extends Object> extends State<RadioDialog<T>> {
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
         TextButton(
+          autofocus: true,
           onPressed: widget.allowEmptySelection || _value != null
               ? () {
                   widget.onSubmit?.call(_value);

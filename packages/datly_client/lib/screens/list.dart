@@ -230,9 +230,14 @@ class _ListScreenState extends State<ListScreen> {
                       .toList();
                 }
 
-                final user = UserData.fromJson(input);
-                final username = input.remove("username");
+                final user = UserData.fromJson(
+                  Map<String, dynamic>.from(input)
+                    ..["joinedAt"] = DateTime.now()
+                        .toUtc()
+                        .millisecondsSinceEpoch, // otherwise: TypeError
+                );
 
+                final username = input.remove("username");
                 final response = await AuthManager.instance.fetch(
                   http.Request(
                       "POST",

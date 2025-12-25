@@ -235,6 +235,7 @@ class _MultipleChoiceDialogState<T extends Object>
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
         TextButton(
+          autofocus: true,
           onPressed: widget.allowEmptySelection || _selected.isNotEmpty
               ? () {
                   widget.onSubmit?.call(_selected);

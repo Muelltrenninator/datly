@@ -78,6 +78,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog> {
           : null,
       actions: [
         TextButton(
+          autofocus: true,
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
