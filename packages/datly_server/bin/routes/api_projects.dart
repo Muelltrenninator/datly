@@ -320,9 +320,18 @@ void define(Router router) {
 
         final signature = req.url.queryParameters["signature"];
         final signatureParental = req.url.queryParameters["signatureParental"];
-        if (signature == null) {
+        final signatureSnapshot = req.url.queryParameters["signatureSnapshot"];
+        final consentVersion = int.tryParse(
+          req.url.queryParameters["consentVersion"] ?? "",
+        );
+        if (signature == null ||
+            signature.isEmpty ||
+            signatureSnapshot == null ||
+            signatureSnapshot.isEmpty ||
+            consentVersion == null ||
+            consentVersion < 1) {
           return Response.badRequest(
-            body: jsonEncode({"error": "Missing signature parameter"}),
+            body: jsonEncode({"error": "Missing signature parameters"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -391,7 +400,6 @@ void define(Router router) {
           db.submissions,
         )..where((s) => s.id.equals(insertion))).getSingle();
 
-        const consentVersion = 1;
         await db
             .into(db.signatures)
             .insert(
@@ -405,6 +413,7 @@ void define(Router router) {
                 signature: signature,
                 signatureParental: Value.absentIfNull(signatureParental),
                 signatureMethod: SignatureMethod.typed,
+                signatureSnapshot: signatureSnapshot,
                 consentVersion: consentVersion,
               ),
             );

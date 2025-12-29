@@ -79,8 +79,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get consentTitle => 'Bildübermittlungszustimmung';
 
   @override
+  String consentVersion(String version, String date) {
+    return 'Version: $version, $date';
+  }
+
+  @override
   String get consentExplanation1 =>
-      'Um dein Bild direkt oder indirekt zu speichern, zu verarbeiten und schließlich zu veröffentlichen, benötigen wir deine ausdrückliche Zustimmung. Dein Benutzername wird mit der Bildeinsendung verknüpft und kann in zukünftigen Veröffentlichungen sichtbar sein. Du kannst deine Zustimmung jederzeit widerrufen, indem du deine Einsendung über dein Profil löschst. Wenn du nicht zustimmst, fahre bitte nicht mit der Einsendung fort.';
+      'Um dein Bild direkt oder indirekt zu speichern, zu verarbeiten und schließlich zu veröffentlichen, benötigen wir deine ausdrückliche Zustimmung. Dein Benutzername wird mit der Bildeinsendung verknüpft und kann in zukünftigen Veröffentlichungen sichtbar sein. Du kannst deine Zustimmung jederzeit widerrufen, indem du deine Einsendung über dein Profil löschst, dadurch wird das Bild nur nicht in den nächsten Datenexport aufgenommen, aber bereits veröffentlichte Bilder können möglicherweise bis zur nächsten Veröffentlichung nicht vollständig gelöscht werden.  Wenn du nicht zustimmst, fahre bitte nicht mit der Einsendung fort.';
 
   @override
   String get consentExplanation2 =>
@@ -96,7 +101,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get consentSignature => 'Elektronische Unterschrift';
+  String get consentSignature => 'Einfache Elektronische Unterschrift (EES)';
+
+  @override
+  String get consentSignatureName => 'Max Mustermann';
 
   @override
   String consentSignatureLegal(String username) {
@@ -107,8 +115,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get consentAge => 'Ich bin mindestens 16 Jahre alt';
 
   @override
-  String get consentSignatureParental =>
-      'Elektronische Unterschrift eines Erziehungsberechtigten';
+  String get consentSignatureParental => 'EES eines Erziehungsberechtigten';
 
   @override
   String get consentParental =>

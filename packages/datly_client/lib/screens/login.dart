@@ -236,14 +236,18 @@ class _MarkdownDialogState extends State<MarkdownDialog> {
         curve: Curves.easeInOutCubicEmphasized,
         child: !error
             ? data != null
-                  ? SingleChildScrollView(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24),
-                        child: MarkdownBlock(
-                          data: data!,
-                          config: Theme.brightnessOf(context) == Brightness.dark
-                              ? MarkdownConfig.darkConfig
-                              : MarkdownConfig.defaultConfig,
+                  ? SizedBox(
+                      width: double.infinity,
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24),
+                          child: MarkdownBlock(
+                            data: data!,
+                            config:
+                                Theme.brightnessOf(context) == Brightness.dark
+                                ? MarkdownConfig.darkConfig
+                                : MarkdownConfig.defaultConfig,
+                          ),
                         ),
                       ),
                     )

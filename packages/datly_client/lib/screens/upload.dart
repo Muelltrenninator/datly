@@ -178,20 +178,14 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
   }
 
   void submit() async {
-    final signature = await showModalBottomSheet<UploadConsentResult>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      builder: (_) => UploadConsentModal(),
-    );
-    if (signature == null || !mounted) return;
-
     final completer = Completer<void>();
     http.Response? response;
+    UploadConsentResult? signature;
     showStatusModal(
       context: context,
       completer: completer,
       failureDetailsGenerator: () {
+        if (signature == null) return "Upload cancelled by user.";
         try {
           if (jsonDecode(response!.body) case {"error": String errorMessage}) {
             return errorMessage;
@@ -205,6 +199,19 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     final imageRaw = await controller!.takePicture();
     await controller!.pausePreview();
     var image = img.decodeImage(await imageRaw.readAsBytes())!;
+    if (!mounted) return;
+
+    signature = await showModalBottomSheet<UploadConsentResult>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      builder: (_) => UploadConsentModal(),
+    );
+    if (signature == null) {
+      completer.completeError("Upload cancelled by user");
+      await controller!.resumePreview();
+      return;
+    }
 
     final project = await ProjectRegistry.instance.get(projects[projectIndex!]);
     response = await AuthManager.instance.fetch(
@@ -216,7 +223,9 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
             queryParameters: {
               "signature": signature.signature,
               if (signature.signatureParental != null)
-                "signature_parental": signature.signatureParental!,
+                "signatureParental": signature.signatureParental!,
+              "signatureSnapshot": signature.signatureSnapshot,
+              "consentVersion": signature.consentVersion.toString(),
             },
           ),
         )
@@ -433,9 +442,17 @@ class UploadConsentModal extends StatefulWidget {
   State<UploadConsentModal> createState() => _UploadConsentModalState();
 }
 
-typedef UploadConsentResult = ({String signature, String? signatureParental});
+typedef UploadConsentResult = ({
+  String signature,
+  String? signatureParental,
+  String signatureSnapshot,
+  int consentVersion,
+});
 
 class _UploadConsentModalState extends State<UploadConsentModal> {
+  static const int consentVersion = 1;
+  static const String consentVersionDate = "2025-12-29";
+
   late bool checkExplanation;
   late bool checkPolicy;
   late bool checkAge;
@@ -469,219 +486,249 @@ class _UploadConsentModalState extends State<UploadConsentModal> {
     if (mounted) setState(() {});
   }
 
+  bool submitEnabled() =>
+      checkExplanation &&
+      checkPolicy &&
+      signatureController.text.trim().isNotEmpty &&
+      (checkAge ||
+          (parentalSignatureController.text.trim().isNotEmpty &&
+              checkParental));
+  void submit() {
+    prefs.setBool("uploadConsentExplanation", checkExplanation);
+    prefs.setBool("uploadConsentPolicy", checkPolicy);
+    prefs.setBool("uploadConsentAge", checkAge);
+
+    final appLocalizations = AppLocalizations.of(context);
+    final snapshot =
+        """
+# ${appLocalizations.consentTitle}
+#### ${appLocalizations.consentVersion(consentVersion.toString(), consentVersionDate)}
+
+${appLocalizations.consentExplanation1}
+
+${appLocalizations.consentExplanation2}
+
+- [${checkExplanation ? "x" : " "}] ${appLocalizations.consentCheckbox}
+- [${checkPolicy ? "x" : " "}] ${appLocalizations.consentPolicy(appLocalizations.loginPrivacyPolicy, appLocalizations.loginTermsOfService)}
+
+---
+
+- ${appLocalizations.consentSignature}: ${signatureController.text.trim()} (${appLocalizations.consentSignatureLegal(AuthManager.instance.authenticatedUser!.username)})
+- [${checkAge ? "x" : " "}] ${appLocalizations.consentAge}
+${!checkAge ? """
+
+---
+
+- ${appLocalizations.consentSignatureParental}: ${parentalSignatureController.text.trim()} (${appLocalizations.consentSignatureLegal(AuthManager.instance.authenticatedUser!.username)})
+- [${checkParental ? "x" : " "}] ${appLocalizations.consentParental}
+""" : ""}
+---
+
+[${appLocalizations.consentButton}]()"""
+            .trim();
+
+    Navigator.of(context).pop<UploadConsentResult>((
+      signature: signatureController.text.trim(),
+      signatureParental: checkAge
+          ? null
+          : parentalSignatureController.text.trim(),
+      signatureSnapshot: snapshot,
+      consentVersion: consentVersion,
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context);
+    Widget divider = Padding(padding: EdgeInsets.all(8), child: Divider());
+    Widget signatureField(TextEditingController controller, String label) =>
+        ListTile(
+          contentPadding: EdgeInsetsDirectional.symmetric(horizontal: 16),
+          title: TextField(
+            controller: controller,
+            autofocus: controller == signatureController
+                ? checkExplanation && checkPolicy
+                : false,
+            autofillHints: [AutofillHints.name],
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.draw),
+              labelText: label,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              helperText: appLocalizations.consentSignatureLegal(
+                AuthManager.instance.authenticatedUser!.username,
+              ),
+              hintText: appLocalizations.consentSignatureName,
+              helperMaxLines: 5,
+              border: OutlineInputBorder(),
+            ),
+          ),
+        );
+    Widget signatureCheckbox(
+      Text label,
+      bool value,
+      ValueChanged<bool?> onChanged,
+    ) => CheckboxListTile(
+      value: value,
+      onChanged: onChanged,
+      title: label,
+      controlAffinity: ListTileControlAffinity.leading,
+      visualDensity: VisualDensity.compact,
+    );
     return DraggableScrollableSheet(
-      minChildSize: 0.8,
+      minChildSize: 0.6,
       maxChildSize: 1.0,
       initialChildSize: 0.8,
       expand: false,
       builder: (_, controller) => Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
-        child: SingleChildScrollView(
+        child: ListView(
           controller: controller,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              ListTile(
-                title: Text(
-                  appLocalizations.consentTitle,
-                  style: TextTheme.of(context).headlineSmall,
+          shrinkWrap: true,
+          children: [
+            SizedBox(height: 16),
+            ListTile(
+              title: Text(
+                appLocalizations.consentTitle,
+                style: TextTheme.of(context).headlineSmall,
+              ),
+              subtitle: Text(
+                appLocalizations.consentVersion(
+                  consentVersion.toString(),
+                  consentVersionDate,
                 ),
+                style: TextTheme.of(context).bodyMedium,
               ),
-              ListTile(
-                title: Text(
-                  appLocalizations.consentExplanation1,
-                  textAlign: TextAlign.justify,
-                ),
+            ),
+            ListTile(
+              title: Text(
+                appLocalizations.consentExplanation1,
+                textAlign: TextAlign.justify,
               ),
-              ListTile(
-                title: Text(
-                  appLocalizations.consentExplanation2,
-                  textAlign: TextAlign.justify,
-                ),
+              dense: true,
+            ),
+            ListTile(
+              title: Text(
+                appLocalizations.consentExplanation2,
+                textAlign: TextAlign.justify,
               ),
-              CheckboxListTile(
-                value: checkExplanation,
-                onChanged: (value) {
-                  checkExplanation = value ?? false;
-                  if (mounted) setState(() {});
-                },
-                title: Text(appLocalizations.consentCheckbox),
-                controlAffinity: ListTileControlAffinity.leading,
-                visualDensity: VisualDensity.compact,
-              ),
-              CheckboxListTile(
-                value: checkPolicy,
-                onChanged: (value) {
-                  checkPolicy = value ?? false;
-                  if (mounted) setState(() {});
-                },
-                title: Text.rich(
-                  TextSpan(
-                    children: () {
-                      final text = appLocalizations.consentPolicy(
-                        "{privacyPolicy}",
-                        "{termsOfService}",
-                      );
-                      final matches = RegExp(
-                        r"(\{privacyPolicy\})|(\{termsOfService\})",
-                      ).allMatches(text);
+              dense: true,
+            ),
+            signatureCheckbox(
+              Text(appLocalizations.consentCheckbox),
+              checkExplanation,
+              (value) {
+                checkExplanation = value ?? false;
+                if (mounted) setState(() {});
+              },
+            ),
+            signatureCheckbox(
+              Text.rich(
+                TextSpan(
+                  children: () {
+                    final text = appLocalizations.consentPolicy(
+                      "{privacyPolicy}",
+                      "{termsOfService}",
+                    );
+                    final matches = RegExp(
+                      r"(\{privacyPolicy\})|(\{termsOfService\})",
+                    ).allMatches(text);
 
-                      final children = <InlineSpan>[];
-                      var cursor = 0;
-                      for (final match in matches) {
-                        if (match.start > cursor) {
-                          children.add(
-                            TextSpan(text: text.substring(cursor, match.start)),
-                          );
-                        }
-                        final isPrivacy = match.group(0) == "{privacyPolicy}";
+                    final children = <InlineSpan>[];
+                    var cursor = 0;
+                    for (final match in matches) {
+                      if (match.start > cursor) {
                         children.add(
-                          TextSpan(
-                            text: isPrivacy
-                                ? appLocalizations.loginPrivacyPolicy
-                                : appLocalizations.loginTermsOfService,
-                            style: TextStyle(
-                              color: ColorScheme.of(context).primary,
-                              decoration: TextDecoration.underline,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => showMarkdownDialog(
-                                context: context,
-                                origin: Uri.parse(
-                                  "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
-                                ),
-                              ),
-                          ),
+                          TextSpan(text: text.substring(cursor, match.start)),
                         );
-                        cursor = match.end;
                       }
-                      if (cursor < text.length) {
-                        children.add(TextSpan(text: text.substring(cursor)));
-                      }
-                      return children;
-                    }(),
-                  ),
-                ),
-                controlAffinity: ListTileControlAffinity.leading,
-                visualDensity: VisualDensity.compact,
-              ),
-              Padding(padding: EdgeInsets.all(8), child: Divider()),
-              ListTile(
-                title: TextField(
-                  controller: signatureController,
-                  autofocus: checkExplanation && checkPolicy,
-                  autofillHints: [AutofillHints.name],
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.draw),
-                    labelText: appLocalizations.consentSignature,
-                    helperText: appLocalizations.consentSignatureLegal(
-                      AuthManager.instance.authenticatedUser!.username,
-                    ),
-                    hintText: "John Doe",
-                    helperMaxLines: 3,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              CheckboxListTile(
-                value: checkAge,
-                onChanged: (value) {
-                  checkAge = value ?? false;
-                  if (mounted) setState(() {});
-                },
-                title: Text(appLocalizations.consentAge),
-                controlAffinity: ListTileControlAffinity.leading,
-                visualDensity: VisualDensity.compact,
-              ),
-              AnimatedSwitcher(
-                duration: Durations.medium1,
-                switchInCurve: Curves.easeInOutCubicEmphasized,
-                switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-                transitionBuilder: (child, animation) => SizeTransition(
-                  sizeFactor: animation,
-                  axisAlignment: -1,
-                  child: child,
-                ),
-                child: checkAge
-                    ? null
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(padding: EdgeInsets.all(8), child: Divider()),
-                          ListTile(
-                            title: TextField(
-                              controller: parentalSignatureController,
-                              autofillHints: [AutofillHints.name],
-                              decoration: InputDecoration(
-                                icon: Icon(Icons.draw),
-                                labelText:
-                                    appLocalizations.consentSignatureParental,
-                                helperText: appLocalizations
-                                    .consentSignatureLegal(
-                                      AuthManager
-                                          .instance
-                                          .authenticatedUser!
-                                          .username,
-                                    ),
-                                hintText: "John Doe",
-                                helperMaxLines: 3,
-                                border: OutlineInputBorder(),
+                      final isPrivacy = match.group(0) == "{privacyPolicy}";
+                      children.add(
+                        TextSpan(
+                          text: isPrivacy
+                              ? appLocalizations.loginPrivacyPolicy
+                              : appLocalizations.loginTermsOfService,
+                          style: TextStyle(
+                            color: ColorScheme.of(context).primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => showMarkdownDialog(
+                              context: context,
+                              origin: Uri.parse(
+                                "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
                               ),
                             ),
-                          ),
-                          CheckboxListTile(
-                            value: checkParental,
-                            onChanged: (value) {
-                              checkParental = value ?? false;
-                              if (mounted) setState(() {});
-                            },
-                            title: Text(appLocalizations.consentParental),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        ],
-                      ),
-              ),
-              Padding(padding: EdgeInsets.all(8), child: Divider()),
-              ListTile(
-                title: Align(
-                  alignment: Alignment.centerRight,
-                  child: FilledButton.icon(
-                    onPressed:
-                        checkExplanation &&
-                            checkPolicy &&
-                            signatureController.text.trim().isNotEmpty &&
-                            (checkAge ||
-                                (parentalSignatureController.text
-                                        .trim()
-                                        .isNotEmpty &&
-                                    checkParental))
-                        ? () {
-                            prefs.setBool(
-                              "uploadConsentExplanation",
-                              checkExplanation,
-                            );
-                            prefs.setBool("uploadConsentPolicy", checkPolicy);
-                            prefs.setBool("uploadConsentAge", checkAge);
-                            Navigator.of(context).pop<UploadConsentResult>((
-                              signature: signatureController.text.trim(),
-                              signatureParental: checkAge
-                                  ? null
-                                  : parentalSignatureController.text.trim(),
-                            ));
-                          }
-                        : null,
-                    icon: Icon(Icons.check),
-                    label: Text(appLocalizations.consentButton),
-                  ),
+                        ),
+                      );
+                      cursor = match.end;
+                    }
+                    if (cursor < text.length) {
+                      children.add(TextSpan(text: text.substring(cursor)));
+                    }
+                    return children;
+                  }(),
                 ),
               ),
-              SizedBox(height: 16),
-            ],
-          ),
+              checkPolicy,
+              (value) {
+                checkPolicy = value ?? false;
+                if (mounted) setState(() {});
+              },
+            ),
+            divider,
+            signatureField(
+              signatureController,
+              appLocalizations.consentSignature,
+            ),
+            signatureCheckbox(Text(appLocalizations.consentAge), checkAge, (
+              value,
+            ) {
+              checkAge = value ?? false;
+              if (mounted) setState(() {});
+            }),
+            AnimatedSwitcher(
+              duration: Durations.medium1,
+              switchInCurve: Curves.easeInOutCubicEmphasized,
+              switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+              transitionBuilder: (child, animation) => SizeTransition(
+                sizeFactor: animation,
+                axisAlignment: -1,
+                child: child,
+              ),
+              child: checkAge
+                  ? null
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        divider,
+                        signatureField(
+                          parentalSignatureController,
+                          appLocalizations.consentSignatureParental,
+                        ),
+                        signatureCheckbox(
+                          Text(appLocalizations.consentParental),
+                          checkParental,
+                          (value) {
+                            checkParental = value ?? false;
+                            if (mounted) setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+            ),
+            divider,
+            ListTile(
+              title: Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton.icon(
+                  onPressed: submitEnabled() ? submit : null,
+                  icon: Icon(Icons.check),
+                  label: Text(appLocalizations.consentButton),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+          ],
         ),
       ),
     );

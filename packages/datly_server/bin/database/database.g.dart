@@ -1678,6 +1678,18 @@ class $SignaturesTable extends Signatures
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   ).withConverter<SignatureMethod>($SignaturesTable.$convertersignatureMethod);
+  static const VerificationMeta _signatureSnapshotMeta = const VerificationMeta(
+    'signatureSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> signatureSnapshot =
+      GeneratedColumn<String>(
+        'signature_snapshot',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
   static const VerificationMeta _signedAtMeta = const VerificationMeta(
     'signedAt',
   );
@@ -1734,6 +1746,7 @@ class $SignaturesTable extends Signatures
     signature,
     signatureParental,
     signatureMethod,
+    signatureSnapshot,
     signedAt,
     consentVersion,
     revokedAt,
@@ -1821,6 +1834,17 @@ class $SignaturesTable extends Signatures
         ),
       );
     }
+    if (data.containsKey('signature_snapshot')) {
+      context.handle(
+        _signatureSnapshotMeta,
+        signatureSnapshot.isAcceptableOrUnknown(
+          data['signature_snapshot']!,
+          _signatureSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_signatureSnapshotMeta);
+    }
     if (data.containsKey('signed_at')) {
       context.handle(
         _signedAtMeta,
@@ -1900,6 +1924,10 @@ class $SignaturesTable extends Signatures
           data['${effectivePrefix}signature_method'],
         )!,
       ),
+      signatureSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signature_snapshot'],
+      )!,
       signedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}signed_at'],
@@ -1940,6 +1968,7 @@ class Signature extends DataClass implements Insertable<Signature> {
   final String signature;
   final String? signatureParental;
   final SignatureMethod signatureMethod;
+  final String signatureSnapshot;
   final DateTime signedAt;
   final int consentVersion;
   final DateTime? revokedAt;
@@ -1954,6 +1983,7 @@ class Signature extends DataClass implements Insertable<Signature> {
     required this.signature,
     this.signatureParental,
     required this.signatureMethod,
+    required this.signatureSnapshot,
     required this.signedAt,
     required this.consentVersion,
     this.revokedAt,
@@ -1979,6 +2009,7 @@ class Signature extends DataClass implements Insertable<Signature> {
         $SignaturesTable.$convertersignatureMethod.toSql(signatureMethod),
       );
     }
+    map['signature_snapshot'] = Variable<String>(signatureSnapshot);
     map['signed_at'] = Variable<DateTime>(signedAt);
     map['consent_version'] = Variable<int>(consentVersion);
     if (!nullToAbsent || revokedAt != null) {
@@ -2005,6 +2036,7 @@ class Signature extends DataClass implements Insertable<Signature> {
           ? const Value.absent()
           : Value(signatureParental),
       signatureMethod: Value(signatureMethod),
+      signatureSnapshot: Value(signatureSnapshot),
       signedAt: Value(signedAt),
       consentVersion: Value(consentVersion),
       revokedAt: revokedAt == null && nullToAbsent
@@ -2037,6 +2069,7 @@ class Signature extends DataClass implements Insertable<Signature> {
       signatureMethod: $SignaturesTable.$convertersignatureMethod.fromJson(
         serializer.fromJson<String>(json['signatureMethod']),
       ),
+      signatureSnapshot: serializer.fromJson<String>(json['signatureSnapshot']),
       signedAt: serializer.fromJson<DateTime>(json['signedAt']),
       consentVersion: serializer.fromJson<int>(json['consentVersion']),
       revokedAt: serializer.fromJson<DateTime?>(json['revokedAt']),
@@ -2058,6 +2091,7 @@ class Signature extends DataClass implements Insertable<Signature> {
       'signatureMethod': serializer.toJson<String>(
         $SignaturesTable.$convertersignatureMethod.toJson(signatureMethod),
       ),
+      'signatureSnapshot': serializer.toJson<String>(signatureSnapshot),
       'signedAt': serializer.toJson<DateTime>(signedAt),
       'consentVersion': serializer.toJson<int>(consentVersion),
       'revokedAt': serializer.toJson<DateTime?>(revokedAt),
@@ -2075,6 +2109,7 @@ class Signature extends DataClass implements Insertable<Signature> {
     String? signature,
     Value<String?> signatureParental = const Value.absent(),
     SignatureMethod? signatureMethod,
+    String? signatureSnapshot,
     DateTime? signedAt,
     int? consentVersion,
     Value<DateTime?> revokedAt = const Value.absent(),
@@ -2091,6 +2126,7 @@ class Signature extends DataClass implements Insertable<Signature> {
         ? signatureParental.value
         : this.signatureParental,
     signatureMethod: signatureMethod ?? this.signatureMethod,
+    signatureSnapshot: signatureSnapshot ?? this.signatureSnapshot,
     signedAt: signedAt ?? this.signedAt,
     consentVersion: consentVersion ?? this.consentVersion,
     revokedAt: revokedAt.present ? revokedAt.value : this.revokedAt,
@@ -2119,6 +2155,9 @@ class Signature extends DataClass implements Insertable<Signature> {
       signatureMethod: data.signatureMethod.present
           ? data.signatureMethod.value
           : this.signatureMethod,
+      signatureSnapshot: data.signatureSnapshot.present
+          ? data.signatureSnapshot.value
+          : this.signatureSnapshot,
       signedAt: data.signedAt.present ? data.signedAt.value : this.signedAt,
       consentVersion: data.consentVersion.present
           ? data.consentVersion.value
@@ -2142,6 +2181,7 @@ class Signature extends DataClass implements Insertable<Signature> {
           ..write('signature: $signature, ')
           ..write('signatureParental: $signatureParental, ')
           ..write('signatureMethod: $signatureMethod, ')
+          ..write('signatureSnapshot: $signatureSnapshot, ')
           ..write('signedAt: $signedAt, ')
           ..write('consentVersion: $consentVersion, ')
           ..write('revokedAt: $revokedAt, ')
@@ -2161,6 +2201,7 @@ class Signature extends DataClass implements Insertable<Signature> {
     signature,
     signatureParental,
     signatureMethod,
+    signatureSnapshot,
     signedAt,
     consentVersion,
     revokedAt,
@@ -2179,6 +2220,7 @@ class Signature extends DataClass implements Insertable<Signature> {
           other.signature == this.signature &&
           other.signatureParental == this.signatureParental &&
           other.signatureMethod == this.signatureMethod &&
+          other.signatureSnapshot == this.signatureSnapshot &&
           other.signedAt == this.signedAt &&
           other.consentVersion == this.consentVersion &&
           other.revokedAt == this.revokedAt &&
@@ -2195,6 +2237,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
   final Value<String> signature;
   final Value<String?> signatureParental;
   final Value<SignatureMethod> signatureMethod;
+  final Value<String> signatureSnapshot;
   final Value<DateTime> signedAt;
   final Value<int> consentVersion;
   final Value<DateTime?> revokedAt;
@@ -2209,6 +2252,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
     this.signature = const Value.absent(),
     this.signatureParental = const Value.absent(),
     this.signatureMethod = const Value.absent(),
+    this.signatureSnapshot = const Value.absent(),
     this.signedAt = const Value.absent(),
     this.consentVersion = const Value.absent(),
     this.revokedAt = const Value.absent(),
@@ -2224,6 +2268,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
     required String signature,
     this.signatureParental = const Value.absent(),
     required SignatureMethod signatureMethod,
+    required String signatureSnapshot,
     this.signedAt = const Value.absent(),
     required int consentVersion,
     this.revokedAt = const Value.absent(),
@@ -2234,6 +2279,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
        ipAddress = Value(ipAddress),
        signature = Value(signature),
        signatureMethod = Value(signatureMethod),
+       signatureSnapshot = Value(signatureSnapshot),
        consentVersion = Value(consentVersion);
   static Insertable<Signature> custom({
     Expression<int>? submissionId,
@@ -2245,6 +2291,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
     Expression<String>? signature,
     Expression<String>? signatureParental,
     Expression<String>? signatureMethod,
+    Expression<String>? signatureSnapshot,
     Expression<DateTime>? signedAt,
     Expression<int>? consentVersion,
     Expression<DateTime>? revokedAt,
@@ -2260,6 +2307,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
       if (signature != null) 'signature': signature,
       if (signatureParental != null) 'signature_parental': signatureParental,
       if (signatureMethod != null) 'signature_method': signatureMethod,
+      if (signatureSnapshot != null) 'signature_snapshot': signatureSnapshot,
       if (signedAt != null) 'signed_at': signedAt,
       if (consentVersion != null) 'consent_version': consentVersion,
       if (revokedAt != null) 'revoked_at': revokedAt,
@@ -2277,6 +2325,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
     Value<String>? signature,
     Value<String?>? signatureParental,
     Value<SignatureMethod>? signatureMethod,
+    Value<String>? signatureSnapshot,
     Value<DateTime>? signedAt,
     Value<int>? consentVersion,
     Value<DateTime?>? revokedAt,
@@ -2292,6 +2341,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
       signature: signature ?? this.signature,
       signatureParental: signatureParental ?? this.signatureParental,
       signatureMethod: signatureMethod ?? this.signatureMethod,
+      signatureSnapshot: signatureSnapshot ?? this.signatureSnapshot,
       signedAt: signedAt ?? this.signedAt,
       consentVersion: consentVersion ?? this.consentVersion,
       revokedAt: revokedAt ?? this.revokedAt,
@@ -2331,6 +2381,9 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
         $SignaturesTable.$convertersignatureMethod.toSql(signatureMethod.value),
       );
     }
+    if (signatureSnapshot.present) {
+      map['signature_snapshot'] = Variable<String>(signatureSnapshot.value);
+    }
     if (signedAt.present) {
       map['signed_at'] = Variable<DateTime>(signedAt.value);
     }
@@ -2358,6 +2411,7 @@ class SignaturesCompanion extends UpdateCompanion<Signature> {
           ..write('signature: $signature, ')
           ..write('signatureParental: $signatureParental, ')
           ..write('signatureMethod: $signatureMethod, ')
+          ..write('signatureSnapshot: $signatureSnapshot, ')
           ..write('signedAt: $signedAt, ')
           ..write('consentVersion: $consentVersion, ')
           ..write('revokedAt: $revokedAt, ')
@@ -4091,6 +4145,7 @@ typedef $$SignaturesTableCreateCompanionBuilder =
       required String signature,
       Value<String?> signatureParental,
       required SignatureMethod signatureMethod,
+      required String signatureSnapshot,
       Value<DateTime> signedAt,
       required int consentVersion,
       Value<DateTime?> revokedAt,
@@ -4107,6 +4162,7 @@ typedef $$SignaturesTableUpdateCompanionBuilder =
       Value<String> signature,
       Value<String?> signatureParental,
       Value<SignatureMethod> signatureMethod,
+      Value<String> signatureSnapshot,
       Value<DateTime> signedAt,
       Value<int> consentVersion,
       Value<DateTime?> revokedAt,
@@ -4166,6 +4222,11 @@ class $$SignaturesTableFilterComposer
   get signatureMethod => $composableBuilder(
     column: $table.signatureMethod,
     builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get signatureSnapshot => $composableBuilder(
+    column: $table.signatureSnapshot,
+    builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<DateTime> get signedAt => $composableBuilder(
@@ -4243,6 +4304,11 @@ class $$SignaturesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get signatureSnapshot => $composableBuilder(
+    column: $table.signatureSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get signedAt => $composableBuilder(
     column: $table.signedAt,
     builder: (column) => ColumnOrderings(column),
@@ -4311,6 +4377,11 @@ class $$SignaturesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get signatureSnapshot => $composableBuilder(
+    column: $table.signatureSnapshot,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get signedAt =>
       $composableBuilder(column: $table.signedAt, builder: (column) => column);
 
@@ -4368,6 +4439,7 @@ class $$SignaturesTableTableManager
                 Value<String> signature = const Value.absent(),
                 Value<String?> signatureParental = const Value.absent(),
                 Value<SignatureMethod> signatureMethod = const Value.absent(),
+                Value<String> signatureSnapshot = const Value.absent(),
                 Value<DateTime> signedAt = const Value.absent(),
                 Value<int> consentVersion = const Value.absent(),
                 Value<DateTime?> revokedAt = const Value.absent(),
@@ -4382,6 +4454,7 @@ class $$SignaturesTableTableManager
                 signature: signature,
                 signatureParental: signatureParental,
                 signatureMethod: signatureMethod,
+                signatureSnapshot: signatureSnapshot,
                 signedAt: signedAt,
                 consentVersion: consentVersion,
                 revokedAt: revokedAt,
@@ -4398,6 +4471,7 @@ class $$SignaturesTableTableManager
                 required String signature,
                 Value<String?> signatureParental = const Value.absent(),
                 required SignatureMethod signatureMethod,
+                required String signatureSnapshot,
                 Value<DateTime> signedAt = const Value.absent(),
                 required int consentVersion,
                 Value<DateTime?> revokedAt = const Value.absent(),
@@ -4412,6 +4486,7 @@ class $$SignaturesTableTableManager
                 signature: signature,
                 signatureParental: signatureParental,
                 signatureMethod: signatureMethod,
+                signatureSnapshot: signatureSnapshot,
                 signedAt: signedAt,
                 consentVersion: consentVersion,
                 revokedAt: revokedAt,

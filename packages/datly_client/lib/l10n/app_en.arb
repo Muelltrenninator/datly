@@ -112,7 +112,22 @@
         "description": "Title for the image submission consent dialog.",
         "context": "upload:consent"
     },
-    "consentExplanation1": "To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile. If you do not agree, please do not proceed with the submission.",
+    "consentVersion": "Version: {version}, {date}",
+    "@consentVersion": {
+        "description": "Shows the version of the consent form being presented to the user.",
+        "context": "upload:consent",
+        "placeholders": {
+            "version": {
+                "type": "String",
+                "example": "1.0"
+            },
+            "date": {
+                "type": "String",
+                "example": "June 15, 2024"
+            }
+        }
+    },
+    "consentExplanation1": "To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile, this will only not include the image in the next data export, but already publicized images may cannot be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.",
     "@consentExplanation1": {
         "description": "Explanation text for the image submission consent dialog.",
         "context": "upload:consent"
@@ -147,6 +162,11 @@
     "consentSignature": "Electronic signature",
     "@consentSignature": {
         "description": "Label for the signature input field in the consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentSignatureName": "John Doe",
+    "@consentSignatureName": {
+        "description": "Example name shown as placeholder in the signature input field.",
         "context": "upload:consent"
     },
     "consentSignatureLegal": "This signature is legally binding. Entering an incorrect name makes the submission invalid and may lead to suspension of the account '{username}'.",

@@ -86,6 +86,7 @@ class Signatures extends Table {
   TextColumn get signature => text()();
   TextColumn get signatureParental => text().nullable()();
   TextColumn get signatureMethod => textEnum<SignatureMethod>()();
+  TextColumn get signatureSnapshot => text()();
 
   DateTimeColumn get signedAt => dateTime().withDefault(currentDateAndTime)();
   IntColumn get consentVersion => integer()();

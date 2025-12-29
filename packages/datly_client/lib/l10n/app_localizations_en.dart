@@ -77,8 +77,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get consentTitle => 'Image submission consent';
 
   @override
+  String consentVersion(String version, String date) {
+    return 'Version: $version, $date';
+  }
+
+  @override
   String get consentExplanation1 =>
-      'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile. If you do not agree, please do not proceed with the submission.';
+      'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile, this will only not include the image in the next data export, but already publicized images may cannot be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.';
 
   @override
   String get consentExplanation2 =>
@@ -95,6 +100,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get consentSignature => 'Electronic signature';
+
+  @override
+  String get consentSignatureName => 'John Doe';
 
   @override
   String consentSignatureLegal(String username) {
