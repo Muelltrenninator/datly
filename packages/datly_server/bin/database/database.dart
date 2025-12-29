@@ -13,12 +13,12 @@ export 'package:drift/drift.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Projects, Users, LoginCodes, Submissions])
+@DriftDatabase(tables: [Projects, Users, LoginCodes, Submissions, Signatures])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -51,9 +51,16 @@ class AppDatabase extends _$AppDatabase {
       await customStatement("PRAGMA journal_mode = WAL");
       await customStatement("PRAGMA optimize=0x10002");
     },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(signatures);
+      }
+    },
   );
 }
 
 enum UserRole { user, admin }
 
 enum SubmissionStatus { pending, accepted, rejected, censored }
+
+enum SignatureMethod { typed }

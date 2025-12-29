@@ -27,10 +27,6 @@ class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {
     'title',
     aliasedName,
     false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 3,
-      maxTextLength: 32,
-    ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -334,10 +330,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     'email',
     aliasedName,
     false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 5,
-      maxTextLength: 64,
-    ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -371,7 +363,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant("user"),
+        defaultValue: Constant(UserRole.user.name),
       ).withConverter<UserRole>($UsersTable.$converterrole);
   @override
   List<GeneratedColumn> get $columns => [
@@ -1584,6 +1576,797 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   }
 }
 
+class $SignaturesTable extends Signatures
+    with TableInfo<$SignaturesTable, Signature> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SignaturesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _submissionIdMeta = const VerificationMeta(
+    'submissionId',
+  );
+  @override
+  late final GeneratedColumn<int> submissionId = GeneratedColumn<int>(
+    'submission_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _submissionSnapshotMeta =
+      const VerificationMeta('submissionSnapshot');
+  @override
+  late final GeneratedColumn<String> submissionSnapshot =
+      GeneratedColumn<String>(
+        'submission_snapshot',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _userMeta = const VerificationMeta('user');
+  @override
+  late final GeneratedColumn<String> user = GeneratedColumn<String>(
+    'user',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userSnapshotMeta = const VerificationMeta(
+    'userSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> userSnapshot = GeneratedColumn<String>(
+    'user_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ipAddressMeta = const VerificationMeta(
+    'ipAddress',
+  );
+  @override
+  late final GeneratedColumn<String> ipAddress = GeneratedColumn<String>(
+    'ip_address',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userAgentMeta = const VerificationMeta(
+    'userAgent',
+  );
+  @override
+  late final GeneratedColumn<String> userAgent = GeneratedColumn<String>(
+    'user_agent',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _signatureMeta = const VerificationMeta(
+    'signature',
+  );
+  @override
+  late final GeneratedColumn<String> signature = GeneratedColumn<String>(
+    'signature',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _signatureParentalMeta = const VerificationMeta(
+    'signatureParental',
+  );
+  @override
+  late final GeneratedColumn<String> signatureParental =
+      GeneratedColumn<String>(
+        'signature_parental',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<SignatureMethod, String>
+  signatureMethod = GeneratedColumn<String>(
+    'signature_method',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<SignatureMethod>($SignaturesTable.$convertersignatureMethod);
+  static const VerificationMeta _signedAtMeta = const VerificationMeta(
+    'signedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> signedAt = GeneratedColumn<DateTime>(
+    'signed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _consentVersionMeta = const VerificationMeta(
+    'consentVersion',
+  );
+  @override
+  late final GeneratedColumn<int> consentVersion = GeneratedColumn<int>(
+    'consent_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revokedAtMeta = const VerificationMeta(
+    'revokedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> revokedAt = GeneratedColumn<DateTime>(
+    'revoked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revokedReasonMeta = const VerificationMeta(
+    'revokedReason',
+  );
+  @override
+  late final GeneratedColumn<String> revokedReason = GeneratedColumn<String>(
+    'revoked_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    submissionId,
+    submissionSnapshot,
+    user,
+    userSnapshot,
+    ipAddress,
+    userAgent,
+    signature,
+    signatureParental,
+    signatureMethod,
+    signedAt,
+    consentVersion,
+    revokedAt,
+    revokedReason,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'signatures';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Signature> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('submission_id')) {
+      context.handle(
+        _submissionIdMeta,
+        submissionId.isAcceptableOrUnknown(
+          data['submission_id']!,
+          _submissionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('submission_snapshot')) {
+      context.handle(
+        _submissionSnapshotMeta,
+        submissionSnapshot.isAcceptableOrUnknown(
+          data['submission_snapshot']!,
+          _submissionSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_submissionSnapshotMeta);
+    }
+    if (data.containsKey('user')) {
+      context.handle(
+        _userMeta,
+        user.isAcceptableOrUnknown(data['user']!, _userMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userMeta);
+    }
+    if (data.containsKey('user_snapshot')) {
+      context.handle(
+        _userSnapshotMeta,
+        userSnapshot.isAcceptableOrUnknown(
+          data['user_snapshot']!,
+          _userSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_userSnapshotMeta);
+    }
+    if (data.containsKey('ip_address')) {
+      context.handle(
+        _ipAddressMeta,
+        ipAddress.isAcceptableOrUnknown(data['ip_address']!, _ipAddressMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ipAddressMeta);
+    }
+    if (data.containsKey('user_agent')) {
+      context.handle(
+        _userAgentMeta,
+        userAgent.isAcceptableOrUnknown(data['user_agent']!, _userAgentMeta),
+      );
+    }
+    if (data.containsKey('signature')) {
+      context.handle(
+        _signatureMeta,
+        signature.isAcceptableOrUnknown(data['signature']!, _signatureMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_signatureMeta);
+    }
+    if (data.containsKey('signature_parental')) {
+      context.handle(
+        _signatureParentalMeta,
+        signatureParental.isAcceptableOrUnknown(
+          data['signature_parental']!,
+          _signatureParentalMeta,
+        ),
+      );
+    }
+    if (data.containsKey('signed_at')) {
+      context.handle(
+        _signedAtMeta,
+        signedAt.isAcceptableOrUnknown(data['signed_at']!, _signedAtMeta),
+      );
+    }
+    if (data.containsKey('consent_version')) {
+      context.handle(
+        _consentVersionMeta,
+        consentVersion.isAcceptableOrUnknown(
+          data['consent_version']!,
+          _consentVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_consentVersionMeta);
+    }
+    if (data.containsKey('revoked_at')) {
+      context.handle(
+        _revokedAtMeta,
+        revokedAt.isAcceptableOrUnknown(data['revoked_at']!, _revokedAtMeta),
+      );
+    }
+    if (data.containsKey('revoked_reason')) {
+      context.handle(
+        _revokedReasonMeta,
+        revokedReason.isAcceptableOrUnknown(
+          data['revoked_reason']!,
+          _revokedReasonMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {submissionId};
+  @override
+  Signature map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Signature(
+      submissionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}submission_id'],
+      )!,
+      submissionSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}submission_snapshot'],
+      )!,
+      user: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user'],
+      )!,
+      userSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_snapshot'],
+      )!,
+      ipAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ip_address'],
+      )!,
+      userAgent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_agent'],
+      ),
+      signature: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signature'],
+      )!,
+      signatureParental: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signature_parental'],
+      ),
+      signatureMethod: $SignaturesTable.$convertersignatureMethod.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}signature_method'],
+        )!,
+      ),
+      signedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}signed_at'],
+      )!,
+      consentVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}consent_version'],
+      )!,
+      revokedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}revoked_at'],
+      ),
+      revokedReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}revoked_reason'],
+      ),
+    );
+  }
+
+  @override
+  $SignaturesTable createAlias(String alias) {
+    return $SignaturesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SignatureMethod, String, String>
+  $convertersignatureMethod = const EnumNameConverter<SignatureMethod>(
+    SignatureMethod.values,
+  );
+}
+
+class Signature extends DataClass implements Insertable<Signature> {
+  final int submissionId;
+  final String submissionSnapshot;
+  final String user;
+  final String userSnapshot;
+  final String ipAddress;
+  final String? userAgent;
+  final String signature;
+  final String? signatureParental;
+  final SignatureMethod signatureMethod;
+  final DateTime signedAt;
+  final int consentVersion;
+  final DateTime? revokedAt;
+  final String? revokedReason;
+  const Signature({
+    required this.submissionId,
+    required this.submissionSnapshot,
+    required this.user,
+    required this.userSnapshot,
+    required this.ipAddress,
+    this.userAgent,
+    required this.signature,
+    this.signatureParental,
+    required this.signatureMethod,
+    required this.signedAt,
+    required this.consentVersion,
+    this.revokedAt,
+    this.revokedReason,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['submission_id'] = Variable<int>(submissionId);
+    map['submission_snapshot'] = Variable<String>(submissionSnapshot);
+    map['user'] = Variable<String>(user);
+    map['user_snapshot'] = Variable<String>(userSnapshot);
+    map['ip_address'] = Variable<String>(ipAddress);
+    if (!nullToAbsent || userAgent != null) {
+      map['user_agent'] = Variable<String>(userAgent);
+    }
+    map['signature'] = Variable<String>(signature);
+    if (!nullToAbsent || signatureParental != null) {
+      map['signature_parental'] = Variable<String>(signatureParental);
+    }
+    {
+      map['signature_method'] = Variable<String>(
+        $SignaturesTable.$convertersignatureMethod.toSql(signatureMethod),
+      );
+    }
+    map['signed_at'] = Variable<DateTime>(signedAt);
+    map['consent_version'] = Variable<int>(consentVersion);
+    if (!nullToAbsent || revokedAt != null) {
+      map['revoked_at'] = Variable<DateTime>(revokedAt);
+    }
+    if (!nullToAbsent || revokedReason != null) {
+      map['revoked_reason'] = Variable<String>(revokedReason);
+    }
+    return map;
+  }
+
+  SignaturesCompanion toCompanion(bool nullToAbsent) {
+    return SignaturesCompanion(
+      submissionId: Value(submissionId),
+      submissionSnapshot: Value(submissionSnapshot),
+      user: Value(user),
+      userSnapshot: Value(userSnapshot),
+      ipAddress: Value(ipAddress),
+      userAgent: userAgent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userAgent),
+      signature: Value(signature),
+      signatureParental: signatureParental == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signatureParental),
+      signatureMethod: Value(signatureMethod),
+      signedAt: Value(signedAt),
+      consentVersion: Value(consentVersion),
+      revokedAt: revokedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(revokedAt),
+      revokedReason: revokedReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(revokedReason),
+    );
+  }
+
+  factory Signature.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Signature(
+      submissionId: serializer.fromJson<int>(json['submissionId']),
+      submissionSnapshot: serializer.fromJson<String>(
+        json['submissionSnapshot'],
+      ),
+      user: serializer.fromJson<String>(json['user']),
+      userSnapshot: serializer.fromJson<String>(json['userSnapshot']),
+      ipAddress: serializer.fromJson<String>(json['ipAddress']),
+      userAgent: serializer.fromJson<String?>(json['userAgent']),
+      signature: serializer.fromJson<String>(json['signature']),
+      signatureParental: serializer.fromJson<String?>(
+        json['signatureParental'],
+      ),
+      signatureMethod: $SignaturesTable.$convertersignatureMethod.fromJson(
+        serializer.fromJson<String>(json['signatureMethod']),
+      ),
+      signedAt: serializer.fromJson<DateTime>(json['signedAt']),
+      consentVersion: serializer.fromJson<int>(json['consentVersion']),
+      revokedAt: serializer.fromJson<DateTime?>(json['revokedAt']),
+      revokedReason: serializer.fromJson<String?>(json['revokedReason']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'submissionId': serializer.toJson<int>(submissionId),
+      'submissionSnapshot': serializer.toJson<String>(submissionSnapshot),
+      'user': serializer.toJson<String>(user),
+      'userSnapshot': serializer.toJson<String>(userSnapshot),
+      'ipAddress': serializer.toJson<String>(ipAddress),
+      'userAgent': serializer.toJson<String?>(userAgent),
+      'signature': serializer.toJson<String>(signature),
+      'signatureParental': serializer.toJson<String?>(signatureParental),
+      'signatureMethod': serializer.toJson<String>(
+        $SignaturesTable.$convertersignatureMethod.toJson(signatureMethod),
+      ),
+      'signedAt': serializer.toJson<DateTime>(signedAt),
+      'consentVersion': serializer.toJson<int>(consentVersion),
+      'revokedAt': serializer.toJson<DateTime?>(revokedAt),
+      'revokedReason': serializer.toJson<String?>(revokedReason),
+    };
+  }
+
+  Signature copyWith({
+    int? submissionId,
+    String? submissionSnapshot,
+    String? user,
+    String? userSnapshot,
+    String? ipAddress,
+    Value<String?> userAgent = const Value.absent(),
+    String? signature,
+    Value<String?> signatureParental = const Value.absent(),
+    SignatureMethod? signatureMethod,
+    DateTime? signedAt,
+    int? consentVersion,
+    Value<DateTime?> revokedAt = const Value.absent(),
+    Value<String?> revokedReason = const Value.absent(),
+  }) => Signature(
+    submissionId: submissionId ?? this.submissionId,
+    submissionSnapshot: submissionSnapshot ?? this.submissionSnapshot,
+    user: user ?? this.user,
+    userSnapshot: userSnapshot ?? this.userSnapshot,
+    ipAddress: ipAddress ?? this.ipAddress,
+    userAgent: userAgent.present ? userAgent.value : this.userAgent,
+    signature: signature ?? this.signature,
+    signatureParental: signatureParental.present
+        ? signatureParental.value
+        : this.signatureParental,
+    signatureMethod: signatureMethod ?? this.signatureMethod,
+    signedAt: signedAt ?? this.signedAt,
+    consentVersion: consentVersion ?? this.consentVersion,
+    revokedAt: revokedAt.present ? revokedAt.value : this.revokedAt,
+    revokedReason: revokedReason.present
+        ? revokedReason.value
+        : this.revokedReason,
+  );
+  Signature copyWithCompanion(SignaturesCompanion data) {
+    return Signature(
+      submissionId: data.submissionId.present
+          ? data.submissionId.value
+          : this.submissionId,
+      submissionSnapshot: data.submissionSnapshot.present
+          ? data.submissionSnapshot.value
+          : this.submissionSnapshot,
+      user: data.user.present ? data.user.value : this.user,
+      userSnapshot: data.userSnapshot.present
+          ? data.userSnapshot.value
+          : this.userSnapshot,
+      ipAddress: data.ipAddress.present ? data.ipAddress.value : this.ipAddress,
+      userAgent: data.userAgent.present ? data.userAgent.value : this.userAgent,
+      signature: data.signature.present ? data.signature.value : this.signature,
+      signatureParental: data.signatureParental.present
+          ? data.signatureParental.value
+          : this.signatureParental,
+      signatureMethod: data.signatureMethod.present
+          ? data.signatureMethod.value
+          : this.signatureMethod,
+      signedAt: data.signedAt.present ? data.signedAt.value : this.signedAt,
+      consentVersion: data.consentVersion.present
+          ? data.consentVersion.value
+          : this.consentVersion,
+      revokedAt: data.revokedAt.present ? data.revokedAt.value : this.revokedAt,
+      revokedReason: data.revokedReason.present
+          ? data.revokedReason.value
+          : this.revokedReason,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Signature(')
+          ..write('submissionId: $submissionId, ')
+          ..write('submissionSnapshot: $submissionSnapshot, ')
+          ..write('user: $user, ')
+          ..write('userSnapshot: $userSnapshot, ')
+          ..write('ipAddress: $ipAddress, ')
+          ..write('userAgent: $userAgent, ')
+          ..write('signature: $signature, ')
+          ..write('signatureParental: $signatureParental, ')
+          ..write('signatureMethod: $signatureMethod, ')
+          ..write('signedAt: $signedAt, ')
+          ..write('consentVersion: $consentVersion, ')
+          ..write('revokedAt: $revokedAt, ')
+          ..write('revokedReason: $revokedReason')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    submissionId,
+    submissionSnapshot,
+    user,
+    userSnapshot,
+    ipAddress,
+    userAgent,
+    signature,
+    signatureParental,
+    signatureMethod,
+    signedAt,
+    consentVersion,
+    revokedAt,
+    revokedReason,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Signature &&
+          other.submissionId == this.submissionId &&
+          other.submissionSnapshot == this.submissionSnapshot &&
+          other.user == this.user &&
+          other.userSnapshot == this.userSnapshot &&
+          other.ipAddress == this.ipAddress &&
+          other.userAgent == this.userAgent &&
+          other.signature == this.signature &&
+          other.signatureParental == this.signatureParental &&
+          other.signatureMethod == this.signatureMethod &&
+          other.signedAt == this.signedAt &&
+          other.consentVersion == this.consentVersion &&
+          other.revokedAt == this.revokedAt &&
+          other.revokedReason == this.revokedReason);
+}
+
+class SignaturesCompanion extends UpdateCompanion<Signature> {
+  final Value<int> submissionId;
+  final Value<String> submissionSnapshot;
+  final Value<String> user;
+  final Value<String> userSnapshot;
+  final Value<String> ipAddress;
+  final Value<String?> userAgent;
+  final Value<String> signature;
+  final Value<String?> signatureParental;
+  final Value<SignatureMethod> signatureMethod;
+  final Value<DateTime> signedAt;
+  final Value<int> consentVersion;
+  final Value<DateTime?> revokedAt;
+  final Value<String?> revokedReason;
+  const SignaturesCompanion({
+    this.submissionId = const Value.absent(),
+    this.submissionSnapshot = const Value.absent(),
+    this.user = const Value.absent(),
+    this.userSnapshot = const Value.absent(),
+    this.ipAddress = const Value.absent(),
+    this.userAgent = const Value.absent(),
+    this.signature = const Value.absent(),
+    this.signatureParental = const Value.absent(),
+    this.signatureMethod = const Value.absent(),
+    this.signedAt = const Value.absent(),
+    this.consentVersion = const Value.absent(),
+    this.revokedAt = const Value.absent(),
+    this.revokedReason = const Value.absent(),
+  });
+  SignaturesCompanion.insert({
+    this.submissionId = const Value.absent(),
+    required String submissionSnapshot,
+    required String user,
+    required String userSnapshot,
+    required String ipAddress,
+    this.userAgent = const Value.absent(),
+    required String signature,
+    this.signatureParental = const Value.absent(),
+    required SignatureMethod signatureMethod,
+    this.signedAt = const Value.absent(),
+    required int consentVersion,
+    this.revokedAt = const Value.absent(),
+    this.revokedReason = const Value.absent(),
+  }) : submissionSnapshot = Value(submissionSnapshot),
+       user = Value(user),
+       userSnapshot = Value(userSnapshot),
+       ipAddress = Value(ipAddress),
+       signature = Value(signature),
+       signatureMethod = Value(signatureMethod),
+       consentVersion = Value(consentVersion);
+  static Insertable<Signature> custom({
+    Expression<int>? submissionId,
+    Expression<String>? submissionSnapshot,
+    Expression<String>? user,
+    Expression<String>? userSnapshot,
+    Expression<String>? ipAddress,
+    Expression<String>? userAgent,
+    Expression<String>? signature,
+    Expression<String>? signatureParental,
+    Expression<String>? signatureMethod,
+    Expression<DateTime>? signedAt,
+    Expression<int>? consentVersion,
+    Expression<DateTime>? revokedAt,
+    Expression<String>? revokedReason,
+  }) {
+    return RawValuesInsertable({
+      if (submissionId != null) 'submission_id': submissionId,
+      if (submissionSnapshot != null) 'submission_snapshot': submissionSnapshot,
+      if (user != null) 'user': user,
+      if (userSnapshot != null) 'user_snapshot': userSnapshot,
+      if (ipAddress != null) 'ip_address': ipAddress,
+      if (userAgent != null) 'user_agent': userAgent,
+      if (signature != null) 'signature': signature,
+      if (signatureParental != null) 'signature_parental': signatureParental,
+      if (signatureMethod != null) 'signature_method': signatureMethod,
+      if (signedAt != null) 'signed_at': signedAt,
+      if (consentVersion != null) 'consent_version': consentVersion,
+      if (revokedAt != null) 'revoked_at': revokedAt,
+      if (revokedReason != null) 'revoked_reason': revokedReason,
+    });
+  }
+
+  SignaturesCompanion copyWith({
+    Value<int>? submissionId,
+    Value<String>? submissionSnapshot,
+    Value<String>? user,
+    Value<String>? userSnapshot,
+    Value<String>? ipAddress,
+    Value<String?>? userAgent,
+    Value<String>? signature,
+    Value<String?>? signatureParental,
+    Value<SignatureMethod>? signatureMethod,
+    Value<DateTime>? signedAt,
+    Value<int>? consentVersion,
+    Value<DateTime?>? revokedAt,
+    Value<String?>? revokedReason,
+  }) {
+    return SignaturesCompanion(
+      submissionId: submissionId ?? this.submissionId,
+      submissionSnapshot: submissionSnapshot ?? this.submissionSnapshot,
+      user: user ?? this.user,
+      userSnapshot: userSnapshot ?? this.userSnapshot,
+      ipAddress: ipAddress ?? this.ipAddress,
+      userAgent: userAgent ?? this.userAgent,
+      signature: signature ?? this.signature,
+      signatureParental: signatureParental ?? this.signatureParental,
+      signatureMethod: signatureMethod ?? this.signatureMethod,
+      signedAt: signedAt ?? this.signedAt,
+      consentVersion: consentVersion ?? this.consentVersion,
+      revokedAt: revokedAt ?? this.revokedAt,
+      revokedReason: revokedReason ?? this.revokedReason,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (submissionId.present) {
+      map['submission_id'] = Variable<int>(submissionId.value);
+    }
+    if (submissionSnapshot.present) {
+      map['submission_snapshot'] = Variable<String>(submissionSnapshot.value);
+    }
+    if (user.present) {
+      map['user'] = Variable<String>(user.value);
+    }
+    if (userSnapshot.present) {
+      map['user_snapshot'] = Variable<String>(userSnapshot.value);
+    }
+    if (ipAddress.present) {
+      map['ip_address'] = Variable<String>(ipAddress.value);
+    }
+    if (userAgent.present) {
+      map['user_agent'] = Variable<String>(userAgent.value);
+    }
+    if (signature.present) {
+      map['signature'] = Variable<String>(signature.value);
+    }
+    if (signatureParental.present) {
+      map['signature_parental'] = Variable<String>(signatureParental.value);
+    }
+    if (signatureMethod.present) {
+      map['signature_method'] = Variable<String>(
+        $SignaturesTable.$convertersignatureMethod.toSql(signatureMethod.value),
+      );
+    }
+    if (signedAt.present) {
+      map['signed_at'] = Variable<DateTime>(signedAt.value);
+    }
+    if (consentVersion.present) {
+      map['consent_version'] = Variable<int>(consentVersion.value);
+    }
+    if (revokedAt.present) {
+      map['revoked_at'] = Variable<DateTime>(revokedAt.value);
+    }
+    if (revokedReason.present) {
+      map['revoked_reason'] = Variable<String>(revokedReason.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SignaturesCompanion(')
+          ..write('submissionId: $submissionId, ')
+          ..write('submissionSnapshot: $submissionSnapshot, ')
+          ..write('user: $user, ')
+          ..write('userSnapshot: $userSnapshot, ')
+          ..write('ipAddress: $ipAddress, ')
+          ..write('userAgent: $userAgent, ')
+          ..write('signature: $signature, ')
+          ..write('signatureParental: $signatureParental, ')
+          ..write('signatureMethod: $signatureMethod, ')
+          ..write('signedAt: $signedAt, ')
+          ..write('consentVersion: $consentVersion, ')
+          ..write('revokedAt: $revokedAt, ')
+          ..write('revokedReason: $revokedReason')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1591,6 +2374,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UsersTable users = $UsersTable(this);
   late final $LoginCodesTable loginCodes = $LoginCodesTable(this);
   late final $SubmissionsTable submissions = $SubmissionsTable(this);
+  late final $SignaturesTable signatures = $SignaturesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1600,6 +2384,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     users,
     loginCodes,
     submissions,
+    signatures,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3295,6 +4080,365 @@ typedef $$SubmissionsTableProcessedTableManager =
       Submission,
       PrefetchHooks Function({bool projectId, bool user})
     >;
+typedef $$SignaturesTableCreateCompanionBuilder =
+    SignaturesCompanion Function({
+      Value<int> submissionId,
+      required String submissionSnapshot,
+      required String user,
+      required String userSnapshot,
+      required String ipAddress,
+      Value<String?> userAgent,
+      required String signature,
+      Value<String?> signatureParental,
+      required SignatureMethod signatureMethod,
+      Value<DateTime> signedAt,
+      required int consentVersion,
+      Value<DateTime?> revokedAt,
+      Value<String?> revokedReason,
+    });
+typedef $$SignaturesTableUpdateCompanionBuilder =
+    SignaturesCompanion Function({
+      Value<int> submissionId,
+      Value<String> submissionSnapshot,
+      Value<String> user,
+      Value<String> userSnapshot,
+      Value<String> ipAddress,
+      Value<String?> userAgent,
+      Value<String> signature,
+      Value<String?> signatureParental,
+      Value<SignatureMethod> signatureMethod,
+      Value<DateTime> signedAt,
+      Value<int> consentVersion,
+      Value<DateTime?> revokedAt,
+      Value<String?> revokedReason,
+    });
+
+class $$SignaturesTableFilterComposer
+    extends Composer<_$AppDatabase, $SignaturesTable> {
+  $$SignaturesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get submissionId => $composableBuilder(
+    column: $table.submissionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get submissionSnapshot => $composableBuilder(
+    column: $table.submissionSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get user => $composableBuilder(
+    column: $table.user,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userSnapshot => $composableBuilder(
+    column: $table.userSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userAgent => $composableBuilder(
+    column: $table.userAgent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signature => $composableBuilder(
+    column: $table.signature,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signatureParental => $composableBuilder(
+    column: $table.signatureParental,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SignatureMethod, SignatureMethod, String>
+  get signatureMethod => $composableBuilder(
+    column: $table.signatureMethod,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<DateTime> get signedAt => $composableBuilder(
+    column: $table.signedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get consentVersion => $composableBuilder(
+    column: $table.consentVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get revokedReason => $composableBuilder(
+    column: $table.revokedReason,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SignaturesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SignaturesTable> {
+  $$SignaturesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get submissionId => $composableBuilder(
+    column: $table.submissionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get submissionSnapshot => $composableBuilder(
+    column: $table.submissionSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get user => $composableBuilder(
+    column: $table.user,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userSnapshot => $composableBuilder(
+    column: $table.userSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userAgent => $composableBuilder(
+    column: $table.userAgent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signature => $composableBuilder(
+    column: $table.signature,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signatureParental => $composableBuilder(
+    column: $table.signatureParental,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signatureMethod => $composableBuilder(
+    column: $table.signatureMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get signedAt => $composableBuilder(
+    column: $table.signedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get consentVersion => $composableBuilder(
+    column: $table.consentVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get revokedReason => $composableBuilder(
+    column: $table.revokedReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SignaturesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SignaturesTable> {
+  $$SignaturesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get submissionId => $composableBuilder(
+    column: $table.submissionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get submissionSnapshot => $composableBuilder(
+    column: $table.submissionSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get user =>
+      $composableBuilder(column: $table.user, builder: (column) => column);
+
+  GeneratedColumn<String> get userSnapshot => $composableBuilder(
+    column: $table.userSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ipAddress =>
+      $composableBuilder(column: $table.ipAddress, builder: (column) => column);
+
+  GeneratedColumn<String> get userAgent =>
+      $composableBuilder(column: $table.userAgent, builder: (column) => column);
+
+  GeneratedColumn<String> get signature =>
+      $composableBuilder(column: $table.signature, builder: (column) => column);
+
+  GeneratedColumn<String> get signatureParental => $composableBuilder(
+    column: $table.signatureParental,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SignatureMethod, String>
+  get signatureMethod => $composableBuilder(
+    column: $table.signatureMethod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get signedAt =>
+      $composableBuilder(column: $table.signedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get consentVersion => $composableBuilder(
+    column: $table.consentVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get revokedAt =>
+      $composableBuilder(column: $table.revokedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get revokedReason => $composableBuilder(
+    column: $table.revokedReason,
+    builder: (column) => column,
+  );
+}
+
+class $$SignaturesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SignaturesTable,
+          Signature,
+          $$SignaturesTableFilterComposer,
+          $$SignaturesTableOrderingComposer,
+          $$SignaturesTableAnnotationComposer,
+          $$SignaturesTableCreateCompanionBuilder,
+          $$SignaturesTableUpdateCompanionBuilder,
+          (
+            Signature,
+            BaseReferences<_$AppDatabase, $SignaturesTable, Signature>,
+          ),
+          Signature,
+          PrefetchHooks Function()
+        > {
+  $$SignaturesTableTableManager(_$AppDatabase db, $SignaturesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SignaturesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SignaturesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SignaturesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> submissionId = const Value.absent(),
+                Value<String> submissionSnapshot = const Value.absent(),
+                Value<String> user = const Value.absent(),
+                Value<String> userSnapshot = const Value.absent(),
+                Value<String> ipAddress = const Value.absent(),
+                Value<String?> userAgent = const Value.absent(),
+                Value<String> signature = const Value.absent(),
+                Value<String?> signatureParental = const Value.absent(),
+                Value<SignatureMethod> signatureMethod = const Value.absent(),
+                Value<DateTime> signedAt = const Value.absent(),
+                Value<int> consentVersion = const Value.absent(),
+                Value<DateTime?> revokedAt = const Value.absent(),
+                Value<String?> revokedReason = const Value.absent(),
+              }) => SignaturesCompanion(
+                submissionId: submissionId,
+                submissionSnapshot: submissionSnapshot,
+                user: user,
+                userSnapshot: userSnapshot,
+                ipAddress: ipAddress,
+                userAgent: userAgent,
+                signature: signature,
+                signatureParental: signatureParental,
+                signatureMethod: signatureMethod,
+                signedAt: signedAt,
+                consentVersion: consentVersion,
+                revokedAt: revokedAt,
+                revokedReason: revokedReason,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> submissionId = const Value.absent(),
+                required String submissionSnapshot,
+                required String user,
+                required String userSnapshot,
+                required String ipAddress,
+                Value<String?> userAgent = const Value.absent(),
+                required String signature,
+                Value<String?> signatureParental = const Value.absent(),
+                required SignatureMethod signatureMethod,
+                Value<DateTime> signedAt = const Value.absent(),
+                required int consentVersion,
+                Value<DateTime?> revokedAt = const Value.absent(),
+                Value<String?> revokedReason = const Value.absent(),
+              }) => SignaturesCompanion.insert(
+                submissionId: submissionId,
+                submissionSnapshot: submissionSnapshot,
+                user: user,
+                userSnapshot: userSnapshot,
+                ipAddress: ipAddress,
+                userAgent: userAgent,
+                signature: signature,
+                signatureParental: signatureParental,
+                signatureMethod: signatureMethod,
+                signedAt: signedAt,
+                consentVersion: consentVersion,
+                revokedAt: revokedAt,
+                revokedReason: revokedReason,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SignaturesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SignaturesTable,
+      Signature,
+      $$SignaturesTableFilterComposer,
+      $$SignaturesTableOrderingComposer,
+      $$SignaturesTableAnnotationComposer,
+      $$SignaturesTableCreateCompanionBuilder,
+      $$SignaturesTableUpdateCompanionBuilder,
+      (Signature, BaseReferences<_$AppDatabase, $SignaturesTable, Signature>),
+      Signature,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3307,4 +4451,6 @@ class $AppDatabaseManager {
       $$LoginCodesTableTableManager(_db, _db.loginCodes);
   $$SubmissionsTableTableManager get submissions =>
       $$SubmissionsTableTableManager(_db, _db.submissions);
+  $$SignaturesTableTableManager get signatures =>
+      $$SignaturesTableTableManager(_db, _db.signatures);
 }

@@ -189,6 +189,7 @@ void main(List<String> args) async {
       (await (db.select(db.loginCodes)..where(
                 (lc) =>
                     lc.user.equals(adminUser) &
+                    lc.createdBy.isNull() &
                     lc.expiresAt.isBiggerOrEqualValue(DateTime.now()),
               ))
               .get())

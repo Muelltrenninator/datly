@@ -98,13 +98,13 @@ abstract class AppLocalizations {
     Locale('de'),
   ];
 
-  /// Button text to retry accessing the camera. This string is formatted in MLA title case.
+  /// Button text to retry accessing the camera.
   ///
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
 
-  /// Button text to delete an item. This string is formatted in MLA title case.
+  /// Button text to delete an item.
   ///
   /// In en, this message translates to:
   /// **'Delete'**
@@ -128,10 +128,10 @@ abstract class AppLocalizations {
   /// **'Unknown login code.'**
   String get loginUnknown;
 
-  /// Label for the login code input field. This string is formatted in MLA title case.
+  /// Label for the login code input field.
   ///
   /// In en, this message translates to:
-  /// **'Login Code'**
+  /// **'Login code'**
   String get loginCodeLabel;
 
   /// Text prompting new users to request a login code.
@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// Link text for new users to request a login code.
   ///
   /// In en, this message translates to:
-  /// **'Request a Code.'**
+  /// **'Request a code.'**
   String get loginNewHereRequest;
 
   /// Link text for the app's privacy policy. This string is formatted in MLA title case.
@@ -158,10 +158,10 @@ abstract class AppLocalizations {
   /// **'Terms of Service'**
   String get loginTermsOfService;
 
-  /// Shown when no camera device is found on the system or the permission is denied. This string is formatted in MLA title case.
+  /// Shown when no camera device is found on the system or the permission is denied.
   ///
   /// In en, this message translates to:
-  /// **'No Camera Found'**
+  /// **'No camera found'**
   String get cameraNotFound;
 
   /// Explains that access to the camera was denied by the user.
@@ -176,10 +176,10 @@ abstract class AppLocalizations {
   /// **'No camera available on this device.'**
   String get cameraErrorUnavailable;
 
-  /// Title for the camera selection dialog. This string is formatted in MLA title case.
+  /// Title for the camera selection dialog.
   ///
   /// In en, this message translates to:
-  /// **'Select Camera'**
+  /// **'Select camera'**
   String get selectCamera;
 
   /// The word 'Back' used to describe a camera facing away from the user. This string is formatted in MLA title case.
@@ -203,8 +203,74 @@ abstract class AppLocalizations {
   /// Title for the project selection dialog.
   ///
   /// In en, this message translates to:
-  /// **'Select Project'**
+  /// **'Select project'**
   String get selectProject;
+
+  /// Title for the image submission consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Image submission consent'**
+  String get consentTitle;
+
+  /// Explanation text for the image submission consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile. If you do not agree, please do not proceed with the submission.'**
+  String get consentExplanation1;
+
+  /// Additional explanation text for the image submission consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'By providing your consent, you confirm that you have the necessary rights to submit this image and that it does not infringe upon the rights of any third parties. You may not submit images depicting other people, topics unrelated to the project, or content that violates legal rights in your jurisdiction or Germany. You also agree that the image may be used for research, analysis, and publication purposes related to the project you are contributing to.'**
+  String get consentExplanation2;
+
+  /// Label for the consent confirmation checkbox in the consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm that the image complies with these conditions'**
+  String get consentCheckbox;
+
+  /// Text for the consent checkbox including links to the privacy policy and terms of service.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and agree to the {privacyPolicy} and {termsOfService}'**
+  String consentPolicy(String privacyPolicy, String termsOfService);
+
+  /// Label for the signature input field in the consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronic signature'**
+  String get consentSignature;
+
+  /// Legal disclaimer for the electronic signature input field in the consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'This signature is legally binding. Entering an incorrect name makes the submission invalid and may lead to suspension of the account \'{username}\'.'**
+  String consentSignatureLegal(String username);
+
+  /// Label for the age confirmation checkbox in the consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'I am at least 16 years old'**
+  String get consentAge;
+
+  /// Label for the signature input field for guardian in the consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronic signature of guardian'**
+  String get consentSignatureParental;
+
+  /// Label for the guardian consent checkbox in the consent dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'I am the guardian of the minor, have read the above conditions and agree them'**
+  String get consentParental;
+
+  /// Button text to give consent and submit the image.
+  ///
+  /// In en, this message translates to:
+  /// **'Give consent and submit'**
+  String get consentButton;
 
   /// Shown when there are no submissions available for the selected project.
   ///
@@ -236,16 +302,16 @@ abstract class AppLocalizations {
   /// **'Censored'**
   String get submissionStatusCensored;
 
-  /// Title for the dialog to confirm deletion of a submission. This string is formatted in MLA title case.
+  /// Title for the dialog to confirm deletion of a submission.
   ///
   /// In en, this message translates to:
-  /// **'Delete Submission'**
+  /// **'Delete submission?'**
   String get submissionDeleteTitle;
 
   /// Message asking the user to confirm deletion of a submission.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this submission? This action cannot be undone.'**
+  /// **'Deleting a submission will remove the image from the next export and revoke consent. This action cannot be undone.'**
   String get submissionDeleteMessage;
 
   /// Accessibility label for the account overview section.
@@ -260,13 +326,13 @@ abstract class AppLocalizations {
   /// **'for {username}'**
   String accountOverviewFor(String username);
 
-  /// Label for a button that leads to more information about the app. This string is formatted in MLA title case.
+  /// Label for a button that leads to more information about the app.
   ///
   /// In en, this message translates to:
-  /// **'Learn More'**
+  /// **'Learn more'**
   String get aboutAppLearnMore;
 
-  /// Label for a button that logs the user out of the app. This string is formatted in MLA title case.
+  /// Label for a button that logs the user out of the app.
   ///
   /// In en, this message translates to:
   /// **'Logout'**

@@ -184,6 +184,15 @@ void define(Router router) {
                     (s) => OrderingTerm.desc(s.id),
                   ]))
                 .get();
+        for (var submission in List.from(submissions)) {
+          final signature =
+              await (db.select(db.signatures)
+                    ..where((sg) => sg.submissionId.equals(submission.id)))
+                  .getSingleOrNull();
+          if (signature == null || signature.revokedAt != null) {
+            submissions.remove(submission);
+          }
+        }
 
         final archive = Archive()
           ..addFile(
@@ -193,16 +202,26 @@ void define(Router router) {
                 "datly": GitBaker.currentBranch.commits.last.hash,
                 "generatedAt": DateTime.now().millisecondsSinceEpoch,
                 "project": project.toJson(),
-                "submissions": submissions.map((s) => s.toJson()).toList(),
+                "submissions": (await Future.wait(
+                  submissions.map(
+                    (s) async => s.toJson()
+                      ..["signature"] =
+                          (await (db.select(db.signatures)..where(
+                                    (sg) => sg.submissionId.equals(s.id),
+                                  ))
+                                  .getSingle())
+                              .toJson(),
+                  ),
+                )).toList(),
               }),
             ),
           )
-          ..addFile(
-            ArchiveFile.string(
-              "data.csv",
-              "images,labels\n${submissions.map((s) => "${s.assetId != null && s.assetMimeType != null ? assetFile(s.assetId!, s.assetMimeType!).path.split("/").last : ""},").join("\n")}",
-            ),
-          )
+          // ..addFile(
+          //   ArchiveFile.string(
+          //     "data.csv",
+          //     "images,labels\n${submissions.map((s) => "${s.assetId != null && s.assetMimeType != null ? assetFile(s.assetId!, s.assetMimeType!).path.split("/").last : ""},").join("\n")}",
+          //   ),
+          // )
           ..addFile(ArchiveFile.directory("images/"));
         for (var submission in submissions) {
           if (submission.assetId != null && submission.assetMimeType != null) {
@@ -288,13 +307,22 @@ void define(Router router) {
           );
         }
 
-        MultipartRequest? multipart;
+        MultipartRequest? data;
         try {
-          multipart = req.multipart();
+          data = req.multipart();
         } catch (_) {}
-        if (multipart == null) {
+        if (data == null) {
           return Response.badRequest(
             body: jsonEncode({"error": "Invalid multipart request"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
+        final signature = req.url.queryParameters["signature"];
+        final signatureParental = req.url.queryParameters["signatureParental"];
+        if (signature == null) {
+          return Response.badRequest(
+            body: jsonEncode({"error": "Missing signature parameter"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -302,7 +330,7 @@ void define(Router router) {
         late final Multipart part;
         String mime;
         try {
-          part = (await multipart.parts.toList()).first;
+          part = (await data.parts.toList()).first;
           mime = part.headers["content-type"] ?? "application/octet-stream";
         } catch (e) {
           return Response.badRequest(
@@ -348,7 +376,7 @@ void define(Router router) {
             : img.encodeJpg(image);
         await file.writeAsBytes(encoded, flush: true);
 
-        await db
+        final insertion = await db
             .into(db.submissions)
             .insert(
               SubmissionsCompanion.insert(
@@ -357,6 +385,27 @@ void define(Router router) {
                 assetId: Value(uuid),
                 assetMimeType: Value(mime),
                 assetBlurHash: blurHash,
+              ),
+            );
+        final newSubmission = await (db.select(
+          db.submissions,
+        )..where((s) => s.id.equals(insertion))).getSingle();
+
+        const consentVersion = 1;
+        await db
+            .into(db.signatures)
+            .insert(
+              SignaturesCompanion.insert(
+                submissionId: Value(newSubmission.id),
+                submissionSnapshot: jsonEncode(newSubmission.toJson()),
+                user: auth.user.username,
+                userSnapshot: jsonEncode(auth.user.toJson()),
+                ipAddress: identifierFromRequest(req)!,
+                userAgent: Value.absentIfNull(req.headers["user-agent"]),
+                signature: signature,
+                signatureParental: Value.absentIfNull(signatureParental),
+                signatureMethod: SignatureMethod.typed,
+                consentVersion: consentVersion,
               ),
             );
 
@@ -487,6 +536,15 @@ void define(Router router) {
         await (db.delete(
           db.submissions,
         )..where((s) => s.id.equals(submission.id))).go();
+
+        await (db.update(
+          db.signatures,
+        )..where((s) => s.submissionId.equals(submission.id))).write(
+          SignaturesCompanion(
+            revokedAt: Value(DateTime.now()),
+            revokedReason: const Value("Submission deleted"),
+          ),
+        );
 
         return Response.ok(null, headers: {"Content-Type": "application/json"});
       }),

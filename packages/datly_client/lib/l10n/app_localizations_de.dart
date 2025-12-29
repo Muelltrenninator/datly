@@ -41,7 +41,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get loginNewHere => 'Neu hier?';
 
   @override
-  String get loginNewHereRequest => 'Einen Code Anfordern.';
+  String get loginNewHereRequest => 'Einen Code anfordern.';
 
   @override
   String get loginPrivacyPolicy => 'Datenschutzerklärung';
@@ -50,7 +50,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get loginTermsOfService => 'Nutzungsbedingungen';
 
   @override
-  String get cameraNotFound => 'Keine Kamera Gefunden';
+  String get cameraNotFound => 'Keine Kamera gefunden';
 
   @override
   String get cameraErrorPermission =>
@@ -61,7 +61,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine Kamera auf diesem Gerät verfügbar.';
 
   @override
-  String get selectCamera => 'Kamera Auswählen';
+  String get selectCamera => 'Kamera auswählen';
 
   @override
   String get selectCameraDescriptionBack => 'Rückkamera';
@@ -73,7 +73,49 @@ class AppLocalizationsDe extends AppLocalizations {
   String get selectCameraDescriptionExternal => 'Externe Kamera';
 
   @override
-  String get selectProject => 'Projekt Auswählen';
+  String get selectProject => 'Projekt auswählen';
+
+  @override
+  String get consentTitle => 'Bildübermittlungszustimmung';
+
+  @override
+  String get consentExplanation1 =>
+      'Um dein Bild direkt oder indirekt zu speichern, zu verarbeiten und schließlich zu veröffentlichen, benötigen wir deine ausdrückliche Zustimmung. Dein Benutzername wird mit der Bildeinsendung verknüpft und kann in zukünftigen Veröffentlichungen sichtbar sein. Du kannst deine Zustimmung jederzeit widerrufen, indem du deine Einsendung über dein Profil löschst. Wenn du nicht zustimmst, fahre bitte nicht mit der Einsendung fort.';
+
+  @override
+  String get consentExplanation2 =>
+      'Mit deiner Zustimmung bestätigst du, dass du die notwendigen Rechte hast, dieses Bild einzureichen, und dass es keine Rechte Dritter verletzt. Du darfst keine Bilder einreichen, die andere Personen, Themen, die nicht Gegenstand des Projekts sind, oder Inhalte, die gegen gesetzliche Rechte in deiner Gerichtsbarkeit oder Deutschland verstoßen, abbilden. Du stimmst außerdem zu, dass das Bild für Forschungs-, Analyse- und Veröffentlichungszwecke im Zusammenhang mit dem Projekt, zu dem du beiträgst, verwendet werden darf.';
+
+  @override
+  String get consentCheckbox =>
+      'Ich bestätige, dass das Bild diesen Bedingungen entspricht';
+
+  @override
+  String consentPolicy(String privacyPolicy, String termsOfService) {
+    return 'Ich habe die $privacyPolicy und $termsOfService gelesen und stimme ihnen zu';
+  }
+
+  @override
+  String get consentSignature => 'Elektronische Unterschrift';
+
+  @override
+  String consentSignatureLegal(String username) {
+    return 'Diese Unterschrift ist rechtsverbindlich. Die Eingabe eines falschen Namens macht die Einsendung ungültig und kann zur Sperrung des Kontos \'$username\' führen.';
+  }
+
+  @override
+  String get consentAge => 'Ich bin mindestens 16 Jahre alt';
+
+  @override
+  String get consentSignatureParental =>
+      'Elektronische Unterschrift eines Erziehungsberechtigten';
+
+  @override
+  String get consentParental =>
+      'Ich bin Erziehungsberechtigter des Minderjährigen, habe die oben genannten Bedingungen gelesen und stimme diesen zu';
+
+  @override
+  String get consentButton => 'Zustimmen und absenden';
 
   @override
   String get noSubmissions => 'Noch keine Einsendungen.';
@@ -91,11 +133,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get submissionStatusCensored => 'Zensiert';
 
   @override
-  String get submissionDeleteTitle => 'Einsendung Löschen';
+  String get submissionDeleteTitle => 'Einsendung löschen?';
 
   @override
   String get submissionDeleteMessage =>
-      'Möchtest du diese Einsendung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
+      'Das Löschen einer Einsendung wird dessen Bild vom nächsten Export entfernen und die Einwilligung zurückziehen. Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
   String get accountOverview => 'Account-Übersicht';
@@ -106,7 +148,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get aboutAppLearnMore => 'Mehr Erfahren';
+  String get aboutAppLearnMore => 'Mehr erfahren';
 
   @override
   String get aboutAppLogout => 'Abmelden';

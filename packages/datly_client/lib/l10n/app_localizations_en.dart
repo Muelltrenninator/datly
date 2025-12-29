@@ -35,13 +35,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginUnknown => 'Unknown login code.';
 
   @override
-  String get loginCodeLabel => 'Login Code';
+  String get loginCodeLabel => 'Login code';
 
   @override
   String get loginNewHere => 'New here?';
 
   @override
-  String get loginNewHereRequest => 'Request a Code.';
+  String get loginNewHereRequest => 'Request a code.';
 
   @override
   String get loginPrivacyPolicy => 'Privacy Policy';
@@ -50,7 +50,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTermsOfService => 'Terms of Service';
 
   @override
-  String get cameraNotFound => 'No Camera Found';
+  String get cameraNotFound => 'No camera found';
 
   @override
   String get cameraErrorPermission => 'Access to the camera was denied.';
@@ -59,7 +59,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraErrorUnavailable => 'No camera available on this device.';
 
   @override
-  String get selectCamera => 'Select Camera';
+  String get selectCamera => 'Select camera';
 
   @override
   String get selectCameraDescriptionBack => 'Back Camera';
@@ -71,7 +71,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectCameraDescriptionExternal => 'External Camera';
 
   @override
-  String get selectProject => 'Select Project';
+  String get selectProject => 'Select project';
+
+  @override
+  String get consentTitle => 'Image submission consent';
+
+  @override
+  String get consentExplanation1 =>
+      'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile. If you do not agree, please do not proceed with the submission.';
+
+  @override
+  String get consentExplanation2 =>
+      'By providing your consent, you confirm that you have the necessary rights to submit this image and that it does not infringe upon the rights of any third parties. You may not submit images depicting other people, topics unrelated to the project, or content that violates legal rights in your jurisdiction or Germany. You also agree that the image may be used for research, analysis, and publication purposes related to the project you are contributing to.';
+
+  @override
+  String get consentCheckbox =>
+      'I confirm that the image complies with these conditions';
+
+  @override
+  String consentPolicy(String privacyPolicy, String termsOfService) {
+    return 'I have read and agree to the $privacyPolicy and $termsOfService';
+  }
+
+  @override
+  String get consentSignature => 'Electronic signature';
+
+  @override
+  String consentSignatureLegal(String username) {
+    return 'This signature is legally binding. Entering an incorrect name makes the submission invalid and may lead to suspension of the account \'$username\'.';
+  }
+
+  @override
+  String get consentAge => 'I am at least 16 years old';
+
+  @override
+  String get consentSignatureParental => 'Electronic signature of guardian';
+
+  @override
+  String get consentParental =>
+      'I am the guardian of the minor, have read the above conditions and agree them';
+
+  @override
+  String get consentButton => 'Give consent and submit';
 
   @override
   String get noSubmissions => 'No submissions yet.';
@@ -89,11 +130,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submissionStatusCensored => 'Censored';
 
   @override
-  String get submissionDeleteTitle => 'Delete Submission';
+  String get submissionDeleteTitle => 'Delete submission?';
 
   @override
   String get submissionDeleteMessage =>
-      'Are you sure you want to delete this submission? This action cannot be undone.';
+      'Deleting a submission will remove the image from the next export and revoke consent. This action cannot be undone.';
 
   @override
   String get accountOverview => 'Account overview';
@@ -104,7 +145,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get aboutAppLearnMore => 'Learn More';
+  String get aboutAppLearnMore => 'Learn more';
 
   @override
   String get aboutAppLogout => 'Logout';

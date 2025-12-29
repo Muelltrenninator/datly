@@ -18,7 +18,7 @@ class Users extends Table {
   TextColumn get projects =>
       text().map(ListConverter<int>()).withDefault(const Constant("[]"))();
   TextColumn get role =>
-      textEnum<UserRole>().withDefault(const Constant("user"))();
+      textEnum<UserRole>().withDefault(Constant(UserRole.user.name))();
 
   @override
   Set<Column<Object>>? get primaryKey => {username};
@@ -71,4 +71,28 @@ class Submissions extends Table {
   TextColumn get assetId => text().nullable().withLength(min: 32, max: 32)();
   TextColumn get assetMimeType => text().nullable()();
   TextColumn get assetBlurHash => text()();
+}
+
+class Signatures extends Table {
+  IntColumn get submissionId => integer()();
+  TextColumn get submissionSnapshot => text()();
+
+  TextColumn get user => text()();
+  TextColumn get userSnapshot => text()();
+
+  TextColumn get ipAddress => text()();
+  TextColumn get userAgent => text().nullable()();
+
+  TextColumn get signature => text()();
+  TextColumn get signatureParental => text().nullable()();
+  TextColumn get signatureMethod => textEnum<SignatureMethod>()();
+
+  DateTimeColumn get signedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get consentVersion => integer()();
+
+  DateTimeColumn get revokedAt => dateTime().nullable()();
+  TextColumn get revokedReason => text().nullable()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {submissionId};
 }

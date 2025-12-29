@@ -2,15 +2,15 @@
     "@@locale": "en",
     "retry": "Retry",
     "@retry": {
-        "description": "Button text to retry accessing the camera. This string is formatted in MLA title case.",
+        "description": "Button text to retry accessing the camera.",
         "context": "global"
     },
     "delete": "Delete",
     "@delete": {
-        "description": "Button text to delete an item. This string is formatted in MLA title case.",
+        "description": "Button text to delete an item.",
         "context": "global"
     },
-    "invite":"Hello {username} 👋\nYou're invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}\n- {projectCount, plural, =0{You've not been added to any project yet} other{You've been added to: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!",
+    "invite": "Hello {username} 👋\nYou're invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}\n- {projectCount, plural, =0{You've not been added to any project yet} other{You've been added to: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!",
     "@invite": {
         "description": "Invitation message sent to users to invite them to a project on Datly.",
         "context": "global",
@@ -42,9 +42,9 @@
         "description": "Error message shown when the provided login code is not recognized.",
         "context": "login"
     },
-    "loginCodeLabel": "Login Code",
+    "loginCodeLabel": "Login code",
     "@loginCodeLabel": {
-        "description": "Label for the login code input field. This string is formatted in MLA title case.",
+        "description": "Label for the login code input field.",
         "context": "login"
     },
     "loginNewHere": "New here?",
@@ -52,7 +52,7 @@
         "description": "Text prompting new users to request a login code.",
         "context": "login"
     },
-    "loginNewHereRequest": "Request a Code.",
+    "loginNewHereRequest": "Request a code.",
     "@loginNewHereRequest": {
         "description": "Link text for new users to request a login code.",
         "context": "login"
@@ -67,9 +67,9 @@
         "description": "Link text for the app's terms of service. This string is formatted in MLA title case.",
         "context": "login"
     },
-    "cameraNotFound": "No Camera Found",
+    "cameraNotFound": "No camera found",
     "@cameraNotFound": {
-        "description": "Shown when no camera device is found on the system or the permission is denied. This string is formatted in MLA title case.",
+        "description": "Shown when no camera device is found on the system or the permission is denied.",
         "context": "upload:error"
     },
     "cameraErrorPermission": "Access to the camera was denied.",
@@ -82,9 +82,9 @@
         "description": "Explains that no camera is available on the device.",
         "context": "upload:error"
     },
-    "selectCamera": "Select Camera",
+    "selectCamera": "Select camera",
     "@selectCamera": {
-        "description": "Title for the camera selection dialog. This string is formatted in MLA title case.",
+        "description": "Title for the camera selection dialog.",
         "context": "upload:cameraSelection"
     },
     "selectCameraDescriptionBack": "Back Camera",
@@ -102,10 +102,83 @@
         "description": "The word 'External' used to describe an external camera. This string is formatted in MLA title case.",
         "context": "upload:cameraSelection"
     },
-    "selectProject": "Select Project",
+    "selectProject": "Select project",
     "@selectProject": {
-        "description": "Title for the project selection dialog. ",
+        "description": "Title for the project selection dialog.",
         "context": "upload:projectSelection"
+    },
+    "consentTitle": "Image submission consent",
+    "@consentTitle": {
+        "description": "Title for the image submission consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentExplanation1": "To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile. If you do not agree, please do not proceed with the submission.",
+    "@consentExplanation1": {
+        "description": "Explanation text for the image submission consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentExplanation2": "By providing your consent, you confirm that you have the necessary rights to submit this image and that it does not infringe upon the rights of any third parties. You may not submit images depicting other people, topics unrelated to the project, or content that violates legal rights in your jurisdiction or Germany. You also agree that the image may be used for research, analysis, and publication purposes related to the project you are contributing to.",
+    "@consentExplanation2": {
+        "description": "Additional explanation text for the image submission consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentCheckbox": "I confirm that the image complies with these conditions",
+    "@consentCheckbox": {
+        "description": "Label for the consent confirmation checkbox in the consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentPolicy": "I have read and agree to the {privacyPolicy} and {termsOfService}",
+    "@consentPolicy": {
+        "description": "Text for the consent checkbox including links to the privacy policy and terms of service.",
+        "context": "upload:consent",
+        "placeholders": {
+            "privacyPolicy": {
+                "type": "String",
+                "description": "See key `loginPrivacyPolicy`",
+                "example": "Privacy Policy"
+            },
+            "termsOfService": {
+                "type": "String",
+                "description": "See key `loginTermsOfService`",
+                "example": "Terms of Service"
+            }
+        }
+    },
+    "consentSignature": "Electronic signature",
+    "@consentSignature": {
+        "description": "Label for the signature input field in the consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentSignatureLegal": "This signature is legally binding. Entering an incorrect name makes the submission invalid and may lead to suspension of the account '{username}'.",
+    "@consentSignatureLegal": {
+        "description": "Legal disclaimer for the electronic signature input field in the consent dialog.",
+        "context": "upload:consent",
+        "placeholders": {
+            "username": {
+                "type": "String",
+                "example": "johndoe"
+            }
+        }
+    },
+    "consentAge": "I am at least 16 years old",
+    "@consentAge": {
+        "description": "Label for the age confirmation checkbox in the consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentSignatureParental": "Electronic signature of guardian",
+    "@consentSignatureParental": {
+        "description": "Label for the signature input field for guardian in the consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentParental": "I am the guardian of the minor, have read the above conditions and agree them",
+    "@consentParental": {
+        "description": "Label for the guardian consent checkbox in the consent dialog.",
+        "context": "upload:consent"
+    },
+    "consentButton": "Give consent and submit",
+    "@consentButton": {
+        "description": "Button text to give consent and submit the image.",
+        "context": "upload:consent"
     },
     "noSubmissions": "No submissions yet.",
     "@noSubmissions": {
@@ -132,12 +205,12 @@
         "description": "The status 'Censored' for a submission. This string is formatted in MLA title case.",
         "context": "submissions:status"
     },
-    "submissionDeleteTitle": "Delete Submission",
+    "submissionDeleteTitle": "Delete submission?",
     "@submissionDeleteTitle": {
-        "description": "Title for the dialog to confirm deletion of a submission. This string is formatted in MLA title case.",
+        "description": "Title for the dialog to confirm deletion of a submission.",
         "context": "submissions:delete"
     },
-    "submissionDeleteMessage": "Are you sure you want to delete this submission? This action cannot be undone.",
+    "submissionDeleteMessage": "Deleting a submission will remove the image from the next export and revoke consent. This action cannot be undone.",
     "@submissionDeleteMessage": {
         "description": "Message asking the user to confirm deletion of a submission.",
         "context": "submissions:delete"
@@ -158,14 +231,14 @@
             }
         }
     },
-    "aboutAppLearnMore": "Learn More",
+    "aboutAppLearnMore": "Learn more",
     "@aboutAppLearnMore": {
-        "description": "Label for a button that leads to more information about the app. This string is formatted in MLA title case.",
+        "description": "Label for a button that leads to more information about the app.",
         "context": "about"
     },
     "aboutAppLogout": "Logout",
     "@aboutAppLogout": {
-        "description": "Label for a button that logs the user out of the app. This string is formatted in MLA title case.",
+        "description": "Label for a button that logs the user out of the app.",
         "context": "about"
     }
 }

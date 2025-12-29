@@ -219,6 +219,16 @@ void define(Router router) {
         await (db.delete(
           db.users,
         )..where((u) => u.username.equals(user.username))).go();
+
+        await (db.update(
+          db.signatures,
+        )..where((s) => s.user.equals(user.username))).write(
+          SignaturesCompanion(
+            revokedAt: Value(DateTime.now()),
+            revokedReason: Value("User deleted by '${auth.user.username}'"),
+          ),
+        );
+
         return Response.ok(null);
       }, minimumRole: UserRole.admin),
     )
