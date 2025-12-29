@@ -101,7 +101,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get consentSignature => 'Einfache Elektronische Unterschrift (EES)';
+  String get consentSignature => 'Einfache Elektronische Signatur (EES)';
 
   @override
   String get consentSignatureName => 'Max Mustermann';
