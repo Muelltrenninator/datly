@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-29T02:54:13
+/// Last generated: 2025-12-29T11:35:05
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -403,7 +403,17 @@ final class GitBaker {
   );
 
   /// List of uncommitted changes in the working tree of the repository.
-  static final List<WorkspaceEntry> workspace = List.unmodifiable([]);
+  static final List<WorkspaceEntry> workspace = List.unmodifiable([
+    WorkspaceEntryChange._(
+      "lib/generated/gitbaker.g.dart",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
+  ]);
 
   /// All branches in the repository.
   ///
@@ -413,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 15,
+      revision: 16,
       ahead: 0,
       behind: 0,
       commits: [
@@ -432,6 +442,7 @@ final class GitBaker {
         "519ba074b0da7bb7e62bf218d8252cd0cd68022a",
         "fa9ea7d48b3854eb49c3e86e2049cdaae3a0fc35",
         "f6f02f7973e4a18a516460ba4caa0f355767bbd8",
+        "857e68953c978aa70a5f98d287a8e057dd887986",
       ],
     ),
   ];
@@ -586,6 +597,15 @@ final class GitBaker {
       hashAbbreviated: "f6f02f7",
       message: "Added consent collection",
       date: DateTime.parse("2025-12-29T01:53:44.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "857e68953c978aa70a5f98d287a8e057dd887986",
+      hashAbbreviated: "857e689",
+      message: "Consent dialog improvements",
+      date: DateTime.parse("2025-12-29T10:34:29.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

@@ -205,6 +205,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
+      useSafeArea: true,
       builder: (_) => UploadConsentModal(),
     );
     if (signature == null) {
