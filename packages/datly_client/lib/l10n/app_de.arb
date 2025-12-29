@@ -23,7 +23,7 @@
     "consentExplanation2": "Mit deiner Zustimmung bestätigst du, dass du die notwendigen Rechte hast, dieses Bild einzureichen, und dass es keine Rechte Dritter verletzt. Du darfst keine Bilder einreichen, die andere Personen, Themen, die nicht Gegenstand des Projekts sind, oder Inhalte, die gegen gesetzliche Rechte in deiner Gerichtsbarkeit oder Deutschland verstoßen, abbilden. Du stimmst außerdem zu, dass das Bild für Forschungs-, Analyse- und Veröffentlichungszwecke im Zusammenhang mit dem Projekt, zu dem du beiträgst, verwendet werden darf.",
     "consentCheckbox": "Ich bestätige, dass das Bild diesen Bedingungen entspricht",
     "consentPolicy": "Ich habe die {privacyPolicy} und {termsOfService} gelesen und stimme ihnen zu",
-    "consentSignature": "Einfache Elektronische Unterschrift (EES)",
+    "consentSignature": "Einfache Elektronische Signatur (EES)",
     "consentSignatureName": "Max Mustermann",
     "consentSignatureLegal": "Diese Unterschrift ist rechtsverbindlich. Die Eingabe eines falschen Namens macht die Einsendung ungültig und kann zur Sperrung des Kontos '{username}' führen.",
     "consentAge": "Ich bin mindestens 16 Jahre alt",

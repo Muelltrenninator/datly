@@ -221,7 +221,7 @@ abstract class AppLocalizations {
   /// Explanation text for the image submission consent dialog.
   ///
   /// In en, this message translates to:
-  /// **'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile, this will only not include the image in the next data export, but already publicized images may cannot be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.'**
+  /// **'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile; this will only not include the image in the next data export, but already publicized images may cannot be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.'**
   String get consentExplanation1;
 
   /// Additional explanation text for the image submission consent dialog.

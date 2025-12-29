@@ -85,7 +85,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get consentExplanation1 =>
-      'Um dein Bild direkt oder indirekt zu speichern, zu verarbeiten und schließlich zu veröffentlichen, benötigen wir deine ausdrückliche Zustimmung. Dein Benutzername wird mit der Bildeinsendung verknüpft und kann in zukünftigen Veröffentlichungen sichtbar sein. Du kannst deine Zustimmung jederzeit widerrufen, indem du deine Einsendung über dein Profil löschst, dadurch wird das Bild nur nicht in den nächsten Datenexport aufgenommen, aber bereits veröffentlichte Bilder können möglicherweise bis zur nächsten Veröffentlichung nicht vollständig gelöscht werden.  Wenn du nicht zustimmst, fahre bitte nicht mit der Einsendung fort.';
+      'Um dein Bild direkt oder indirekt zu speichern, zu verarbeiten und schließlich zu veröffentlichen, benötigen wir deine ausdrückliche Zustimmung. Dein Benutzername wird mit der Bildeinsendung verknüpft und kann in zukünftigen Veröffentlichungen sichtbar sein. Du kannst deine Zustimmung jederzeit widerrufen, indem du deine Einsendung über dein Profil löschst; dadurch wird das Bild nur nicht in den nächsten Datenexport aufgenommen, aber bereits veröffentlichte Bilder können möglicherweise bis zur nächsten Veröffentlichung nicht vollständig gelöscht werden.  Wenn du nicht zustimmst, fahre bitte nicht mit der Einsendung fort.';
 
   @override
   String get consentExplanation2 =>
