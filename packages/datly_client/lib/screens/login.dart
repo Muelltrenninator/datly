@@ -2,14 +2,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:markdown_widget/markdown_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/app_localizations_en.dart';
 import '../widgets/title_bar.dart';
+import 'terms.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -155,8 +154,12 @@ class _LoginScreenState extends State<LoginScreen>
                         text: AppLocalizations.of(context).loginNewHereRequest,
                         style: TextStyle(fontWeight: FontWeight.w600),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () =>
-                              launchUrl(Uri.parse("mailto:me@jhubi1.com")),
+                          ..onTap = () => launchUrl(
+                            Uri.parse(
+                              // "mailto:me@jhubi1.com"
+                              "https://docs.google.com/forms/d/e/1FAIpQLScFCNKhmlUcuR6qzyj0fR09a4BOwp4ZGzur9GvR0orLtP0rzg/viewform?usp=dialog",
+                            ),
+                          ),
                       ),
                       TextSpan(text: "\n"),
                       TextSpan(
@@ -199,89 +202,3 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 }
-
-class MarkdownDialog extends StatefulWidget {
-  final Uri origin;
-
-  const MarkdownDialog({super.key, required this.origin});
-
-  @override
-  State<MarkdownDialog> createState() => _MarkdownDialogState();
-}
-
-class _MarkdownDialogState extends State<MarkdownDialog> {
-  String? data;
-  bool error = false;
-
-  @override
-  void initState() {
-    super.initState();
-    http.get(widget.origin).then((response) {
-      if (response.statusCode == 200 && response.body.isNotEmpty) {
-        data = response.body;
-      } else {
-        error = true;
-      }
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      contentPadding: EdgeInsets.symmetric(vertical: 16),
-      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
-      content: AnimatedSize(
-        duration: Durations.medium1,
-        curve: Curves.easeInOutCubicEmphasized,
-        child: !error
-            ? data != null
-                  ? SizedBox(
-                      width: double.infinity,
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 24),
-                          child: MarkdownBlock(
-                            data: data!,
-                            config:
-                                Theme.brightnessOf(context) == Brightness.dark
-                                ? MarkdownConfig.darkConfig
-                                : MarkdownConfig.defaultConfig,
-                          ),
-                        ),
-                      ),
-                    )
-                  : Padding(
-                      padding: EdgeInsets.only(top: 32, bottom: 32),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [CircularProgressIndicator()],
-                      ),
-                    )
-            : Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  "Failed to load document.",
-                  style: DefaultTextStyle.of(
-                    context,
-                  ).style.copyWith(color: ColorScheme.of(context).error),
-                ),
-              ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
-        ),
-      ],
-    );
-  }
-}
-
-Future<void> showMarkdownDialog({
-  required BuildContext context,
-  required Uri origin,
-}) async => showDialog<void>(
-  context: context,
-  builder: (_) => MarkdownDialog(origin: origin),
-);

@@ -60,7 +60,7 @@ class ReverseAuthenticationGuard extends AutoRouteGuard {
   }
 }
 
-final Color themeColor = Color(0xFF9c27b0);
+final Color themeColor = Color(0xff9c27b0);
 ColorScheme get colorSchemeLight => ColorScheme.fromSeed(seedColor: themeColor);
 ColorScheme get colorSchemeDark =>
     ColorScheme.fromSeed(seedColor: themeColor, brightness: Brightness.dark);

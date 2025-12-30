@@ -25,15 +25,13 @@ The data controller for processing carried out via Datly is the maintainer liste
 
 We do **not** collect unrelated personal data (contact lists, device address books, payment data, health or sensitive category data as a matter of design). Do not upload photos that contain sensitive personal data about others unless you have lawful consent.
 
-(These practices reflect GDPR principles such as data minimisation and purpose limitation.) :contentReference[oaicite:0]{index=0}
-
 ## 3. Purpose & legal bases for processing
 
 **Primary purpose:** to store and process images for the development, training, evaluation and improvement of AI/ML models and related research/benchmarks.
 
 **Legal bases (Article 6 GDPR):**
 
-- **Consent (Art. 6(1)(a))** — for processing images you actively upload for training purposes we rely on your explicit informed consent at the time of upload. Consent is freely given, specific and can be withdrawn. :contentReference[oaicite:1]{index=1}  
+- **Consent (Art. 6(1)(a))** — for processing images you actively upload for training purposes we rely on your explicit informed consent at the time of upload. Consent is freely given, specific and can be withdrawn.  
 - **Legitimate interests / contract (Art. 6(1)(f)/(b))** — for account management, fraud prevention, security and maintaining the service we rely on legitimate interests and contract where applicable (e.g., if you opt into optional notifications). We will document any legitimate-interests assessment where required.
 
 If the legal basis for a particular processing step differs, we will make that clear at the point of collection.
@@ -42,7 +40,7 @@ If the legal basis for a particular processing step differs, we will make that c
 
 By uploading an image you grant Datly a **non-exclusive, worldwide, royalty-free, transferable and sublicensable** license to store, reproduce, analyse, transform (including anonymisation/feature extraction), and use the image and any derived data for training, validating, evaluating and improving AI/ML models and for associated research and development. This includes use in internal or external publications or benchmarks in de-identified or aggregated form.
 
-**Important:** We will remove EXIF/embedded metadata before storage. If you request deletion we will delete original files and take steps to exclude them from future training; however, information that has already been irreversibly incorporated into a trained model may not be fully removable. We will make reasonable efforts to prevent further use of deleted images in subsequent training. The legal limits to erasing information already learned by models are described in the GDPR (right to erasure and practical limitations). :contentReference[oaicite:2]{index=2}
+**Important:** We will remove EXIF/embedded metadata before storage. If you request deletion we will delete original files and take steps to exclude them from future training; however, information that has already been irreversibly incorporated into a trained model may not be fully removable. We will make reasonable efforts to prevent further use of deleted images in subsequent training. The legal limits to erasing information already learned by models are described in the GDPR (right to erasure and practical limitations).
 
 ## 5. Retention
 
@@ -56,7 +54,7 @@ These retention periods are chosen to balance model development needs and data m
 
 Under the GDPR you have rights including (where applicable):  
 
-- Right to be informed (this notice), access, rectification, erasure (right to be forgotten), restriction of processing, objection, data portability, and rights related to automated decision-making. We will assist you to exercise these rights and respond within GDPR timeframes. :contentReference[oaicite:3]{index=3}
+- Right to be informed (this notice), access, rectification, erasure (right to be forgotten), restriction of processing, objection, data portability, and rights related to automated decision-making. We will assist you to exercise these rights and respond within GDPR timeframes.
 
 To exercise any right, contact **<me@jhubi1.com>**. We may require reasonable proof of identity before fulfilling requests.
 
@@ -64,7 +62,7 @@ You may also withdraw any consent you gave for image use at any time; withdrawal
 
 ## 7. Data Protection Impact Assessment (DPIA)
 
-Processing personal images to train AI can be a high-risk activity. Where required by the GDPR, Datly will carry out a Data Protection Impact Assessment (DPIA) before or when launching processing operations that are likely to result in a high risk to data subjects (for example large-scale profiling or certain AI uses). You may request summary information about any DPIA we have carried out. :contentReference[oaicite:4]{index=4}
+Processing personal images to train AI can be a high-risk activity. Where required by the GDPR, Datly will carry out a Data Protection Impact Assessment (DPIA) before or when launching processing operations that are likely to result in a high risk to data subjects (for example large-scale profiling or certain AI uses). You may request summary information about any DPIA we have carried out.
 
 ## 8. Security
 
@@ -76,7 +74,7 @@ Data may be processed or stored outside the EU/EEA (e.g., by hosting or ML servi
 
 ## 10. Sharing & subprocessors
 
-We may use subprocessors (hosting providers, ML platforms, security services) to store and process data. Subprocessors are contractually required to process data only on our instructions and to implement appropriate safeguards. We may share de-identified or aggregated research outputs or models; usernames and email addresses will **not** be included in training datasets or shared model artifacts.
+We use trusted subprocessors to store and process data. Specifically, our primary hosting provider is **Hetzner Online GmbH**, located in **Nuremberg, Germany (eu-central)**, where we utilize a private shared server environment. Subprocessors are contractually required to process data only on our instructions and to implement appropriate safeguards. We may share de-identified or aggregated research outputs or models; usernames and email addresses will **not** be included in training datasets or shared model artifacts.
 
 ## 11. Minors
 
@@ -84,7 +82,7 @@ Datly is **not intended** for children. By using the service you represent that 
 
 ## 12. Complaints & supervisory authority
 
-If you have an unresolved complaint about our processing you may contact your national data protection authority. In Germany you may contact the relevant state supervisory authority or the Federal Commissioner for Data Protection and Freedom of Information (BfDI) for federal matters. Filing a complaint with a supervisory authority is free of charge. :contentReference[oaicite:5]{index=5}
+If you have an unresolved complaint about our processing you may contact your national data protection authority. In Germany you may contact the relevant state supervisory authority or the Federal Commissioner for Data Protection and Freedom of Information (BfDI) for federal matters. Filing a complaint with a supervisory authority is free of charge.
 
 ## 13. Changes to this Privacy Policy
 

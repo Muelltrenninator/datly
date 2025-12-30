@@ -15,7 +15,7 @@ import '../main.dart';
 import '../registry.dart';
 import '../widgets/radio_dialog.dart';
 import '../widgets/status_modal.dart';
-import 'login.dart';
+import 'terms.dart';
 
 @RoutePage()
 class UploadPage extends StatefulWidget {
