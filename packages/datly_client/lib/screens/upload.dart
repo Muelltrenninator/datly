@@ -500,6 +500,7 @@ class _UploadConsentModalState extends State<UploadConsentModal> {
     prefs.setBool("uploadConsentAge", checkAge);
 
     final appLocalizations = AppLocalizations.of(context);
+    final username = AuthManager.instance.authenticatedUser!.username;
     final snapshot =
         """
 # ${appLocalizations.consentTitle}
@@ -514,13 +515,15 @@ ${appLocalizations.consentExplanation2}
 
 ---
 
-- ${appLocalizations.consentSignature}: ${signatureController.text.trim()} (${appLocalizations.consentSignatureLegal(AuthManager.instance.authenticatedUser!.username)})
+- ${appLocalizations.consentSignature}: ${signatureController.text.trim()}
+  - (${appLocalizations.consentSignatureLegal(username)})
 - [${checkAge ? "x" : " "}] ${appLocalizations.consentAge}
 ${!checkAge ? """
 
 ---
 
-- ${appLocalizations.consentSignatureParental}: ${parentalSignatureController.text.trim()} (${appLocalizations.consentSignatureLegal(AuthManager.instance.authenticatedUser!.username)})
+- ${appLocalizations.consentSignatureParental}: ${parentalSignatureController.text.trim()}
+  - (${appLocalizations.consentSignatureLegal(username)})
 - [${checkParental ? "x" : " "}] ${appLocalizations.consentParental}
 """ : ""}
 ---
