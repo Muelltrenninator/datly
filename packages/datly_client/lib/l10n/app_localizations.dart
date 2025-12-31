@@ -98,6 +98,12 @@ abstract class AppLocalizations {
     Locale('de'),
   ];
 
+  /// A quotation format that wraps the content in quotation marks.
+  ///
+  /// In en, this message translates to:
+  /// **'“{content}”'**
+  String quote(String content);
+
   /// Button text to retry accessing the camera.
   ///
   /// In en, this message translates to:
@@ -113,7 +119,7 @@ abstract class AppLocalizations {
   /// Invitation message sent to users to invite them to a project on Datly.
   ///
   /// In en, this message translates to:
-  /// **'Hello {username} 👋\nYou\'re invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}\n- {projectCount, plural, =0{You\'ve not been added to any project yet} other{You\'ve been added to: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!'**
+  /// **'Hello {username} 👋\nYou\'re invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}{projectCount, plural, =0{} other{\n- Member of: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!'**
   String invite(
     String username,
     String host,

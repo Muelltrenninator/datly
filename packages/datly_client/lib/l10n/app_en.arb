@@ -1,5 +1,15 @@
 {
     "@@locale": "en",
+    "quote": "“{content}”",
+    "@quote": {
+        "description": "A quotation format that wraps the content in quotation marks.",
+        "context": "global",
+        "placeholders": {
+            "content": {
+                "type": "String"
+            }
+        }
+    },
     "retry": "Retry",
     "@retry": {
         "description": "Button text to retry accessing the camera.",
@@ -10,7 +20,7 @@
         "description": "Button text to delete an item.",
         "context": "global"
     },
-    "invite": "Hello {username} 👋\nYou're invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}\n- {projectCount, plural, =0{You've not been added to any project yet} other{You've been added to: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!",
+    "invite": "Hello {username} 👋\nYou're invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}{projectCount, plural, =0{} other{\n- Member of: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!",
     "@invite": {
         "description": "Invitation message sent to users to invite them to a project on Datly.",
         "context": "global",

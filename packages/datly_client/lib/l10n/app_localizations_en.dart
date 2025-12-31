@@ -9,6 +9,11 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String quote(String content) {
+    return '“$content”';
+  }
+
+  @override
   String get retry => 'Retry';
 
   @override
@@ -25,10 +30,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       projectCount,
       locale: localeName,
-      other: 'You\'ve been added to: $projects',
-      zero: 'You\'ve not been added to any project yet',
+      other: '\n- Member of: $projects',
+      zero: '',
     );
-    return 'Hello $username 👋\nYou\'re invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- $host\n- $_temp0\n- Login code: `$code` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!';
+    return 'Hello $username 👋\nYou\'re invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- $host$_temp0\n- Login code: `$code` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!';
   }
 
   @override

@@ -899,6 +899,7 @@ Future<void> showLoginCodeDialog(
               MenuItemButton(
                 onPressed: user != null
                     ? () async {
+                        final appLocalizations = AppLocalizations.of(context);
                         final projectNames = user.projects.isNotEmpty
                             ? (await Future.wait(
                                     user.projects.map(
@@ -906,13 +907,13 @@ Future<void> showLoginCodeDialog(
                                     ),
                                   ))
                                   .whereType<ProjectData>()
-                                  .map((p) => p.title)
+                                  .map((p) => appLocalizations.quote(p.title))
                                   .join(", ")
                             : "";
                         if (!context.mounted) return;
                         Clipboard.setData(
                           ClipboardData(
-                            text: AppLocalizations.of(context).invite(
+                            text: appLocalizations.invite(
                               user.username,
                               Uri.base.origin,
                               user.projects.length,

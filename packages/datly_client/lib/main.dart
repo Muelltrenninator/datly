@@ -237,7 +237,7 @@ extension on ThemeData {
 ///
 /// The current implementation is based on the guidelines from Material You
 /// Expressive design documentation.
-/// 
+///
 /// The sizes can be compared using the standard comparison operators (<, >,
 /// <=,  >=). This is useful for adapting layouts based on the current window size
 /// class.
