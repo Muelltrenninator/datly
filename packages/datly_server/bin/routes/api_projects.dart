@@ -320,7 +320,10 @@ void define(Router router) {
 
         final signature = req.url.queryParameters["signature"];
         final signatureParental = req.url.queryParameters["signatureParental"];
-        final signatureSnapshot = req.url.queryParameters["signatureSnapshot"];
+        final signatureSnapshot = req.url.queryParameters["signatureSnapshot"]
+            ?.split("")
+            .take(4096) // length limit
+            .join();
         final consentVersion = int.tryParse(
           req.url.queryParameters["consentVersion"] ?? "",
         );
@@ -332,6 +335,13 @@ void define(Router router) {
             consentVersion < 1) {
           return Response.badRequest(
             body: jsonEncode({"error": "Missing signature parameters"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+        if (signature.length > 128 ||
+            (signatureParental != null && signatureParental.length > 128)) {
+          return Response.badRequest(
+            body: jsonEncode({"error": "Signature parameters too long"}),
             headers: {"Content-Type": "application/json"},
           );
         }
