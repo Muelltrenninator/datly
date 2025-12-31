@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-31T16:38:14
+/// Last generated: 2025-12-31T18:05:23
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -413,6 +413,15 @@ final class GitBaker {
         hasUntrackedChanges: false,
       ),
     ),
+    WorkspaceEntryChange._(
+      "packages/datly_client/lib/screens/upload.dart",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
   ]);
 
   /// All branches in the repository.
@@ -423,7 +432,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 28,
+      revision: 29,
       ahead: 0,
       behind: 0,
       commits: [
@@ -455,6 +464,7 @@ final class GitBaker {
         "09e4ec2eeadc6a1ea048170bcdc09b12350b0289",
         "d16adcb5c53e86203fa38b3f699fc4711c37034c",
         "398c6eb92bb063627b82380da5e96b941ae5c63b",
+        "d1209019210e4b02e9cc443818a08f27e9f75790",
       ],
     ),
   ];
@@ -726,6 +736,15 @@ final class GitBaker {
       hashAbbreviated: "398c6eb",
       message: "Mobile improvements 7",
       date: DateTime.parse("2025-12-31T15:35:16.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "d1209019210e4b02e9cc443818a08f27e9f75790",
+      hashAbbreviated: "d120901",
+      message: "Mobile improvements 8",
+      date: DateTime.parse("2025-12-31T15:48:38.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",
