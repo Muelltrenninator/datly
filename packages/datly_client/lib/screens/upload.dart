@@ -188,7 +188,6 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
           context: context,
           isScrollControlled: true,
           useRootNavigator: true,
-          useSafeArea: true,
           builder: (_) => UploadConsentModal(),
         );
     if (signature == null) {
@@ -588,7 +587,7 @@ ${!checkAge ? """
         padding: EdgeInsets.only(
           left: 16,
           right: 16,
-          // bottom: MediaQuery.viewInsetsOf(context).bottom,
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
         children: [
           SizedBox(height: 16),
