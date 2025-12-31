@@ -588,7 +588,7 @@ ${!checkAge ? """
         padding: EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
+          // bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
         children: [
           SizedBox(height: 16),

@@ -371,7 +371,12 @@ void define(Router router) {
             headers: {"Content-Type": "application/json"},
           );
         }
+
         image.exif.clear();
+        image.exif.imageIfd
+          ..software = "Datly"
+          ..copyright =
+              "(c) ${DateTime.now().toUtc().year} ${auth.user.username}";
 
         if (image.width != 224 || image.height != 224) {
           final size = image.width < image.height ? image.width : image.height;
