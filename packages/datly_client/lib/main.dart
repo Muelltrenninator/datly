@@ -184,6 +184,7 @@ class _MainScreenState extends State<MainScreen> {
     child: Actions(
       actions: {ImmersiveModeIntent: ImmersiveModeAction(_immersiveMode)},
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: TitleBar(
           backgroundColor: _immersiveMode.value ? Colors.transparent : null,
         ),

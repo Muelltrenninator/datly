@@ -47,6 +47,11 @@
             }
         }
     },
+    "loginError": "Server unreachable. Please check your internet connection.",
+    "@loginError": {
+        "description": "Error message shown when the server cannot be reached during login.",
+        "context": "login"
+    },
     "loginUnknown": "Unknown login code.",
     "@loginUnknown": {
         "description": "Error message shown when the provided login code is not recognized.",

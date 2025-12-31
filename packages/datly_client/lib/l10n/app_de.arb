@@ -4,6 +4,7 @@
     "retry": "Erneut Versuchen",
     "delete": "Löschen",
     "invite":"Hallo {username} 👋\nDu bist eingeladen, an einem Crowdsourcing teilzunehmen! Logg dich gleich ein, ein Account wurde schon für dich erstellt:\n\n- {host}{projectCount, plural, =0{} other{\n- Mitglied von: {projects}}}\n- Logincode: `{code}` (NICHT TEILEN!)\n\nHilf uns unser Ziel zu verwirklichen. Man sieht sich dort!",
+    "loginError": "Server nicht erreichbar. Bitte überprüfe deine Internetverbindung.",
     "loginUnknown": "Unbekannter Logincode.",
     "loginCodeLabel": "Logincode",
     "loginNewHere": "Neu hier?",

@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/app_localizations.dart';
-import '../l10n/app_localizations_en.dart';
 import '../widgets/title_bar.dart';
 import 'terms.dart';
 
@@ -62,13 +61,16 @@ class _LoginScreenState extends State<LoginScreen>
     if (mounted) setState(() {});
 
     await AuthManager.instance.fetchAuthenticatedUser(token: token);
+    if (!mounted) return;
+
+    final appLocalizations = AppLocalizations.of(context);
 
     submitLoading = false;
-    submitErrorText = mounted
-        ? AppLocalizations.of(context).loginUnknown
-        : AppLocalizationsEn().loginUnknown;
+    submitErrorText = AuthManager.instance.wasLastFetchNetworkError
+        ? appLocalizations.loginError
+        : appLocalizations.loginUnknown;
     disallowedTokens.add(token);
-    if (mounted) setState(() {});
+    setState(() {});
 
     Future.delayed(Duration(seconds: 3)).then((_) {
       disallowedTokens.remove(token);
@@ -122,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen>
                         border: OutlineInputBorder(),
                         labelText: AppLocalizations.of(context).loginCodeLabel,
                         errorText: submitErrorText,
+                        errorMaxLines: 3,
                         suffixIcon: Padding(
                           padding: const EdgeInsets.only(right: 4),
                           child: IconButton(

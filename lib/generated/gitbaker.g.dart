@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-31T14:11:55
+/// Last generated: 2025-12-31T14:58:36
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 22,
+      revision: 23,
       ahead: 0,
       behind: 0,
       commits: [
@@ -449,6 +449,7 @@ final class GitBaker {
         "b80463dc1d94a4c12147e79a21f03db33149a3c5",
         "ca08c2130f30729532369962559b2dd021cd308c",
         "f99ae8a663113e3f833beafc22aa1780f8ece59b",
+        "41864659a438224a20f15e460d05564d2d0e3f63",
       ],
     ),
   ];
@@ -666,6 +667,15 @@ final class GitBaker {
       hashAbbreviated: "f99ae8a",
       message: "Mobile improvements 3, localization improvements",
       date: DateTime.parse("2025-12-31T13:11:14.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "41864659a438224a20f15e460d05564d2d0e3f63",
+      hashAbbreviated: "4186465",
+      message: "Reverted breaking from f99aae8a on UploadPage",
+      date: DateTime.parse("2025-12-31T13:58:03.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

@@ -267,53 +267,48 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final windowSizeClass = WindowSizeClass.of(context);
-    final image = SizedBox(
-      width: 224,
-      height: 224,
-      child: widget.data.assetUri() != null
-          ? FadeInImage.memoryNetwork(
-              placeholder: blurHashImage,
-              image: widget.data.assetUri().toString(),
-              fadeInDuration: Duration(milliseconds: 1),
-              fadeOutDuration: Duration(milliseconds: 1),
-              imageErrorBuilder: (_, _, _) => SizedBox(
-                height: 224,
-                width: 224,
-                child: Stack(
-                  children: [
-                    SizedBox.expand(
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Image.memory(
-                          blurHashImage,
-                          width: 64,
-                          height: 64,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: double.infinity,
-                      width: double.infinity,
-                      color: colorScheme.error.withAlpha(128),
-                    ),
-                    Center(
-                      child: Icon(
-                        Icons.broken_image_outlined,
-                        color: colorScheme.onError,
-                        size: 48,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              width: 224,
+
+    var image = widget.data.assetUri() != null
+        ? FadeInImage.memoryNetwork(
+            placeholder: blurHashImage,
+            image: widget.data.assetUri().toString(),
+            fadeInDuration: Duration(milliseconds: 1),
+            fadeOutDuration: Duration(milliseconds: 1),
+            imageErrorBuilder: (_, _, _) => SizedBox(
               height: 224,
-              fit: BoxFit.cover,
-            )
-          : FittedBox(
-              child: Image.memory(blurHashImage, width: 64, height: 64),
+              width: 224,
+              child: Stack(
+                children: [
+                  SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: Image.memory(blurHashImage, width: 64, height: 64),
+                    ),
+                  ),
+                  Container(
+                    height: double.infinity,
+                    width: double.infinity,
+                    color: colorScheme.error.withAlpha(128),
+                  ),
+                  Center(
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      color: colorScheme.onError,
+                      size: 48,
+                    ),
+                  ),
+                ],
+              ),
             ),
-    );
+            width: 224,
+            height: 224,
+            fit: BoxFit.cover,
+          )
+        : FittedBox(child: Image.memory(blurHashImage, width: 64, height: 64));
+    image = AuthManager.instance.authenticatedUserIsAdmin
+        ? SizedBox(width: 224, height: 224, child: image)
+        : AspectRatio(aspectRatio: 1 / 1, child: image);
+
     final card = SizedBox(
       width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
       child: Card.filled(

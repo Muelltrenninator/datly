@@ -37,6 +37,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get loginError =>
+      'Server nicht erreichbar. Bitte überprüfe deine Internetverbindung.';
+
+  @override
   String get loginUnknown => 'Unbekannter Logincode.';
 
   @override

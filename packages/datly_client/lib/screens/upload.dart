@@ -178,14 +178,31 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
   }
 
   void submit() async {
+    final imageRaw = await controller!.takePicture();
+    await controller!.pausePreview();
+    var image = img.decodeImage(await imageRaw.readAsBytes())!;
+    if (!mounted) return;
+
+    UploadConsentResult? signature =
+        await showModalBottomSheet<UploadConsentResult>(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          useSafeArea: true,
+          builder: (_) => UploadConsentModal(),
+        );
+    if (signature == null) {
+      await controller!.resumePreview();
+      return;
+    }
+    if (!mounted) return;
+
     final completer = Completer<void>();
     http.Response? response;
-    UploadConsentResult? signature;
     showStatusModal(
       context: context,
       completer: completer,
       failureDetailsGenerator: () {
-        if (signature == null) return "Upload cancelled by user.";
         try {
           if (jsonDecode(response!.body) case {"error": String errorMessage}) {
             return errorMessage;
@@ -195,24 +212,6 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
             .trim();
       },
     );
-
-    final imageRaw = await controller!.takePicture();
-    await controller!.pausePreview();
-    var image = img.decodeImage(await imageRaw.readAsBytes())!;
-    if (!mounted) return;
-
-    signature = await showModalBottomSheet<UploadConsentResult>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      useSafeArea: true,
-      builder: (_) => UploadConsentModal(),
-    );
-    if (signature == null) {
-      completer.completeError("Upload cancelled by user");
-      await controller!.resumePreview();
-      return;
-    }
 
     final project = await ProjectRegistry.instance.get(projects[projectIndex!]);
     response = await AuthManager.instance.fetch(
@@ -548,9 +547,6 @@ ${!checkAge ? """
           contentPadding: EdgeInsetsDirectional.symmetric(horizontal: 16),
           title: TextField(
             controller: controller,
-            autofocus: controller == signatureController
-                ? checkExplanation && checkPolicy
-                : false,
             autofillHints: [AutofillHints.name],
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.draw),

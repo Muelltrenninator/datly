@@ -128,6 +128,12 @@ abstract class AppLocalizations {
     String code,
   );
 
+  /// Error message shown when the server cannot be reached during login.
+  ///
+  /// In en, this message translates to:
+  /// **'Server unreachable. Please check your internet connection.'**
+  String get loginError;
+
   /// Error message shown when the provided login code is not recognized.
   ///
   /// In en, this message translates to:

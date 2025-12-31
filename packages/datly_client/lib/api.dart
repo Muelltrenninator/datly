@@ -68,13 +68,16 @@ class AuthManager extends ChangeNotifier {
   String? get authToken => prefs.getString("token");
   final http.Client client = http.Client();
 
+  bool _wasLastFetchNetworkError = false;
+  bool get wasLastFetchNetworkError => _wasLastFetchNetworkError;
+
   Future<http.Response?> fetch(
     http.BaseRequest request, {
     String? token,
   }) async {
     request = fetchPrepare(request, token: token);
 
-    http.Response? response;
+    http.Response response;
     try {
       final streamedResponse = await client
           .send(request)
@@ -82,14 +85,17 @@ class AuthManager extends ChangeNotifier {
       response = await http.Response.fromStream(streamedResponse).onError(
         (error, stackTrace) => Error.throwWithStackTrace(error!, stackTrace),
       );
-    } catch (_) {}
+    } catch (_) {
+      _wasLastFetchNetworkError = true;
+      return null;
+    }
+    _wasLastFetchNetworkError = false;
 
-    if (response?.statusCode == 401) {
+    if (response.statusCode == 401) {
       final valueBefore = _authenticatedUser;
       _authenticatedUser = null;
       prefs.remove("token");
       if (valueBefore != null) notifyListeners();
-      return null;
     }
 
     return response;

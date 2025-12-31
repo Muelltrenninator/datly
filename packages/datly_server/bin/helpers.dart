@@ -13,8 +13,7 @@ String generateCode() => List.generate(
 ).join();
 
 File assetFile(String assetId, String assetMimeType) {
-  final extension =
-      extensionFromMime(assetMimeType) ?? "application/octet-stream";
+  final extension = extensionFromMime(assetMimeType) ?? "png"; // fallback
   return File("${assetsDirectory.path}/$assetId.$extension");
 }
 
@@ -30,7 +29,7 @@ String? identifierFromRequest(Request request) {
       ?.split("=")
       .last;
   final ip =
-      (request.context['shelf.io.connection_info'] as HttpConnectionInfo?)
+      (request.context["shelf.io.connection_info"] as HttpConnectionInfo?)
           ?.remoteAddress
           .address;
   return xForwarded ?? forwarded ?? ip;
