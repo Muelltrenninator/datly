@@ -584,11 +584,7 @@ ${!checkAge ? """
       builder: (_, controller) => ListView(
         controller: controller,
         shrinkWrap: true,
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
+        padding: EdgeInsets.only(left: 16, right: 16),
         children: [
           SizedBox(height: 16),
           ListTile(
