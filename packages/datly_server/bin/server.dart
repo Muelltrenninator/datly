@@ -40,12 +40,11 @@ Future<Response> fileHandler(Request req) async {
   var file = File("public/$path");
   if (!(await file.exists())) file = File("public/index.html");
 
-  late final Uint8List contents;
+  late final Object contents;
   if (file.path == "public/index.html") {
-    contents = Uint8List.fromList(
-      (await file.readAsString())
-          .replaceAll("{{CANONICAL}}", req.url.replace(path: "").toString())
-          .codeUnits,
+    contents = (await file.readAsString()).replaceAll(
+      "{{CANONICAL}}",
+      "https://datly.con.bz",
     );
   } else {
     contents = await file.readAsBytes();

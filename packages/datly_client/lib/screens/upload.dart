@@ -147,7 +147,10 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     );
     if (selection == null) return;
 
-    cameraIndex = availableCameras.indexOf(selection);
+    final tmpIndex = availableCameras.indexOf(selection);
+    if (tmpIndex == cameraIndex) return;
+
+    cameraIndex = tmpIndex;
     prefs.setInt("camera", cameraIndex);
     controller?.dispose();
     controller = null;
@@ -213,11 +216,16 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     );
 
     final project = await ProjectRegistry.instance.get(projects[projectIndex!]);
+    if (project == null) {
+      completer.completeError("Project not found");
+      return;
+    }
+
     response = await AuthManager.instance.fetch(
       http.MultipartRequest(
           "POST",
           Uri.parse(
-            "${ApiManager.baseUri}/projects/${project!.id}/submissions",
+            "${ApiManager.baseUri}/projects/${project.id}/submissions",
           ).replace(
             queryParameters: {
               "signature": signature.signature,

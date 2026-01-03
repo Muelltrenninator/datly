@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2025-12-31T18:05:23
+/// Last generated: 2026-01-03T02:20:19
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -422,6 +422,60 @@ final class GitBaker {
         hasUntrackedChanges: false,
       ),
     ),
+    WorkspaceEntryChange._(
+      "packages/datly_client/lib/widgets/title_bar.dart",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
+    WorkspaceEntryChange._(
+      "packages/datly_client/pubspec.yaml",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
+    WorkspaceEntryChange._(
+      "packages/datly_client/web/index.html",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
+    WorkspaceEntryChange._(
+      "packages/datly_server/bin/helpers.dart",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
+    WorkspaceEntryChange._(
+      "packages/datly_server/bin/server.dart",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
+    WorkspaceEntryChange._(
+      "pubspec.yaml",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
   ]);
 
   /// All branches in the repository.
@@ -432,7 +486,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 29,
+      revision: 30,
       ahead: 0,
       behind: 0,
       commits: [
@@ -465,6 +519,7 @@ final class GitBaker {
         "d16adcb5c53e86203fa38b3f699fc4711c37034c",
         "398c6eb92bb063627b82380da5e96b941ae5c63b",
         "d1209019210e4b02e9cc443818a08f27e9f75790",
+        "0d18024683d5ceddd2f981ce6dbbf60187b5230b",
       ],
     ),
   ];
@@ -745,6 +800,15 @@ final class GitBaker {
       hashAbbreviated: "d120901",
       message: "Mobile improvements 8",
       date: DateTime.parse("2025-12-31T15:48:38.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "0d18024683d5ceddd2f981ce6dbbf60187b5230b",
+      hashAbbreviated: "0d18024",
+      message: "Mobile improvements 9",
+      date: DateTime.parse("2025-12-31T17:14:52.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

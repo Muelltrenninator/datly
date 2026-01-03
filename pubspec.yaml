@@ -1,7 +1,7 @@
 name: datly
 description: A lightweight, self-hosted data collection tool intended for training data.
 publish_to: none
-repository: https://github.com/JHubi1/datly
+repository: https://github.com/Muelltrenninator/datly
 
 environment:
   sdk: ^3.9.2
