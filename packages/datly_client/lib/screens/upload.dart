@@ -359,67 +359,74 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
       ),
     );
 
-    final widget = Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          !error
-              ? controller != null && controller!.value.isInitialized
-                    ? Center(heightFactor: 1.2, child: previewWidget())
-                    : Center(child: CircularProgressIndicator())
-              : noCamera
-              ? Center(child: errorWidget())
-              : Center(child: Icon(Icons.error_outline, size: 48)),
-          projectWidget(),
-        ],
-      ),
-      floatingActionButton: AnimatedSwitcher(
-        duration: Durations.medium1,
-        switchInCurve: Curves.easeInOutCubicEmphasized,
-        switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-        transitionBuilder: (child, animation) => SlideTransition(
-          position: (Tween<Offset>(
-            begin: Offset(0, 1.1),
-            end: Offset(0, 0),
-          )).animate(animation),
-          child: child,
+    final widget = Stack(
+      children: [
+        !error
+            ? controller != null && controller!.value.isInitialized
+                  ? Center(heightFactor: 1.2, child: previewWidget())
+                  : Center(child: CircularProgressIndicator())
+            : noCamera
+            ? Center(child: errorWidget())
+            : Center(child: Icon(Icons.error_outline, size: 48)),
+        projectWidget(),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Transform.translate(
+            offset: Offset(-16, -16),
+            child: AnimatedSwitcher(
+              duration: Durations.medium1,
+              switchInCurve: Curves.easeInOutCubicEmphasized,
+              switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+              transitionBuilder: (child, animation) => SlideTransition(
+                position: (Tween<Offset>(
+                  begin: Offset(0, 1.1),
+                  end: Offset(0, 0),
+                )).animate(animation),
+                child: child,
+              ),
+              child: controller != null
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                          onPressed: switchCamera,
+                          child: AnimatedSwitcher(
+                            duration: Durations.medium1,
+                            switchInCurve: Curves.easeInOutCubicEmphasized,
+                            switchOutCurve:
+                                Curves.easeInOutCubicEmphasized.flipped,
+                            child: Icon(switch (controller!
+                                .description
+                                .lensDirection) {
+                              CameraLensDirection.back => Icons.camera_rear,
+                              CameraLensDirection.front => Icons.camera_front,
+                              CameraLensDirection.external =>
+                                Icons.cameraswitch,
+                            }),
+                          ),
+                        ),
+                        if (projects.isNotEmpty) ...[
+                          SizedBox(height: 4),
+                          FloatingActionButton(
+                            onPressed: projects.isNotEmpty
+                                ? switchProject
+                                : null,
+                            child: Icon(Icons.assignment),
+                          ),
+                          SizedBox(height: 8),
+                          FloatingActionButton.large(
+                            onPressed: projects.isNotEmpty ? submit : null,
+                            child: Icon(Icons.camera),
+                          ),
+                        ],
+                      ],
+                    )
+                  : null,
+            ),
+          ),
         ),
-        child: controller != null
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                    onPressed: switchCamera,
-                    child: AnimatedSwitcher(
-                      duration: Durations.medium1,
-                      switchInCurve: Curves.easeInOutCubicEmphasized,
-                      switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-                      child: Icon(
-                        switch (controller!.description.lensDirection) {
-                          CameraLensDirection.back => Icons.camera_rear,
-                          CameraLensDirection.front => Icons.camera_front,
-                          CameraLensDirection.external => Icons.cameraswitch,
-                        },
-                      ),
-                    ),
-                  ),
-                  if (projects.isNotEmpty) ...[
-                    SizedBox(height: 4),
-                    FloatingActionButton(
-                      onPressed: projects.isNotEmpty ? switchProject : null,
-                      child: Icon(Icons.assignment),
-                    ),
-                    SizedBox(height: 8),
-                    FloatingActionButton.large(
-                      onPressed: projects.isNotEmpty ? submit : null,
-                      child: Icon(Icons.camera),
-                    ),
-                  ],
-                ],
-              )
-            : null,
-      ),
+      ],
     );
     return Shortcuts(
       shortcuts: {

@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-01-03T02:39:46
+/// Last generated: 2026-01-03T22:15:17
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -413,6 +413,24 @@ final class GitBaker {
         hasUntrackedChanges: false,
       ),
     ),
+    WorkspaceEntryChange._(
+      "packages/datly_client/lib/screens/login.dart",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
+    WorkspaceEntryChange._(
+      "packages/datly_client/lib/screens/upload.dart",
+      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      submoduleState: WorkspaceEntrySubmoduleState._(
+        commitChanged: false,
+        hasTrackedChanges: false,
+        hasUntrackedChanges: false,
+      ),
+    ),
   ]);
 
   /// All branches in the repository.
@@ -423,7 +441,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 31,
+      revision: 33,
       ahead: 0,
       behind: 0,
       commits: [
@@ -458,6 +476,8 @@ final class GitBaker {
         "d1209019210e4b02e9cc443818a08f27e9f75790",
         "0d18024683d5ceddd2f981ce6dbbf60187b5230b",
         "dd6881775ed4ab1f9f84a8c9eeceaa810635cddc",
+        "11049c8f13edf0a570b9bfefcf8349e39e6a3e5f",
+        "647adf6b6ff6b67215a54326c10254323f518a41",
       ],
     ),
   ];
@@ -756,6 +776,24 @@ final class GitBaker {
       hashAbbreviated: "dd68817",
       message: "Various changes",
       date: DateTime.parse("2026-01-03T01:38:37.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "11049c8f13edf0a570b9bfefcf8349e39e6a3e5f",
+      hashAbbreviated: "11049c8",
+      message: "Fixed user and project data updating on submission",
+      date: DateTime.parse("2026-01-03T19:10:20.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "647adf6b6ff6b67215a54326c10254323f518a41",
+      hashAbbreviated: "647adf6",
+      message: "Limit login codes for better readability",
+      date: DateTime.parse("2026-01-03T19:20:33.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

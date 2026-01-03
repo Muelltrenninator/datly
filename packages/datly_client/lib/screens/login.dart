@@ -28,7 +28,8 @@ class _LoginScreenState extends State<LoginScreen>
   void initState() {
     super.initState();
     tokenController.addListener(() {
-      if (!disallowedTokens.contains(tokenController.text)) {
+      if (!AuthManager.instance.wasLastFetchNetworkError &&
+          !disallowedTokens.contains(tokenController.text)) {
         submitErrorText = null;
       }
       if (mounted) setState(() {});
@@ -37,6 +38,13 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
       duration: Durations.extralong4,
     )..forward();
+
+    if (AuthManager.instance.wasLastFetchNetworkError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        submitErrorText = AppLocalizations.of(context).loginError;
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   @override
