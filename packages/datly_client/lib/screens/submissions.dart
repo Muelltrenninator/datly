@@ -246,12 +246,19 @@ class SubmissionWidget extends StatefulWidget {
 }
 
 class _SubmissionWidgetState extends State<SubmissionWidget> {
+  SubmissionData? _data;
+
   ProjectData? project;
   UserData? user;
 
   @override
   void initState() {
     super.initState();
+    fetch();
+  }
+
+  void fetch() {
+    _data = widget.data;
     ProjectRegistry.instance.get(widget.data.projectId).then((projectData) {
       project = projectData;
       if (mounted) setState(() {});
@@ -264,6 +271,8 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.data != _data) fetch();
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final windowSizeClass = WindowSizeClass.of(context);
