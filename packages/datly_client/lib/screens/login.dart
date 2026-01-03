@@ -110,14 +110,15 @@ class _LoginScreenState extends State<LoginScreen>
                       autocorrect: false,
                       autofillHints: [],
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp("[0-9A-Za-z]"),
-                        ),
                         TextInputFormatter.withFunction(
                           (oldValue, newValue) => newValue.copyWith(
                             text: newValue.text.toUpperCase(),
                           ),
                         ),
+                        FilteringTextInputFormatter.allow(RegExp("[0-9A-Z]")),
+                        // FilteringTextInputFormatter.allow(
+                        //   RegExp("[0123456789ABCDEFGHJKLMNPQRSTUVWXY]"),
+                        // ), // TODO: migrate to server specification later
                       ],
                       maxLength: 8,
                       decoration: InputDecoration(
