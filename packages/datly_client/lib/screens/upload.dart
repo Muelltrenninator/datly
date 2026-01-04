@@ -186,13 +186,10 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     var image = img.decodeImage(await imageRaw.readAsBytes())!;
     if (!mounted) return;
 
-    UploadConsentResult? signature =
-        await showModalBottomSheet<UploadConsentResult>(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (_) => UploadConsentModal(),
-        );
+    UploadConsentResult? signature = await showDialog<UploadConsentResult>(
+      context: context,
+      builder: (_) => UploadConsentModal(),
+    );
     if (signature == null) {
       await controller!.resumePreview();
       return;
@@ -396,14 +393,14 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                             switchInCurve: Curves.easeInOutCubicEmphasized,
                             switchOutCurve:
                                 Curves.easeInOutCubicEmphasized.flipped,
-                            child: Icon(switch (controller!
-                                .description
-                                .lensDirection) {
-                              CameraLensDirection.back => Icons.camera_rear,
-                              CameraLensDirection.front => Icons.camera_front,
-                              CameraLensDirection.external =>
-                                Icons.cameraswitch,
-                            }),
+                            child: Icon(
+                              switch (controller!.description.lensDirection) {
+                                CameraLensDirection.back => Icons.camera_rear,
+                                CameraLensDirection.front => Icons.camera_front,
+                                CameraLensDirection.external =>
+                                  Icons.cameraswitch,
+                              },
+                            ),
                           ),
                         ),
                         if (projects.isNotEmpty) ...[
@@ -559,6 +556,7 @@ ${!checkAge ? """
   Widget build(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context);
     Widget divider = Padding(padding: EdgeInsets.all(8), child: Divider());
+
     Widget signatureField(TextEditingController controller, String label) =>
         ListTile(
           contentPadding: EdgeInsetsDirectional.symmetric(horizontal: 16),
@@ -591,167 +589,169 @@ ${!checkAge ? """
       controlAffinity: ListTileControlAffinity.leading,
       visualDensity: VisualDensity.compact,
     );
-    return DraggableScrollableSheet(
-      minChildSize: 0.6,
-      maxChildSize: 1.0,
-      initialChildSize: 0.8,
-      expand: false,
-      builder: (_, controller) => Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: ListView(
-          controller: controller,
-          shrinkWrap: true,
-          children: [
-            SizedBox(height: 16),
-            ListTile(
-              title: Text(
-                appLocalizations.consentTitle,
-                style: TextTheme.of(context).headlineSmall,
-              ),
-              subtitle: Text(
-                appLocalizations.consentVersion(
-                  consentVersion.toString(),
-                  consentVersionDate,
-                ),
-                style: TextTheme.of(context).bodyMedium,
-              ),
-            ),
-            ListTile(
-              title: Text(
-                appLocalizations.consentExplanation1,
-                textAlign: TextAlign.justify,
-              ),
-              dense: true,
-            ),
-            ListTile(
-              title: Text(
-                appLocalizations.consentExplanation2,
-                textAlign: TextAlign.justify,
-              ),
-              dense: true,
-            ),
-            signatureCheckbox(
-              Text(appLocalizations.consentCheckbox),
-              checkExplanation,
-              (value) {
-                checkExplanation = value ?? false;
-                if (mounted) setState(() {});
-              },
-            ),
-            signatureCheckbox(
-              Text.rich(
-                TextSpan(
-                  children: () {
-                    final text = appLocalizations.consentPolicy(
-                      "{privacyPolicy}",
-                      "{termsOfService}",
-                    );
-                    final matches = RegExp(
-                      r"(\{privacyPolicy\})|(\{termsOfService\})",
-                    ).allMatches(text);
 
-                    final children = <InlineSpan>[];
-                    var cursor = 0;
-                    for (final match in matches) {
-                      if (match.start > cursor) {
-                        children.add(
-                          TextSpan(text: text.substring(cursor, match.start)),
-                        );
-                      }
-                      final isPrivacy = match.group(0) == "{privacyPolicy}";
-                      children.add(
-                        TextSpan(
-                          text: isPrivacy
-                              ? appLocalizations.loginPrivacyPolicy
-                              : appLocalizations.loginTermsOfService,
-                          style: TextStyle(
-                            color: ColorScheme.of(context).primary,
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => showMarkdownDialog(
-                              context: context,
-                              origin: Uri.parse(
-                                "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
-                              ),
-                            ),
-                        ),
-                      );
-                      cursor = match.end;
-                    }
-                    if (cursor < text.length) {
-                      children.add(TextSpan(text: text.substring(cursor)));
-                    }
-                    return children;
-                  }(),
-                ),
-              ),
-              checkPolicy,
-              (value) {
-                checkPolicy = value ?? false;
-                if (mounted) setState(() {});
-              },
+    final widget = ListView(
+      shrinkWrap: true,
+      padding: EdgeInsets.only(left: 16, right: 16),
+      children: [
+        SizedBox(height: 16),
+        ListTile(
+          title: Text(
+            appLocalizations.consentTitle,
+            style: TextTheme.of(context).headlineSmall,
+          ),
+          subtitle: Text(
+            appLocalizations.consentVersion(
+              consentVersion.toString(),
+              consentVersionDate,
             ),
-            divider,
-            signatureField(
-              signatureController,
-              appLocalizations.consentSignature,
-            ),
-            signatureCheckbox(Text(appLocalizations.consentAge), checkAge, (
-              value,
-            ) {
-              checkAge = value ?? false;
-              if (mounted) setState(() {});
-            }),
-            AnimatedSwitcher(
-              duration: Durations.medium1,
-              switchInCurve: Curves.easeInOutCubicEmphasized,
-              switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-              transitionBuilder: (child, animation) => SizeTransition(
-                sizeFactor: animation,
-                axisAlignment: -1,
-                child: child,
-              ),
-              child: checkAge
-                  ? null
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        divider,
-                        signatureField(
-                          parentalSignatureController,
-                          appLocalizations.consentSignatureParental,
-                        ),
-                        signatureCheckbox(
-                          Text(appLocalizations.consentParental),
-                          checkParental,
-                          (value) {
-                            checkParental = value ?? false;
-                            if (mounted) setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-            ),
-            divider,
-            ListTile(
-              title: Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.icon(
-                  onPressed: submitEnabled() ? submit : null,
-                  icon: Icon(Icons.check),
-                  label: Text(appLocalizations.consentButton),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-          ],
+            style: TextTheme.of(context).bodyMedium,
+          ),
         ),
-      ),
+        ListTile(
+          title: Text(
+            appLocalizations.consentExplanation1,
+            textAlign: TextAlign.justify,
+          ),
+          dense: true,
+        ),
+        ListTile(
+          title: Text(
+            appLocalizations.consentExplanation2,
+            textAlign: TextAlign.justify,
+          ),
+          dense: true,
+        ),
+        signatureCheckbox(
+          Text(appLocalizations.consentCheckbox),
+          checkExplanation,
+          (value) {
+            checkExplanation = value ?? false;
+            if (mounted) setState(() {});
+          },
+        ),
+        signatureCheckbox(
+          Text.rich(
+            TextSpan(
+              children: () {
+                final text = appLocalizations.consentPolicy(
+                  "{privacyPolicy}",
+                  "{termsOfService}",
+                );
+                final matches = RegExp(
+                  r"(\{privacyPolicy\})|(\{termsOfService\})",
+                ).allMatches(text);
+
+                final children = <InlineSpan>[];
+                var cursor = 0;
+                for (final match in matches) {
+                  if (match.start > cursor) {
+                    children.add(
+                      TextSpan(text: text.substring(cursor, match.start)),
+                    );
+                  }
+                  final isPrivacy = match.group(0) == "{privacyPolicy}";
+                  children.add(
+                    TextSpan(
+                      text: isPrivacy
+                          ? appLocalizations.loginPrivacyPolicy
+                          : appLocalizations.loginTermsOfService,
+                      style: TextStyle(
+                        color: ColorScheme.of(context).primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => showMarkdownDialog(
+                          context: context,
+                          origin: Uri.parse(
+                            "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
+                          ),
+                        ),
+                    ),
+                  );
+                  cursor = match.end;
+                }
+                if (cursor < text.length) {
+                  children.add(TextSpan(text: text.substring(cursor)));
+                }
+                return children;
+              }(),
+            ),
+          ),
+          checkPolicy,
+          (value) {
+            checkPolicy = value ?? false;
+            if (mounted) setState(() {});
+          },
+        ),
+        divider,
+        signatureField(signatureController, appLocalizations.consentSignature),
+        signatureCheckbox(Text(appLocalizations.consentAge), checkAge, (value) {
+          checkAge = value ?? false;
+          if (mounted) setState(() {});
+        }),
+        AnimatedSwitcher(
+          duration: Durations.medium1,
+          switchInCurve: Curves.easeInOutCubicEmphasized,
+          switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+          transitionBuilder: (child, animation) => SizeTransition(
+            sizeFactor: animation,
+            axisAlignment: -1,
+            child: child,
+          ),
+          child: checkAge
+              ? null
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    divider,
+                    signatureField(
+                      parentalSignatureController,
+                      appLocalizations.consentSignatureParental,
+                    ),
+                    signatureCheckbox(
+                      Text(appLocalizations.consentParental),
+                      checkParental,
+                      (value) {
+                        checkParental = value ?? false;
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+        ),
+        divider,
+        ListTile(
+          title: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  MaterialLocalizations.of(context).cancelButtonLabel,
+                ),
+              ),
+              FilledButton.icon(
+                onPressed: submitEnabled() ? submit : null,
+                icon: Icon(Icons.check),
+                label: Text(appLocalizations.consentButton),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 16),
+      ],
     );
+    return WindowSizeClass.of(context) >= WindowSizeClass.expanded
+        ? Dialog(
+            constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: widget,
+            ),
+          )
+        : Dialog.fullscreen(child: widget);
   }
 }

@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-01-03T22:15:17
+/// Last generated: 2026-01-04T01:11:25
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -406,16 +406,7 @@ final class GitBaker {
   static final List<WorkspaceEntry> workspace = List.unmodifiable([
     WorkspaceEntryChange._(
       "lib/generated/gitbaker.g.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/screens/login.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      status: WorkspaceEntryStatus._fromLetters("M", "M"),
       submoduleState: WorkspaceEntrySubmoduleState._(
         commitChanged: false,
         hasTrackedChanges: false,
@@ -424,7 +415,7 @@ final class GitBaker {
     ),
     WorkspaceEntryChange._(
       "packages/datly_client/lib/screens/upload.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
+      status: WorkspaceEntryStatus._fromLetters("M", "M"),
       submoduleState: WorkspaceEntrySubmoduleState._(
         commitChanged: false,
         hasTrackedChanges: false,
@@ -441,7 +432,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 33,
+      revision: 34,
       ahead: 0,
       behind: 0,
       commits: [
@@ -478,6 +469,7 @@ final class GitBaker {
         "dd6881775ed4ab1f9f84a8c9eeceaa810635cddc",
         "11049c8f13edf0a570b9bfefcf8349e39e6a3e5f",
         "647adf6b6ff6b67215a54326c10254323f518a41",
+        "f31b5c0bac409b1960747096e137c9b39624ab0b",
       ],
     ),
   ];
@@ -794,6 +786,15 @@ final class GitBaker {
       hashAbbreviated: "647adf6",
       message: "Limit login codes for better readability",
       date: DateTime.parse("2026-01-03T19:20:33.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "f31b5c0bac409b1960747096e137c9b39624ab0b",
+      hashAbbreviated: "f31b5c0",
+      message: "Mobile improvements 10",
+      date: DateTime.parse("2026-01-03T21:23:25.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",
