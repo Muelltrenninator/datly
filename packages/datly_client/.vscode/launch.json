@@ -23,5 +23,17 @@
             ],
             "deviceId": "chrome"
         },
+        {
+            "name": "Web [Profile]",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "args": [
+                "--web-browser-flag",
+                "--disable-web-security"
+            ],
+            "deviceId": "chrome",
+            "flutterMode": "profile"
+        }
     ]
 }

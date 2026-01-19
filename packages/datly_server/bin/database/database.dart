@@ -25,14 +25,18 @@ class AppDatabase extends _$AppDatabase {
     isolateSetup: () => open.overrideForAll(() {
       if (Platform.isWindows) {
         try {
-          return DynamicLibrary.open("sqlite/sqlite3.dll");
-        } catch (_) {}
-      } else if (Platform.isLinux) {
-        try {
-          return DynamicLibrary.open("sqlite/sqlite3_arm64.so");
+          return DynamicLibrary.open("sqlite/sqlite3.arm64.windows.dll");
         } catch (_) {
           try {
-            return DynamicLibrary.open("sqlite/sqlite3.so");
+            return DynamicLibrary.open("sqlite/sqlite3.x64.windows.dll");
+          } catch (_) {}
+        }
+      } else if (Platform.isLinux) {
+        try {
+          return DynamicLibrary.open("sqlite/libsqlite3.arm64.linux.so");
+        } catch (_) {
+          try {
+            return DynamicLibrary.open("sqlite/libsqlite3.x64.linux.so");
           } catch (_) {}
         }
       }

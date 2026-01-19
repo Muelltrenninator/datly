@@ -167,17 +167,12 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        final includePendingReviews =
-            req.url.queryParameters["includePendingReviews"] == "true";
-
         final submissions =
             await (db.select(db.submissions)
                   ..where(
                     (s) =>
                         s.projectId.equals(project.id) &
-                        (includePendingReviews
-                            ? const Constant(true)
-                            : s.status.equals(SubmissionStatus.accepted.name)),
+                        s.status.equals(SubmissionStatus.accepted.name),
                   )
                   ..orderBy([
                     (s) => OrderingTerm.desc(s.submittedAt),
@@ -243,6 +238,88 @@ void define(Router router) {
         return Response.ok(
           ZipEncoder().encodeBytes(archive),
           headers: {"Content-Type": "application/zip"},
+        );
+      }, minimumRole: UserRole.admin),
+    )
+    ..get(
+      "/projects/<id>/submissions/attributions", // MARK: [GET] /projects/<id>/submissions/attributions
+      apiAuthWall((req, _) async {
+        if (!pandocAvailable) {
+          return Response(
+            503,
+            body: jsonEncode({
+              "error": "Pandoc is not available on the server",
+            }),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
+        final project =
+            await (db.select(db.projects)..where(
+                  (u) => u.id.equals(int.tryParse(req.params["id"]!) ?? -1),
+                ))
+                .getSingleOrNull();
+        if (project == null) {
+          return Response.notFound(jsonEncode({"error": "Project not found"}));
+        }
+
+        final submissions =
+            await (db.select(db.submissions)
+                  ..where(
+                    (s) =>
+                        s.projectId.equals(project.id) &
+                        s.status.equals(SubmissionStatus.accepted.name),
+                  )
+                  ..orderBy([
+                    (s) => OrderingTerm.desc(s.submittedAt),
+                    (s) => OrderingTerm.desc(s.id),
+                  ]))
+                .get();
+        for (var submission in List.from(submissions)) {
+          final signature =
+              await (db.select(db.signatures)
+                    ..where((sg) => sg.submissionId.equals(submission.id)))
+                  .getSingleOrNull();
+          if (signature == null || signature.revokedAt != null) {
+            submissions.remove(submission);
+          }
+        }
+
+        if (submissions.isEmpty) {
+          return Response.badRequest(
+            body: jsonEncode({"error": "No valid submissions found"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
+        String formatSignature(Signature sig) {
+          final signatureMethod = switch (sig.signatureMethod) {
+            SignatureMethod.typed => "typing",
+          };
+          return "Signed v${sig.consentVersion} by $signatureMethod at ${sig.signedAt.toUtc().toIso8601String()}";
+        }
+
+        final src = (await Future.wait<String>(
+          submissions.reversed.toList().asMap().entries.map(
+            (e) async => [
+              "${e.key + 1}. Submission #${e.value.id + 1} – ${e.value.user} – Datly",
+              e.value.submittedAt.toUtc().toIso8601String(),
+              formatSignature(
+                await (db.select(db.signatures)
+                      ..where((sg) => sg.submissionId.equals(e.value.id)))
+                    .getSingle(),
+              ),
+            ].reduce((a, b) => "$a<br>$b"),
+          ),
+        )).join("\n");
+
+        return Response.ok(
+          jsonEncode({
+            "plain": src,
+            "html": await pandoc(src, to: "html", standalone: false),
+            "rtf": await pandoc(src),
+          }),
+          headers: {"Content-Type": "application/json"},
         );
       }, minimumRole: UserRole.admin),
     )

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
 
@@ -17,6 +18,7 @@ import '../widgets/confirmation_dialog.dart';
 import '../widgets/multi_prompt_dialog.dart';
 import '../widgets/multiple_choice_dialog.dart';
 import '../widgets/prompt_dialog.dart';
+import '../widgets/status_modal.dart';
 import '../widgets/title_bar.dart';
 
 @RoutePage()
@@ -702,12 +704,23 @@ class _ListWidgetState extends State<ListWidget> {
                           label: Text("Submissions"),
                           onPressed: () => context.navigateTo(submissionRoute),
                         ),
-                      if (widget.isProject)
+                      if (widget.isProject) ...[
                         ActionChip(
                           avatar: Icon(Icons.cloud_download_outlined),
                           label: Text("Asset Dump"),
                           onPressed: () async {
-                            final response = await AuthManager.instance.fetch(
+                            final completer = Completer();
+                            String? error;
+                            http.Response? response;
+                            showStatusModal(
+                              context: context,
+                              completer: completer,
+                              failureDetailsGenerator: () =>
+                                  error ??
+                                  responseFailureDetailsGenerator(response),
+                            );
+
+                            response = await AuthManager.instance.fetch(
                               http.Request(
                                 "GET",
                                 Uri.parse(
@@ -715,34 +728,116 @@ class _ListWidgetState extends State<ListWidget> {
                                 ),
                               ),
                             );
+                            if (response == null ||
+                                response.statusCode != 200) {
+                              completer.completeError("");
+                              return;
+                            }
 
                             // DOWNLOAD
 
-                            if (kIsWeb) {
-                              final blobParts =
-                                  [response!.bodyBytes.toJS].toJS
-                                      as JSArray<web.BlobPart>;
-                              final blob = web.Blob(
-                                blobParts,
-                                web.BlobPropertyBag(type: "application/zip"),
-                              );
-                              final url = web.URL.createObjectURL(blob);
+                            try {
+                              if (kIsWeb) {
+                                final blob = web.Blob(
+                                  [response.bodyBytes.toJS].toJS
+                                      as JSArray<web.BlobPart>,
+                                  web.BlobPropertyBag(type: "application/zip"),
+                                );
+                                final url = web.URL.createObjectURL(blob);
 
-                              final anchor = web.HTMLAnchorElement()
-                                ..style.display = "none"
-                                ..href = url
-                                ..download =
-                                    "datly-project_${project!.id}-dump.zip";
-                              web.document.body?.append(anchor);
-                              anchor.dispatchEvent(web.MouseEvent("click"));
-                              anchor.remove();
+                                final anchor = web.HTMLAnchorElement()
+                                  ..style.display = "none"
+                                  ..href = url
+                                  ..download =
+                                      "datly-project_${project!.id}-dump.zip";
+                                web.document.body?.append(anchor);
+                                anchor.dispatchEvent(web.MouseEvent("click"));
+                                anchor.remove();
 
-                              web.URL.revokeObjectURL(url);
-                            } else {
-                              throw UnimplementedError();
+                                web.URL.revokeObjectURL(url);
+                              } else {
+                                throw UnimplementedError();
+                              }
+                            } catch (e) {
+                              if (e is UnimplementedError) rethrow;
+                              error = e.toString();
+                              completer.completeError("");
+                              return;
                             }
+
+                            completer.complete();
                           },
                         ),
+                        ActionChip(
+                          avatar: Icon(Icons.attribution),
+                          label: Text("Copy Attributions"),
+                          onPressed: () async {
+                            final completer = Completer();
+                            String? error;
+                            http.Response? response;
+                            showStatusModal(
+                              context: context,
+                              completer: completer,
+                              failureDetailsGenerator: () =>
+                                  error ??
+                                  responseFailureDetailsGenerator(response),
+                            );
+
+                            response = await AuthManager.instance.fetch(
+                              http.Request(
+                                "GET",
+                                Uri.parse(
+                                  "${ApiManager.baseUri}/projects/${project!.id}/submissions/attributions",
+                                ),
+                              ),
+                            );
+                            if (response == null ||
+                                response.statusCode != 200) {
+                              completer.completeError("");
+                              return;
+                            }
+                            final body = jsonDecode(response.body);
+
+                            try {
+                              if (kIsWeb) {
+                                final blobPlain = web.Blob(
+                                  [body["plain"] as String].jsify()
+                                      as JSArray<web.BlobPart>,
+                                  web.BlobPropertyBag(type: "text/plain"),
+                                );
+                                final blobHtml = web.Blob(
+                                  [body["html"] as String].jsify()
+                                      as JSArray<web.BlobPart>,
+                                  web.BlobPropertyBag(type: "text/html"),
+                                );
+
+                                final clipboardApi =
+                                    web.window.navigator.clipboard;
+                                final clipboardData = web.ClipboardItem(
+                                  {
+                                        blobPlain.type: blobPlain,
+                                        blobHtml.type: blobHtml,
+                                      }.jsify()
+                                      as JSObject,
+                                );
+
+                                await clipboardApi
+                                    .write([clipboardData].toJS)
+                                    .toDart;
+                              } else {
+                                throw UnimplementedError();
+                              }
+                            } catch (e) {
+                              if (e is UnimplementedError) rethrow;
+                              error = e.toString();
+                              completer.completeError("");
+                              return;
+                            }
+
+                            completer.complete();
+                          },
+                        ),
+                      ],
                       ActionChip(
                         backgroundColor: colorScheme.error,
                         avatar: Icon(

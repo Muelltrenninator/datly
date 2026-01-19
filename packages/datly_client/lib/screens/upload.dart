@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:camera/camera.dart';
@@ -201,15 +200,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     showStatusModal(
       context: context,
       completer: completer,
-      failureDetailsGenerator: () {
-        try {
-          if (jsonDecode(response!.body) case {"error": String errorMessage}) {
-            return errorMessage;
-          }
-        } catch (_) {}
-        return "Status code: ${response?.statusCode ?? "<unavailable>"}\n${response?.body}"
-            .trim();
-      },
+      failureDetailsGenerator: () => responseFailureDetailsGenerator(response),
     );
 
     final project = await ProjectRegistry.instance.get(projects[projectIndex!]);

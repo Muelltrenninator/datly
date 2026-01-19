@@ -1,6 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+String responseFailureDetailsGenerator(http.Response? response) {
+  try {
+    if (jsonDecode(response!.body) case {"error": String errorMessage}) {
+      return errorMessage;
+    }
+  } catch (_) {}
+  return "Status code: ${response?.statusCode ?? "<unavailable>"}\n${response?.body}"
+      .trim();
+}
 
 class StatusModal extends StatefulWidget {
   final Completer completer;

@@ -12,11 +12,13 @@ import 'widgets/title_bar.dart';
 
 class ApiManager {
   ApiManager._();
-  static final ApiManager _instance = ApiManager._();
-  static ApiManager get instance => _instance;
 
-  static Uri get baseUri =>
-      kDebugMode ? Uri.parse("http://localhost:33552/api") : Uri.parse("/api");
+  static final forceProduction = false;
+  static Uri get baseUri => Uri.parse(
+    forceProduction
+        ? "https://datly.con.bz/api"
+        : (kDebugMode ? "http://localhost:33552/api" : "/api"),
+  );
 }
 
 class AuthManager extends ChangeNotifier {
@@ -82,9 +84,7 @@ class AuthManager extends ChangeNotifier {
       final streamedResponse = await client
           .send(request)
           .timeout(Duration(seconds: 15));
-      response = await http.Response.fromStream(streamedResponse).onError(
-        (error, stackTrace) => Error.throwWithStackTrace(error!, stackTrace),
-      );
+      response = await http.Response.fromStream(streamedResponse);
     } catch (_) {
       _wasLastFetchNetworkError = true;
       return null;

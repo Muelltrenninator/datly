@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
@@ -16,6 +17,13 @@ import '../registry.dart';
 import '../widgets/confirmation_dialog.dart';
 import '../widgets/radio_dialog.dart';
 import 'list.dart';
+
+final Map<String, Uint8List?> _blurHashCache = {};
+Uint8List _decodeBlurHash(String blurHash) {
+  return Uint8List.fromList(
+    img.encodePng(BlurHash.decode(blurHash).toImage(64, 64)),
+  );
+}
 
 @RoutePage()
 class SubmissionsPage extends StatefulWidget {
@@ -76,6 +84,43 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
     if (mounted) setState(() {});
   }
 
+  Stream<List> _bufferedJsonStream(Stream<List<int>> byteStream) async* {
+    final buffer = StringBuffer();
+
+    await for (final chunk in byteStream.transform(const Utf8Decoder())) {
+      buffer.write(chunk);
+      final content = buffer.toString();
+      final lines = content.split("\n");
+
+      for (var i = 0; i < lines.length - 1; i++) {
+        final line = lines[i].trim();
+        if (line.isNotEmpty) {
+          try {
+            yield jsonDecode(line) as List;
+          } catch (e) {
+            if (kDebugMode) {
+              print("Failed to parse JSON line: $e");
+            }
+          }
+        }
+      }
+
+      buffer.clear();
+      buffer.write(lines.last);
+    }
+
+    final remaining = buffer.toString().trim();
+    if (remaining.isNotEmpty) {
+      try {
+        yield jsonDecode(remaining) as List;
+      } catch (e) {
+        if (kDebugMode) {
+          print("Failed to parse final JSON: $e");
+        }
+      }
+    }
+  }
+
   void fetch() {
     client?.close();
     stream = null;
@@ -87,6 +132,11 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
         (effectiveUser != AuthManager.instance.authenticatedUser?.username ||
             effectiveProject != null)) {
       error = true;
+      if (kDebugMode) {
+        print(
+          "Non-admin user tried to access another user's or a specific project's submissions.",
+        );
+      }
       if (mounted) setState(() {});
       return;
     }
@@ -115,25 +165,36 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                     ) ??
                     false)) {
               error = true;
+              if (kDebugMode) {
+                print(
+                  "Failed to fetch submissions stream: ${value.statusCode} ${value.reasonPhrase}",
+                );
+              }
               if (mounted) setState(() {});
               return;
             }
 
-            stream = value.stream
-                .transform(Utf8Decoder())
-                .map((e) => jsonDecode(e) as List)
-                .handleError((_) {
-                  error = true;
-                  if (mounted) setState(() {});
-                });
+            stream = _bufferedJsonStream(value.stream).handleError((e) {
+              error = true;
+              if (kDebugMode) {
+                print("Error while receiving submissions stream. [$e]");
+              }
+              if (mounted) setState(() {});
+            });
             if (mounted) setState(() {});
           })
-          .catchError((_, _) {
+          .catchError((e, _) {
             error = true;
+            if (kDebugMode) {
+              print("Error while initiating submissions stream (#2). [$e]");
+            }
             if (mounted) setState(() {});
           });
-    } catch (_) {
+    } catch (e) {
       error = true;
+      if (kDebugMode) {
+        print("Error while initiating submissions stream (#1). [$e]");
+      }
       if (mounted) setState(() {});
     }
 
@@ -197,12 +258,14 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                               child: Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                children: List.generate(
-                                  data.length,
-                                  (i) => SubmissionWidget(
-                                    data: SubmissionData.fromJson(data[i]),
-                                  ),
-                                ),
+                                children: List.generate(data.length, (i) {
+                                  final submissionData =
+                                      SubmissionData.fromJson(data[i]);
+                                  return SubmissionWidget(
+                                    key: ValueKey(submissionData.id),
+                                    data: submissionData,
+                                  );
+                                }),
                               ),
                             );
                           },
@@ -246,19 +309,49 @@ class SubmissionWidget extends StatefulWidget {
 }
 
 class _SubmissionWidgetState extends State<SubmissionWidget> {
-  SubmissionData? _data;
-
   ProjectData? project;
   UserData? user;
+  Uint8List? blurHashImage;
 
   @override
   void initState() {
     super.initState();
-    fetch();
+    _loadBlurHash();
+    _loadMetadata();
   }
 
-  void fetch() {
-    _data = widget.data;
+  @override
+  void didUpdateWidget(SubmissionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data.id != widget.data.id) {
+      _loadBlurHash();
+      _loadMetadata();
+    } else if (oldWidget.data.assetBlurHash != widget.data.assetBlurHash) {
+      _loadBlurHash();
+    }
+  }
+
+  Future<void> _loadBlurHash() async {
+    final hash = widget.data.assetBlurHash;
+
+    if (_blurHashCache.containsKey(hash)) {
+      blurHashImage = _blurHashCache[hash];
+      if (mounted) setState(() {});
+      return;
+    }
+    _blurHashCache[hash] = null; // blocking
+
+    try {
+      final decoded = await compute(_decodeBlurHash, hash);
+      _blurHashCache[hash] = decoded;
+      blurHashImage = decoded;
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (kDebugMode) print("Failed to decode BlurHash: $e");
+    }
+  }
+
+  void _loadMetadata() {
     ProjectRegistry.instance.get(widget.data.projectId).then((projectData) {
       project = projectData;
       if (mounted) setState(() {});
@@ -271,15 +364,21 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.data != _data) fetch();
-
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final windowSizeClass = WindowSizeClass.of(context);
 
-    var image = widget.data.assetUri() != null
+    Widget? image;
+    if (blurHashImage == null) {
+      image = SizedBox(
+        width: 224,
+        height: 224,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    image ??= widget.data.assetUri() != null
         ? FadeInImage.memoryNetwork(
-            placeholder: blurHashImage,
+            placeholder: blurHashImage!,
             image: widget.data.assetUri().toString(),
             fadeInDuration: Duration(milliseconds: 1),
             fadeOutDuration: Duration(milliseconds: 1),
@@ -291,7 +390,11 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                   SizedBox.expand(
                     child: FittedBox(
                       fit: BoxFit.cover,
-                      child: Image.memory(blurHashImage, width: 64, height: 64),
+                      child: Image.memory(
+                        blurHashImage!,
+                        width: 64,
+                        height: 64,
+                      ),
                     ),
                   ),
                   Container(
@@ -313,7 +416,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
             height: 224,
             fit: BoxFit.cover,
           )
-        : FittedBox(child: Image.memory(blurHashImage, width: 64, height: 64));
+        : FittedBox(child: Image.memory(blurHashImage!, width: 64, height: 64));
     image = AuthManager.instance.authenticatedUserIsAdmin
         ? SizedBox(width: 224, height: 224, child: image)
         : AspectRatio(aspectRatio: 1 / 1, child: image);
@@ -417,7 +520,18 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           AuthManager.instance.authenticatedUserIsAdmin &&
                               widget.data.status != "censored"
                           ? () async {
-                              final selection = await showRadioDialog(
+                              String? selection;
+                              if (HardwareKeyboard.instance.isShiftPressed) {
+                                selection ??= widget.data.status == "accepted"
+                                    ? "rejected"
+                                    : "accepted";
+                              } else if (HardwareKeyboard
+                                  .instance
+                                  .isControlPressed) {
+                                selection ??= "rejected";
+                              }
+
+                              selection ??= await showRadioDialog(
                                 context: context,
                                 title: "Set Status",
                                 items: [
@@ -493,9 +607,6 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
 
   Uri get uri => Uri.parse(
     "${ApiManager.baseUri}/projects/${widget.data.projectId}/submissions/${widget.data.id}",
-  );
-  Uint8List get blurHashImage => Uint8List.fromList(
-    img.encodePng(BlurHash.decode(widget.data.assetBlurHash).toImage(64, 64)),
   );
 }
 

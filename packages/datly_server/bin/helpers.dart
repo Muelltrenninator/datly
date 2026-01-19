@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -39,4 +40,35 @@ String? identifierFromRequest(Request request) {
           ?.remoteAddress
           .address;
   return ip;
+}
+
+late final bool pandocAvailable;
+Future<String> pandoc(
+  String src, {
+  String from = "markdown",
+  String to = "rtf",
+  bool standalone = true,
+  List<String> extraArgs = const [],
+}) async {
+  final args = <String>[
+    if (standalone) "-s",
+    "-f",
+    from,
+    "-t",
+    to,
+    ...extraArgs,
+  ];
+  final process = await Process.start("pandoc", args); // runInShell: true
+
+  process.stdin.add(utf8.encode(src));
+  await process.stdin.close();
+
+  final stdout = await utf8.decoder.bind(process.stdout).join();
+  final stderr = await utf8.decoder.bind(process.stderr).join();
+
+  if (await process.exitCode != 0) {
+    throw Exception("pandoc failed (exit ${await process.exitCode}): $stderr");
+  }
+
+  return stdout;
 }

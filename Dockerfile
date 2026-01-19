@@ -15,5 +15,7 @@ COPY --from=build /app/packages/datly_server/bin/public/ /app/bin/public/
 COPY --from=build /app/packages/datly_server/bin/sqlite/ /app/bin/sqlite/
 COPY --from=build /app/packages/datly_server/bin/server /app/bin/
 
+COPY --from=pandoc/minimal:3 /usr/local/bin/pandoc /usr/local/bin/pandoc
+
 EXPOSE 33552
 CMD ["/app/bin/server"]

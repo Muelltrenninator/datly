@@ -11,6 +11,7 @@
 - Accounts are created and approved manually by administrators. Usernames are assigned by admins and are **not changeable** by users.  
 - We currently collect **no other personal data by default**. An email address may be collected in the future for optional notifications, but email addresses and usernames will **not** be included in any training datasets.  
 - All uploaded images have embedded metadata (EXIF) removed before they are stored (data minimisation).  
+- When you submit an image, we permanently store the submitting client's IP address and browser user‑agent for security, abuse prevention, and to comply with requirements of the overarching project this data is collected for.  
 - Access to the service is **free**.
 
 ## 1. Controller & contact
@@ -23,6 +24,8 @@ The data controller for processing carried out via Datly is the maintainer liste
 - **Account identifiers.** A username (admin-assigned). Optionally an email address only if you voluntarily provide it for notifications; emails are not used in training datasets.  
 - **Minimal administrative data.** Status/approval timestamps and basic logs required to manage accounts and moderate uploads.
 
+- **Network and device metadata at upload.** The IP address and browser user‑agent of the submitting client are captured at the time of each image submission. These are retained indefinitely to protect the service (security, fraud/abuse prevention, audit, and compliance with requirements of the overarching project this data is collected for).
+
 We do **not** collect unrelated personal data (contact lists, device address books, payment data, health or sensitive category data as a matter of design). Do not upload photos that contain sensitive personal data about others unless you have lawful consent.
 
 ## 3. Purpose & legal bases for processing
@@ -32,7 +35,7 @@ We do **not** collect unrelated personal data (contact lists, device address boo
 **Legal bases (Article 6 GDPR):**
 
 - **Consent (Art. 6(1)(a))** — for processing images you actively upload for training purposes we rely on your explicit informed consent at the time of upload. Consent is freely given, specific and can be withdrawn.  
-- **Legitimate interests / contract (Art. 6(1)(f)/(b))** — for account management, fraud prevention, security and maintaining the service we rely on legitimate interests and contract where applicable (e.g., if you opt into optional notifications). We will document any legitimate-interests assessment where required.
+- **Legitimate interests / contract (Art. 6(1)(f)/(b))** — for account management, fraud prevention, security and maintaining the service we rely on legitimate interests and contract where applicable (e.g., if you opt into optional notifications). This includes retaining IP addresses and browser user‑agent strings associated with uploads indefinitely for security, abuse prevention, and compliance with requirements of the overarching project this data is collected for. We will document any legitimate-interests assessment where required.
 
 If the legal basis for a particular processing step differs, we will make that clear at the point of collection.
 
@@ -45,6 +48,7 @@ By uploading an image you grant Datly a **non-exclusive, worldwide, royalty-free
 ## 5. Retention
 
 - Default retention for original uploaded images: **up to 24 months** from upload, unless you request earlier deletion.  
+- IP addresses and browser user‑agent strings captured at submission are retained **indefinitely** for security, fraud/abuse prevention, audit purposes, and compliance with requirements of the overarching project this data is collected for.  
 - If you request account deletion we will remove original image files and account data (except logs necessary for security, legal compliance, or backup retention) within **30 days** where technically feasible. We will exclude your images from future training and datasets after deletion.  
 - Backup copies or limited logs may be retained longer only for legal, security or backup-restoration purposes; such data will be minimised and access restricted.
 

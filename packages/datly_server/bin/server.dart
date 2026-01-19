@@ -108,6 +108,18 @@ void shutdown([String signal = "Signal"]) async {
 }
 
 void main(List<String> args) async {
+  pandoc("").onError((e, _) => e.toString()).then((value) {
+    if (value.contains("pandoc failed")) {
+      t.warn(
+        "Pandoc is not installed, not correctly configured, or not functioning properly. Document conversion features will not work.",
+        description: value,
+      );
+      pandocAvailable = false;
+      return;
+    }
+    pandocAvailable = true;
+  });
+
   for (var i in [ProcessSignal.sigint, ProcessSignal.sigterm]) {
     i.watch().listen((e) => shutdown(e.name), onError: (_) {});
   }
@@ -133,7 +145,13 @@ void main(List<String> args) async {
                 parts.removeAt(0);
                 parts.insert(3, "[500]");
               }
-              return "${parts[2]} ${parts[3].replaceAll(RegExp(r"\[|\]"), "")} - ${parts[4]}";
+
+              var path = parts[4];
+              if (path.startsWith("/api/projects/1/submissions?signature=")) {
+                path = "/api/projects/1/submissions?[REDACTED]";
+              }
+
+              return "${parts[2]} ${parts[3].replaceAll(RegExp(r"\[|\]"), "")} - $path";
             }
 
             if (isError) {
