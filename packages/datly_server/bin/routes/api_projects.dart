@@ -303,7 +303,6 @@ void define(Router router) {
           submissions.reversed.toList().asMap().entries.map(
             (e) async => [
               "${e.key + 1}. Submission #${e.value.id + 1} – ${e.value.user} – Datly",
-              e.value.submittedAt.toUtc().toIso8601String(),
               formatSignature(
                 await (db.select(db.signatures)
                       ..where((sg) => sg.submissionId.equals(e.value.id)))
