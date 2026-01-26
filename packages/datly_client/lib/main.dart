@@ -163,8 +163,10 @@ class _MainScreenState extends State<MainScreen> {
 
   void onUpdate() {
     if (_immersiveMode.value == true) {
+      if (kIsWeb) web.document.documentElement?.requestFullscreen();
       prefs.setBool("immersiveMode", true);
     } else {
+      if (kIsWeb) web.document.exitFullscreen();
       prefs.remove("immersiveMode");
     }
     if (mounted) setState(() {});
