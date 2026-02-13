@@ -33,6 +33,7 @@
     "consentParental": "Ich bin Erziehungsberechtigter des Minderjährigen, habe die oben genannten Bedingungen gelesen und stimme diesen zu",
     "consentButton": "Zustimmen und absenden",
     "noSubmissions": "Noch keine Einsendungen.",
+    "invalidPage": "Ungültige Seitenzahl.",
     "submissionStatusPending": "Ausstehend",
     "submissionStatusAccepted": "Akzeptiert",
     "submissionStatusRejected": "Abgelehnt",

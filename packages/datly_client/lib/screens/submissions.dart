@@ -29,10 +29,12 @@ Uint8List _decodeBlurHash(String blurHash) {
 class SubmissionsPage extends StatefulWidget {
   final String? user;
   final String? project;
+  final int page;
   const SubmissionsPage({
     super.key,
     @QueryParam() this.user,
     @QueryParam() this.project,
+    @QueryParam() this.page = 1,
   });
 
   @override
@@ -40,9 +42,6 @@ class SubmissionsPage extends StatefulWidget {
 }
 
 class _SubmissionsPageState extends State<SubmissionsPage> {
-  String? stateValueUser;
-  String? stateValueProject;
-
   http.Client? client;
   Stream<List>? stream;
   bool error = false;
@@ -70,6 +69,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   void initState() {
     super.initState();
     optionLeftAligned.addListener(opUpdate);
+    WidgetsBinding.instance.addPostFrameCallback((_) => fetch());
   }
 
   @override
@@ -82,6 +82,12 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
 
   void opUpdate() {
     if (mounted) setState(() {});
+  }
+
+  @override
+  void didUpdateWidget(SubmissionsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    fetch();
   }
 
   Stream<List> _bufferedJsonStream(Stream<List<int>> byteStream) async* {
@@ -150,7 +156,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                 "GET",
                 effectiveProject != null
                     ? Uri.parse(
-                        "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live",
+                        "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}",
                       )
                     : Uri.parse(
                         "${ApiManager.baseUri}/users/$effectiveUser/submissions/live",
@@ -212,16 +218,15 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (stateValueUser != widget.user || stateValueProject != widget.project) {
-      stateValueUser = widget.user;
-      stateValueProject = widget.project;
-      fetch();
-    }
-
+    final availablePages = effectiveProjectData?.submissionCount != null
+        ? (effectiveProjectData!.submissionCount / 2)
+              .ceil() // 96
+        : null;
     return Stack(
       children: [
         !error
-            ? stream != null
+            ? stream != null &&
+                      (effectiveProject == null || effectiveProjectData != null)
                   ? SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -244,7 +249,13 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                             List data = snapshot.data ?? [];
                             if (data.isEmpty) {
                               return Text(
-                                AppLocalizations.of(context).noSubmissions,
+                                widget.page < 1 ||
+                                        (availablePages != null &&
+                                            widget.page > availablePages)
+                                    ? AppLocalizations.of(context).invalidPage
+                                    : AppLocalizations.of(
+                                        context,
+                                      ).noSubmissions,
                                 style: DefaultTextStyle.of(context).style
                                     .copyWith(
                                       color: Theme.of(context).disabledColor,
@@ -253,20 +264,52 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                               );
                             }
 
-                            return SizedBox(
-                              width: double.infinity,
-                              child: Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: List.generate(data.length, (i) {
-                                  final submissionData =
-                                      SubmissionData.fromJson(data[i]);
-                                  return SubmissionWidget(
-                                    key: ValueKey(submissionData.id),
-                                    data: submissionData,
-                                  );
-                                }),
-                              ),
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: List.generate(data.length, (i) {
+                                      final submissionData =
+                                          SubmissionData.fromJson(data[i]);
+                                      return SubmissionWidget(
+                                        key: ValueKey(submissionData.id),
+                                        data: submissionData,
+                                      );
+                                    }),
+                                  ),
+                                ),
+                                if (effectiveProject != null &&
+                                    availablePages! > 1)
+                                  Container(
+                                    margin: const EdgeInsets.only(
+                                      top: 32,
+                                      left: 64,
+                                      right: 64,
+                                    ),
+                                    constraints: BoxConstraints(maxWidth: 320),
+                                    child: Column(
+                                      children: [
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: Divider(height: 1),
+                                        ),
+                                        SizedBox(height: 4),
+                                        SubmissionsPageControl(
+                                          page: widget.page,
+                                          availablePages: availablePages,
+                                          routeParams: (
+                                            project: widget.project,
+                                            user: widget.user,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
                             );
                           },
                         ),
@@ -638,11 +681,7 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
   void initState() {
     super.initState();
     widget.optionLeftAligned.addListener(opUpdate);
-    _controller = AnimationController(
-      // value: 1,
-      duration: Durations.medium1,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: Durations.medium1, vsync: this);
   }
 
   @override
@@ -753,4 +792,83 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
       ),
     );
   }
+}
+
+class SubmissionsPageControl extends StatelessWidget {
+  final int page;
+  final int availablePages;
+  final ({String? project, String? user}) routeParams;
+  final bool enabled;
+
+  const SubmissionsPageControl({
+    super.key,
+    required this.page,
+    required this.availablePages,
+    required this.routeParams,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final tileCount = (constraints.maxWidth / 40).floor() - 2;
+      assert(tileCount > 0);
+
+      var startPage = (page - (tileCount / 2).floor()).clamp(1, availablePages);
+      var endPage = (startPage + tileCount - 1).clamp(1, availablePages);
+
+      while (endPage - startPage + 1 < tileCount && startPage > 1) {
+        startPage = (startPage - 1).clamp(1, availablePages);
+      }
+
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: page > 1
+                ? () {
+                    context.navigateTo(
+                      SubmissionsRoute(
+                        project: routeParams.project,
+                        user: routeParams.user,
+                        page: page - 1,
+                      ),
+                    );
+                  }
+                : null,
+            icon: Icon(Icons.navigate_before),
+          ),
+          for (var i = startPage; i <= endPage; i++)
+            (i == page ? IconButton.filledTonal : IconButton.new)(
+              onPressed: () {
+                if (i == page) return;
+                context.navigateTo(
+                  SubmissionsRoute(
+                    project: routeParams.project,
+                    user: routeParams.user,
+                    page: i,
+                  ),
+                );
+              },
+              icon: Builder(builder: (context) => Text("$i")),
+            ),
+          IconButton(
+            onPressed: page < availablePages
+                ? () {
+                    context.navigateTo(
+                      SubmissionsRoute(
+                        project: routeParams.project,
+                        user: routeParams.user,
+                        page: page + 1,
+                      ),
+                    );
+                  }
+                : null,
+            icon: Icon(Icons.navigate_next),
+          ),
+        ],
+      );
+    },
+  );
 }

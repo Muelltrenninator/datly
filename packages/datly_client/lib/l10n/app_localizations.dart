@@ -302,6 +302,12 @@ abstract class AppLocalizations {
   /// **'No submissions yet.'**
   String get noSubmissions;
 
+  /// Shown when the user tries to access a page number that is out of range.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid page number.'**
+  String get invalidPage;
+
   /// The status 'Pending' for a submission. This string is formatted in MLA title case.
   ///
   /// In en, this message translates to:

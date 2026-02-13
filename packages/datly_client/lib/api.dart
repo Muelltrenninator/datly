@@ -235,12 +235,14 @@ class ProjectData {
   String title;
   String? description;
   DateTime createdAt;
+  int submissionCount;
 
   ProjectData({
     required this.id,
     required this.title,
     required this.description,
     required this.createdAt,
+    required this.submissionCount,
   });
 
   factory ProjectData.fromJson(Map<String, dynamic> json) => ProjectData(
@@ -251,11 +253,13 @@ class ProjectData {
       json["createdAt"],
       isUtc: true,
     ),
+    submissionCount: json["submissionCount"],
   );
   Map<String, dynamic> toJson() => {
     "id": id,
     "title": title,
     "description": description,
     "createdAt": createdAt.millisecondsSinceEpoch,
+    "submissionCount": submissionCount,
   };
 }

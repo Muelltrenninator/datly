@@ -220,6 +220,11 @@
         "description": "Shown when there are no submissions available for the selected project.",
         "context": "submissions"
     },
+    "invalidPage": "Invalid page number.",
+    "@invalidPage": {
+        "description": "Shown when the user tries to access a page number that is out of range.",
+        "context": "submissions"
+    },
     "submissionStatusPending": "Pending",
     "@submissionStatusPending": {
         "description": "The status 'Pending' for a submission. This string is formatted in MLA title case.",

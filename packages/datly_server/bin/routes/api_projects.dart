@@ -27,8 +27,31 @@ void define(Router router) {
           if (auth?.user.role == UserRole.admin) return false;
           return !auth!.user.projects.contains(p.id);
         });
+
+        final count = db.submissions.id.count();
+        final submissionCounts = Map.fromEntries(
+          (await ((db.selectOnly(db.submissions)
+                    ..addColumns([db.submissions.projectId, count])
+                    ..groupBy([db.submissions.projectId]))
+                  .get()))
+              .map(
+                (row) => MapEntry(
+                  row.read(db.submissions.projectId)!,
+                  row.read(count) ?? 0,
+                ),
+              ),
+        );
+
         return Response.ok(
-          jsonEncode(projects.map((u) => u.toJson()).toList()),
+          jsonEncode(
+            projects
+                .map(
+                  (u) =>
+                      u.toJson()
+                        ..addAll({"submissionCount": submissionCounts[u.id]}),
+                )
+                .toList(),
+          ),
           headers: {"Content-Type": "application/json"},
         );
       }),
@@ -45,8 +68,20 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
+        final count = db.submissions.id.count();
+        final submissionCount =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([count])
+                      ..where(db.submissions.projectId.equals(project.id)))
+                    .get())
+                .first
+                .read(count) ??
+            0;
+
         return Response.ok(
-          project.toJsonString(),
+          jsonEncode(
+            project.toJson()..addAll({"submissionCount": submissionCount}),
+          ),
           headers: {"Content-Type": "application/json"},
         );
       }),
@@ -131,6 +166,17 @@ void define(Router router) {
     ..get(
       "/projects/<id>/submissions", // MARK: [GET] /projects/<id>/submissions
       apiAuthWall((req, _) async {
+        int? page;
+        if (req.url.queryParameters["page"] != null) {
+          page = int.tryParse(req.url.queryParameters["page"]!);
+          if (page == null || page < 1) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Invalid page parameter"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+        }
+
         final project =
             await (db.select(db.projects)..where(
                   (u) => u.id.equals(int.tryParse(req.params["id"]!) ?? -1),
@@ -140,14 +186,14 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        final submissions =
-            await (db.select(db.submissions)
-                  ..where((s) => s.projectId.equals(project.id))
-                  ..orderBy([
-                    (s) => OrderingTerm.desc(s.submittedAt),
-                    (s) => OrderingTerm.desc(s.id),
-                  ]))
-                .get();
+        final query = db.select(db.submissions)
+          ..where((s) => s.projectId.equals(project.id))
+          ..orderBy([
+            (s) => OrderingTerm.desc(s.submittedAt),
+            (s) => OrderingTerm.desc(s.id),
+          ]);
+        if (page != null) query.limit(2, offset: (page - 1) * 2);
+        final submissions = await query.get();
 
         return Response.ok(
           jsonEncode(submissions.map((s) => s.toJson()).toList()),
@@ -325,6 +371,17 @@ void define(Router router) {
     ..get(
       "/projects/<id>/submissions/live", // MARK: [GET] /projects/<id>/submissions/live
       apiAuthWall((req, _) async {
+        int? page;
+        if (req.url.queryParameters["page"] != null) {
+          page = int.tryParse(req.url.queryParameters["page"]!);
+          if (page == null || page < 1) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Invalid page parameter"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+        }
+
         final project =
             await (db.select(db.projects)..where(
                   (u) => u.id.equals(int.tryParse(req.params["id"]!) ?? -1),
@@ -334,14 +391,14 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        final submissions =
-            (db.select(db.submissions)
-                  ..where((s) => s.projectId.equals(project.id))
-                  ..orderBy([
-                    (s) => OrderingTerm.desc(s.submittedAt),
-                    (s) => OrderingTerm.desc(s.id),
-                  ]))
-                .watch();
+        final query = db.select(db.submissions)
+          ..where((s) => s.projectId.equals(project.id))
+          ..orderBy([
+            (s) => OrderingTerm.desc(s.submittedAt),
+            (s) => OrderingTerm.desc(s.id),
+          ]);
+        if (page != null) query.limit(2, offset: (page - 1) * 2);
+        final submissions = query.watch();
 
         return Response.ok(
           submissions.map(

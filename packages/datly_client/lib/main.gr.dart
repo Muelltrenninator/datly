@@ -16,7 +16,7 @@ import 'package:datly_client/screens/list.dart' as _i2;
 import 'package:datly_client/screens/login.dart' as _i3;
 import 'package:datly_client/screens/submissions.dart' as _i5;
 import 'package:datly_client/screens/upload.dart' as _i6;
-import 'package:flutter/material.dart' as _i8;
+import 'package:flutter/foundation.dart' as _i8;
 
 /// generated route for
 /// [_i1.ErrorScreen]
@@ -105,11 +105,17 @@ class SubmissionsRoute extends _i7.PageRouteInfo<SubmissionsRouteArgs> {
     _i8.Key? key,
     String? user,
     String? project,
+    int page = 1,
     List<_i7.PageRouteInfo>? children,
   }) : super(
          SubmissionsRoute.name,
-         args: SubmissionsRouteArgs(key: key, user: user, project: project),
-         rawQueryParams: {'user': user, 'project': project},
+         args: SubmissionsRouteArgs(
+           key: key,
+           user: user,
+           project: project,
+           page: page,
+         ),
+         rawQueryParams: {'user': user, 'project': project, 'page': page},
          initialChildren: children,
        );
 
@@ -123,19 +129,26 @@ class SubmissionsRoute extends _i7.PageRouteInfo<SubmissionsRouteArgs> {
         orElse: () => SubmissionsRouteArgs(
           user: queryParams.optString('user'),
           project: queryParams.optString('project'),
+          page: queryParams.getInt('page', 1),
         ),
       );
       return _i5.SubmissionsPage(
         key: args.key,
         user: args.user,
         project: args.project,
+        page: args.page,
       );
     },
   );
 }
 
 class SubmissionsRouteArgs {
-  const SubmissionsRouteArgs({this.key, this.user, this.project});
+  const SubmissionsRouteArgs({
+    this.key,
+    this.user,
+    this.project,
+    this.page = 1,
+  });
 
   final _i8.Key? key;
 
@@ -143,20 +156,26 @@ class SubmissionsRouteArgs {
 
   final String? project;
 
+  final int page;
+
   @override
   String toString() {
-    return 'SubmissionsRouteArgs{key: $key, user: $user, project: $project}';
+    return 'SubmissionsRouteArgs{key: $key, user: $user, project: $project, page: $page}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! SubmissionsRouteArgs) return false;
-    return key == other.key && user == other.user && project == other.project;
+    return key == other.key &&
+        user == other.user &&
+        project == other.project &&
+        page == other.page;
   }
 
   @override
-  int get hashCode => key.hashCode ^ user.hashCode ^ project.hashCode;
+  int get hashCode =>
+      key.hashCode ^ user.hashCode ^ project.hashCode ^ page.hashCode;
 }
 
 /// generated route for

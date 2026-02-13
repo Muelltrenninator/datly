@@ -135,6 +135,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSubmissions => 'No submissions yet.';
 
   @override
+  String get invalidPage => 'Invalid page number.';
+
+  @override
   String get submissionStatusPending => 'Pending';
 
   @override
