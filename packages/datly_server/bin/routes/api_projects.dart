@@ -46,9 +46,8 @@ void define(Router router) {
           jsonEncode(
             projects
                 .map(
-                  (u) =>
-                      u.toJson()
-                        ..addAll({"submissionCount": submissionCounts[u.id]}),
+                  (u) => u.toJson()
+                    ..addAll({"submissionCount": submissionCounts[u.id] ?? 0}),
                 )
                 .toList(),
           ),
@@ -192,7 +191,7 @@ void define(Router router) {
             (s) => OrderingTerm.desc(s.submittedAt),
             (s) => OrderingTerm.desc(s.id),
           ]);
-        if (page != null) query.limit(2, offset: (page - 1) * 2);
+        if (page != null) query.limit(96, offset: (page - 1) * 96);
         final submissions = await query.get();
 
         return Response.ok(
@@ -397,7 +396,7 @@ void define(Router router) {
             (s) => OrderingTerm.desc(s.submittedAt),
             (s) => OrderingTerm.desc(s.id),
           ]);
-        if (page != null) query.limit(2, offset: (page - 1) * 2);
+        if (page != null) query.limit(96, offset: (page - 1) * 96);
         final submissions = query.watch();
 
         return Response.ok(

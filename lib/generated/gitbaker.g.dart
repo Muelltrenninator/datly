@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-02-13T21:15:17
+/// Last generated: 2026-02-13T21:50:33
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -406,96 +406,6 @@ final class GitBaker {
   static final List<WorkspaceEntry> workspace = List.unmodifiable([
     WorkspaceEntryChange._(
       "lib/generated/gitbaker.g.dart",
-      status: WorkspaceEntryStatus._fromLetters("M", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/api.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/l10n/app_de.arb",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/l10n/app_en.arb",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/l10n/app_localizations.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/l10n/app_localizations_de.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/l10n/app_localizations_en.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/main.gr.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/screens/list.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_client/lib/screens/submissions.dart",
-      status: WorkspaceEntryStatus._fromLetters(".", "M"),
-      submoduleState: WorkspaceEntrySubmoduleState._(
-        commitChanged: false,
-        hasTrackedChanges: false,
-        hasUntrackedChanges: false,
-      ),
-    ),
-    WorkspaceEntryChange._(
-      "packages/datly_server/bin/routes/api_projects.dart",
       status: WorkspaceEntryStatus._fromLetters(".", "M"),
       submoduleState: WorkspaceEntrySubmoduleState._(
         commitChanged: false,
@@ -513,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 38,
+      revision: 39,
       ahead: 0,
       behind: 0,
       commits: [
@@ -555,6 +465,7 @@ final class GitBaker {
         "e5b4d589cacee28e290da964e064807c475f35b1",
         "8e99055b6f6d224fe217fbbea6becc2d82737a0a",
         "7328bccfd3745a0f110ed03f3e7a85338191ca3d",
+        "6b873fd1efcf6fdf67790afad2ad18f8aee1ee3a",
       ],
     ),
   ];
@@ -916,6 +827,15 @@ final class GitBaker {
       hashAbbreviated: "7328bcc",
       message: "Immersive mode fullscreen",
       date: DateTime.parse("2026-01-26T08:02:10.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "6b873fd1efcf6fdf67790afad2ad18f8aee1ee3a",
+      hashAbbreviated: "6b873fd",
+      message: "Pagination, Submission Count",
+      date: DateTime.parse("2026-02-13T20:49:49.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

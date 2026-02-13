@@ -219,8 +219,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   @override
   Widget build(BuildContext context) {
     final availablePages = effectiveProjectData?.submissionCount != null
-        ? (effectiveProjectData!.submissionCount / 2)
-              .ceil() // 96
+        ? (effectiveProjectData!.submissionCount / 96).ceil()
         : null;
     return Stack(
       children: [

@@ -689,6 +689,10 @@ class _ListWidgetState extends State<ListWidget> {
                                   }
                                 : null,
                           ),
+                          Chip(
+                            avatar: Icon(Icons.list_alt_outlined),
+                            label: Text("${user?.submissionCount}"),
+                          ),
                         ],
                 ),
               ),

@@ -12,9 +12,24 @@ void define(Router router) {
   router
     ..get(
       "/users/whoami", // MARK: [GET] /users/whoami
-      apiAuthWall((req, auth) {
+      apiAuthWall((req, auth) async {
+        final count = db.submissions.id.count();
+        final submissionCount =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([count])
+                      ..where(db.submissions.user.equals(auth!.user.username)))
+                    .get())
+                .first
+                .read(count) ??
+            0;
+
         return Response.ok(
-          jsonEncode(auth!.user.toJson()..addAll({"code": auth.code.toJson()})),
+          jsonEncode(
+            auth.user.toJson()..addAll({
+              "code": auth.code.toJson(),
+              "submissionCount": submissionCount,
+            }),
+          ),
           headers: {"Content-Type": "application/json"},
         );
       }),
@@ -23,8 +38,32 @@ void define(Router router) {
       "/users/list", // MARK: [GET] /users/list
       apiAuthWall((req, auth) async {
         final users = await db.select(db.users).get();
+
+        final count = db.submissions.id.count();
+        final submissionCounts = Map.fromEntries(
+          (await ((db.selectOnly(db.submissions)
+                    ..addColumns([db.submissions.user, count])
+                    ..groupBy([db.submissions.user]))
+                  .get()))
+              .map(
+                (row) => MapEntry(
+                  row.read(db.submissions.user)!,
+                  row.read(count) ?? 0,
+                ),
+              ),
+        );
+
         return Response.ok(
-          jsonEncode(users.map((u) => u.toJson()).toList()),
+          jsonEncode(
+            users
+                .map(
+                  (u) => u.toJson()
+                    ..addAll({
+                      "submissionCount": submissionCounts[u.username] ?? 0,
+                    }),
+                )
+                .toList(),
+          ),
           headers: {"Content-Type": "application/json"},
         );
       }, minimumRole: UserRole.admin),
@@ -40,6 +79,16 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "User not found"}));
         }
 
+        final count = db.submissions.id.count();
+        final submissionCount =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([count])
+                      ..where(db.submissions.user.equals(user.username)))
+                    .get())
+                .first
+                .read(count) ??
+            0;
+
         if (auth!.user.role.index < UserRole.admin.index &&
             auth.user.username != user.username) {
           return Response.ok(
@@ -51,7 +100,9 @@ void define(Router router) {
           );
         } else {
           return Response.ok(
-            user.toJsonString(),
+            jsonEncode(
+              user.toJson()..addAll({"submissionCount": submissionCount}),
+            ),
             headers: {"Content-Type": "application/json"},
           );
         }

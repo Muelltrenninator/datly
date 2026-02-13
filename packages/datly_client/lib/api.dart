@@ -119,6 +119,7 @@ class UserData {
   DateTime joinedAt;
   List<int> projects;
   String role;
+  int submissionCount;
 
   UserData({
     required this.username,
@@ -126,6 +127,7 @@ class UserData {
     required this.joinedAt,
     required this.projects,
     required this.role,
+    required this.submissionCount,
   });
 
   bool isAdmin() => role == "admin";
@@ -162,6 +164,7 @@ class UserData {
     ),
     projects: List<int>.from(json["projects"]),
     role: json["role"]!,
+    submissionCount: json["submissionCount"]!,
   );
   Map<String, dynamic> toJson() => {
     "username": username,
@@ -169,6 +172,7 @@ class UserData {
     "joinedAt": joinedAt.millisecondsSinceEpoch,
     "projects": projects,
     "role": role,
+    "submissionCount": submissionCount,
   };
 }
 
