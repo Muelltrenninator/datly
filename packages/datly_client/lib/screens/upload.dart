@@ -272,6 +272,21 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
             maxLines: 3,
           ),
           SizedBox(height: 16),
+          if (!camerasPermissionDenied) ...[
+            OutlinedButton.icon(
+              onPressed: () => showMarkdownDialog(
+                context: context,
+                source: MarkdownDialogStringSource(
+                  AppLocalizations.of(
+                    context,
+                  ).cameraErrorUnavailableDescription,
+                ),
+              ),
+              icon: Icon(Icons.troubleshoot_outlined),
+              label: Text(AppLocalizations.of(context).cameraErrorTroubleshoot),
+            ),
+            SizedBox(height: 4),
+          ],
           (camerasPermissionDenied ? FilledButton.icon : OutlinedButton.icon)
               .call(
                 onPressed: () async {
@@ -513,7 +528,7 @@ ${appLocalizations.consentExplanation1}
 ${appLocalizations.consentExplanation2}
 
 - [${checkExplanation ? "x" : " "}] ${appLocalizations.consentCheckbox}
-- [${checkPolicy ? "x" : " "}] ${appLocalizations.consentPolicy(appLocalizations.loginPrivacyPolicy, appLocalizations.loginTermsOfService)}
+- [${checkPolicy ? "x" : " "}] ${appLocalizations.consentPolicy(appLocalizations.privacyPolicy, appLocalizations.termsOfService)}
 
 ---
 
@@ -645,8 +660,8 @@ ${!checkAge ? """
                   children.add(
                     TextSpan(
                       text: isPrivacy
-                          ? appLocalizations.loginPrivacyPolicy
-                          : appLocalizations.loginTermsOfService,
+                          ? appLocalizations.privacyPolicy
+                          : appLocalizations.termsOfService,
                       style: TextStyle(
                         color: ColorScheme.of(context).primary,
                         decoration: TextDecoration.underline,
@@ -654,8 +669,10 @@ ${!checkAge ? """
                       recognizer: TapGestureRecognizer()
                         ..onTap = () => showMarkdownDialog(
                           context: context,
-                          origin: Uri.parse(
-                            "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
+                          source: MarkdownDialogHttpSource(
+                            Uri.parse(
+                              "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
+                            ),
                           ),
                         ),
                     ),

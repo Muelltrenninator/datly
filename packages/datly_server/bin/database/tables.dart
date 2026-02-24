@@ -13,56 +13,28 @@ class Projects extends Table {
 
 class Users extends Table {
   TextColumn get username => text().withLength(min: 3, max: 16)();
-  TextColumn get email => text()();
+  TextColumn get password => text()();
+  TextColumn get email => text().unique()();
   DateTimeColumn get joinedAt => dateTime().withDefault(currentDateAndTime)();
   TextColumn get projects =>
       text().map(ListConverter<int>()).withDefault(const Constant("[]"))();
   TextColumn get role =>
       textEnum<UserRole>().withDefault(Constant(UserRole.user.name))();
+  TextColumn get disabled =>
+      text().nullable().withDefault(const Constant(null))();
+  BoolColumn get activated => boolean().withDefault(const Constant(false))();
+  TextColumn get locale => text().withDefault(const Constant("en"))();
 
   @override
   Set<Column<Object>>? get primaryKey => {username};
 }
 
-class LoginCodes extends Table {
-  TextColumn get code => text().withLength(min: 8, max: 8)();
-  @ReferenceName('loginCodeOfUser')
-  TextColumn get user => text().references(
-    Users,
-    #username,
-    onDelete: KeyAction.cascade,
-    onUpdate: KeyAction.cascade,
-  )();
-  @ReferenceName('loginCodeCreatedBy')
-  TextColumn get createdBy => text().nullable().references(
-    Users,
-    #username,
-    onDelete: KeyAction.setDefault,
-    onUpdate: KeyAction.setDefault,
-  )();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get expiresAt => dateTime().withDefault(
-    currentDateAndTime.modify(DateTimeModifier.days(180)),
-  )();
-
-  @override
-  Set<Column<Object>>? get primaryKey => {code};
-}
-
 class Submissions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get projectId => integer().references(
-    Projects,
-    #id,
-    onDelete: KeyAction.cascade,
-    onUpdate: KeyAction.cascade,
-  )();
-  TextColumn get user => text().nullable().references(
-    Users,
-    #username,
-    onDelete: KeyAction.cascade,
-    onUpdate: KeyAction.setDefault,
-  )();
+  IntColumn get projectId =>
+      integer().references(Projects, #id, onDelete: KeyAction.cascade)();
+  TextColumn get user =>
+      text().references(Users, #username, onDelete: KeyAction.cascade)();
   TextColumn get status => textEnum<SubmissionStatus>().withDefault(
     Constant(SubmissionStatus.pending.name),
   )();

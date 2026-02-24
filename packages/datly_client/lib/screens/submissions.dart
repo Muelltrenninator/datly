@@ -159,7 +159,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                         "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}",
                       )
                     : Uri.parse(
-                        "${ApiManager.baseUri}/users/$effectiveUser/submissions/live",
+                        "${ApiManager.baseUri}/user/$effectiveUser/submissions/live",
                       ),
               ),
             ),

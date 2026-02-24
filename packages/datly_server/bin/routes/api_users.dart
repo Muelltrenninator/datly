@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../database/database.dart';
+import '../email/email.dart';
 import '../helpers.dart';
 import '../server.dart';
 import 'api.dart';
@@ -25,10 +27,9 @@ void define(Router router) {
 
         return Response.ok(
           jsonEncode(
-            auth.user.toJson()..addAll({
-              "code": auth.code.toJson(),
-              "submissionCount": submissionCount,
-            }),
+            auth.user.toJson()
+              ..remove("password")
+              ..addAll({"submissionCount": submissionCount}),
           ),
           headers: {"Content-Type": "application/json"},
         );
@@ -58,6 +59,7 @@ void define(Router router) {
             users
                 .map(
                   (u) => u.toJson()
+                    ..remove("password")
                     ..addAll({
                       "submissionCount": submissionCounts[u.username] ?? 0,
                     }),
@@ -68,15 +70,89 @@ void define(Router router) {
         );
       }, minimumRole: UserRole.admin),
     )
+    ..post(
+      "/users/login", // MARK: [POST] /users/login
+      apiAuthWall((req, auth) async {
+        if (auth != null) {
+          return Response.ok(
+            jsonEncode({"message": "Already logged in"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
+        if (jsonDecode(await req.readAsString()) case {
+          "email": String email,
+          "password": String password,
+        }) {
+          if (email.isEmpty || password.isEmpty) {
+            return Response.badRequest(
+              body: jsonEncode({
+                "error":
+                    "${email.isEmpty ? "Email" : "Password"} cannot be empty",
+              }),
+              headers: {"Content-Type": "application/json"},
+            );
+          } else if (emailRegex.hasMatch(email) == false) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Invalid email address"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+
+          final user = await (db.select(
+            db.users,
+          )..where((u) => u.email.equals(email))).getSingleOrNull();
+          if (user == null ||
+              !(await verifyPassword(password, user.password))) {
+            return Response.unauthorized(
+              jsonEncode({"error": "Unknown email or password"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+
+          if (user.disabled != null) {
+            return Response.forbidden(
+              jsonEncode({"error": "User account is disabled"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+
+          return Response.ok(
+            jsonEncode({
+              "token":
+                  JWT(
+                    {},
+                    issuer: jwtIssuer(req),
+                    audience: Audience.one("auth"),
+                    subject: user.username,
+                  ).sign(
+                    jwtPrivateKey,
+                    algorithm: JWTAlgorithm.RS256,
+                    expiresIn: Duration(days: 180),
+                  ),
+            }),
+            headers: {"Content-Type": "application/json"},
+          );
+        } else {
+          return Response.badRequest(
+            body: jsonEncode({"error": "Username and password required"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+      }, minimumRole: UserRole.external),
+    )
     ..get(
-      "/users/<username>", // MARK: [GET] /users/<username>
+      "/user/<username>", // MARK: [GET] /user/<username>
       apiAuthWall((req, auth) async {
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
                 .getSingleOrNull();
         if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
         }
 
         final count = db.submissions.id.count();
@@ -101,7 +177,9 @@ void define(Router router) {
         } else {
           return Response.ok(
             jsonEncode(
-              user.toJson()..addAll({"submissionCount": submissionCount}),
+              user.toJson()
+                ..remove("password")
+                ..addAll({"submissionCount": submissionCount}),
             ),
             headers: {"Content-Type": "application/json"},
           );
@@ -109,8 +187,17 @@ void define(Router router) {
       }),
     )
     ..post(
-      "/users/<username>", // MARK: [POST] /users/<username>
-      apiAuthWall((req, _) async {
+      "/user/<username>", // MARK: [POST] /user/<username>
+      apiAuthWall((req, auth) async {
+        final isAdmin =
+            (auth?.user.role ?? UserRole.user).index >= UserRole.admin.index;
+        if (auth != null && !isAdmin) {
+          return Response.forbidden(
+            jsonEncode({"error": "Insufficient permissions"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
         final username = req.params["username"]!;
         if (!RegExp(r"^[a-zA-Z0-9_]{3,16}$").hasMatch(username)) {
           return Response.badRequest(
@@ -123,54 +210,110 @@ void define(Router router) {
           db.users,
         )..where((u) => u.username.equals(username))).getSingleOrNull();
         if (user != null) {
-          return Response.notFound(
-            jsonEncode({"error": "Username already taken"}),
+          return Response(
+            409,
+            body: jsonEncode({"error": "Username already taken"}),
+            headers: {"Content-Type": "application/json"},
           );
         }
 
         if (jsonDecode(await req.readAsString()) case {
           "email": String email,
-          "projects": List<dynamic> projects,
-          "role": String role,
+          "projects": List<dynamic>? projects,
+          "role": String? role,
+          "locale": String? locale,
         }) {
-          List<int> parsedProjects;
-          try {
-            parsedProjects = projects.map((e) => e as int).toList();
-            for (var projectId in parsedProjects) {
-              final project = await (db.select(
-                db.projects,
-              )..where((p) => p.id.equals(projectId))).getSingleOrNull();
-              if (project == null) {
-                return Response.badRequest(
-                  body: jsonEncode({"error": "Project $projectId not found"}),
-                  headers: {"Content-Type": "application/json"},
-                );
-              }
-            }
-          } catch (e) {
+          final password = await generatePlaintextPassword();
+
+          final emailCheck = emailRegex.hasMatch(email);
+          if (!emailCheck) {
             return Response.badRequest(
-              body: jsonEncode({"error": "Invalid projects list"}),
+              body: jsonEncode({"error": "Invalid email address"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+          if (await (db.select(
+                db.users,
+              )..where((u) => u.email.equals(email))).getSingleOrNull() !=
+              null) {
+            return Response(
+              409,
+              body: jsonEncode({"error": "Email already linked"}),
               headers: {"Content-Type": "application/json"},
             );
           }
 
-          if (!UserRole.values.asNameMap().keys.contains(role)) {
-            return Response.badRequest(
-              body: jsonEncode({"error": "Invalid user role"}),
-              headers: {"Content-Type": "application/json"},
-            );
+          List<int> parsedProjects;
+          if (isAdmin && projects != null) {
+            try {
+              parsedProjects = projects.map((e) => e as int).toList();
+              for (var projectId in parsedProjects) {
+                final project = await (db.select(
+                  db.projects,
+                )..where((p) => p.id.equals(projectId))).getSingleOrNull();
+                if (project == null) {
+                  return Response.badRequest(
+                    body: jsonEncode({"error": "Project $projectId not found"}),
+                    headers: {"Content-Type": "application/json"},
+                  );
+                }
+              }
+            } catch (e) {
+              return Response.badRequest(
+                body: jsonEncode({"error": "Invalid projects list"}),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+          } else {
+            parsedProjects = [1];
+          }
+
+          UserRole effectiveRole;
+          if (isAdmin && role != null) {
+            if (UserRole.values.asNameMap().keys.contains(role)) {
+              effectiveRole = UserRole.values.byName(role);
+            } else {
+              return Response.badRequest(
+                body: jsonEncode({"error": "Invalid user role"}),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+          } else {
+            effectiveRole = UserRole.user;
+          }
+
+          String effectiveLocale;
+          if (locale != null) {
+            effectiveLocale = locale;
+          } else {
+            effectiveLocale = localeFromRequest(req) ?? "en";
           }
 
           final createdUser = UsersCompanion.insert(
             username: username,
+            password: await hashPassword(password: password),
             email: email,
-            projects: projects.isNotEmpty
+            projects: parsedProjects.isNotEmpty
                 ? Value(parsedProjects)
                 : Value.absent(),
-            role: Value(UserRole.values.byName(role)),
+            role: Value(effectiveRole),
+            locale: Value(effectiveLocale),
+          );
+          await db.into(db.users).insert(createdUser);
+
+          final user = await (db.select(
+            db.users,
+          )..where((u) => u.username.equals(username))).getSingle();
+          queueEmail(
+            (isAdmin
+                    ? EmailMessagesTemplates.passwordResetWelcome
+                    : EmailMessagesTemplates.welcome)(
+                  user: user,
+                  newPassword: password,
+                )
+                .stylized(),
           );
 
-          await db.into(db.users).insert(createdUser);
           return Response(201);
         } else {
           return Response.badRequest(
@@ -178,24 +321,62 @@ void define(Router router) {
             headers: {"Content-Type": "application/json"},
           );
         }
-      }, minimumRole: UserRole.admin),
+      }, minimumRole: UserRole.external),
     )
     ..put(
-      "/users/<username>", // MARK: [PUT] /users/<username>
+      "/user/<username>", // MARK: [PUT] /user/<username>
       apiAuthWall((req, _) async {
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
                 .getSingleOrNull();
         if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
         }
 
         if (jsonDecode(await req.readAsString()) case {
+          "password": String? password,
           "email": String? email,
           "projects": List<dynamic>? projects,
           "role": String? role,
         }) {
+          if (password != null) {
+            final passwordCheck = await isSecurePassword(password);
+            if (!passwordCheck.secure) {
+              return Response.badRequest(
+                body: jsonEncode({
+                  "error": "Insecure password",
+                  "code": passwordCheck.code,
+                  "message": passwordCheck.message,
+                }),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+          }
+
+          if (email != null) {
+            final emailCheck = emailRegex.hasMatch(email);
+            if (!emailCheck) {
+              return Response.badRequest(
+                body: jsonEncode({"error": "Invalid email address"}),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+            if (await (db.select(
+                  db.users,
+                )..where((u) => u.email.equals(email))).getSingleOrNull() !=
+                null) {
+              return Response(
+                409,
+                body: jsonEncode({"error": "Email already linked"}),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+          }
+
           List<int>? parsedProjects;
           if (projects != null) {
             try {
@@ -229,6 +410,9 @@ void define(Router router) {
 
           final updatedUser = UsersCompanion(
             email: email != null ? Value(email) : Value.absent(),
+            password: password != null
+                ? Value(await hashPassword(password: password))
+                : Value.absent(),
             projects: parsedProjects != null
                 ? Value(parsedProjects)
                 : Value.absent(),
@@ -250,18 +434,20 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..delete(
-      "/users/<username>", // MARK: [DELETE] /users/<username>
+      "/user/<username>", // MARK: [DELETE] /user/<username>
       apiAuthWall((req, auth) async {
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
                 .getSingleOrNull();
         if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
-        }
-
-        if (user.username == auth!.user.username) {
-          return Response.badRequest(
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        } else if (user.username == auth!.user.username) {
+          return Response(
+            409,
             body: jsonEncode({"error": "Cannot delete own user account"}),
             headers: {"Content-Type": "application/json"},
           );
@@ -270,7 +456,6 @@ void define(Router router) {
         await (db.delete(
           db.users,
         )..where((u) => u.username.equals(user.username))).go();
-
         await (db.update(
           db.signatures,
         )..where((s) => s.user.equals(user.username))).write(
@@ -280,139 +465,142 @@ void define(Router router) {
           ),
         );
 
+        queueEmail(
+          EmailMessagesTemplates.accountDeleted(user: user).stylized(),
+        );
+
         return Response.ok(null);
       }, minimumRole: UserRole.admin),
     )
-    ..get(
-      "/users/<username>/loginCode", // MARK: [GET] /users/<username>/loginCode
-      apiAuthWall((req, auth) async {
-        final user =
-            await (db.select(db.users)
-                  ..where((u) => u.username.equals(req.params["username"]!)))
-                .getSingleOrNull();
-        if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
-        }
-
-        final codes = await (db.select(
-          db.loginCodes,
-        )..where((lc) => lc.user.equals(user.username))).get();
-
-        return Response.ok(
-          jsonEncode(codes.map((c) => c.toJson()).toList()),
-          headers: {"Content-Type": "application/json"},
-        );
-      }, minimumRole: UserRole.admin),
-    )
     ..post(
-      "/users/<username>/loginCode", // MARK: [POST] /users/<username>/loginCode
+      "/user/<username>/disable", // MARK: [POST] /user/<username>/disable
       apiAuthWall((req, auth) async {
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
                 .getSingleOrNull();
         if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
-        }
-
-        final code = generateCode();
-        await db
-            .into(db.loginCodes)
-            .insert(
-              LoginCodesCompanion.insert(
-                code: code,
-                user: user.username,
-                createdBy: Value(auth!.user.username),
-              ),
-            );
-
-        return Response.ok(
-          jsonEncode({"code": code}),
-          headers: {"Content-Type": "application/json"},
-        );
-      }, minimumRole: UserRole.admin),
-    )
-    ..post(
-      "/users/<username>/loginCode/renew", // MARK: [POST] /users/<username>/loginCode/renew
-      apiAuthWall((req, auth) async {
-        final user =
-            await (db.select(db.users)
-                  ..where((u) => u.username.equals(req.params["username"]!)))
-                .getSingleOrNull();
-        if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
-        }
-        final code =
-            await (db.select(db.loginCodes)..where(
-                  (c) => c.code.equals(req.url.queryParameters["code"] ?? ""),
-                ))
-                .getSingleOrNull();
-        if (code == null) {
-          return Response.badRequest(
-            body: jsonEncode({"error": "Code not found"}),
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        } else if (user.disabled != null) {
+          return Response(
+            409,
+            body: jsonEncode({"error": "User account already disabled"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        } else if (user.username == auth!.user.username) {
+          return Response(
+            409,
+            body: jsonEncode({"error": "Cannot disable own user account"}),
             headers: {"Content-Type": "application/json"},
           );
         }
 
-        final newExpiresAt = code.expiresAt.add(Duration(days: 180));
-        await (db.update(db.loginCodes)
-              ..where((lc) => lc.code.equals(code.code)))
-            .write(LoginCodesCompanion(expiresAt: Value(newExpiresAt)));
+        if (jsonDecode(await req.readAsString()) case {
+          "reason": String? reason,
+        }) {
+          await (db.update(db.users)
+                ..where((u) => u.username.equals(user.username)))
+              .write(UsersCompanion(disabled: Value(reason?.trim() ?? "")));
+          queueEmail(
+            EmailMessagesTemplates.accountDisabled(
+              user: user,
+              reason: reason?.trim() ?? "",
+            ).stylized(),
+          );
 
-        return Response.ok(null, headers: {"Content-Type": "application/json"});
-      }, minimumRole: UserRole.admin),
-    )
-    ..delete(
-      "/users/<username>/loginCode", // MARK: [DELETE] /users/<username>/loginCode
-      apiAuthWall((req, _) async {
-        final code =
-            await (db.select(db.loginCodes)..where(
-                  (u) =>
-                      u.user.equals(req.params["username"]!) &
-                      u.code.equals(req.url.queryParameters["code"]!),
-                ))
-                .getSingleOrNull();
-        if (code == null) {
-          return Response.notFound(jsonEncode({"error": "Code not found"}));
+          return Response.ok(null);
+        } else {
+          return Response.badRequest(
+            body: jsonEncode({"error": "Invalid request body"}),
+            headers: {"Content-Type": "application/json"},
+          );
         }
-
-        await (db.delete(
-          db.loginCodes,
-        )..where((lc) => lc.code.equals(code.code))).go();
-
-        return Response.ok(null);
       }, minimumRole: UserRole.admin),
     )
-    ..delete(
-      "/users/<username>/loginCode/purge", // MARK: [DELETE] /users/<username>/loginCode/purge
+    ..post(
+      "/user/<username>/reenable", // MARK: [POST] /user/<username>/reenable
       apiAuthWall((req, auth) async {
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
                 .getSingleOrNull();
         if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        } else if (user.disabled == null) {
+          return Response(
+            409,
+            body: jsonEncode({"error": "User account is not disabled"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        } else if (user.username == auth!.user.username) {
+          return Response(
+            409,
+            body: jsonEncode({"error": "Cannot reenable own user account"}),
+            headers: {"Content-Type": "application/json"},
+          );
         }
 
-        await (db.delete(db.loginCodes)..where(
-              (lc) =>
-                  lc.user.equals(user.username) &
-                  lc.code.equals(auth!.code.code).not(),
-            ))
-            .go();
+        await (db.update(db.users)
+              ..where((u) => u.username.equals(user.username)))
+            .write(UsersCompanion(disabled: Value(null)));
+        queueEmail(
+          EmailMessagesTemplates.accountReenabled(user: user).stylized(),
+        );
+
+        return Response.ok(null);
+      }, minimumRole: UserRole.admin),
+    )
+    ..post(
+      "/user/<username>/passwordReset", // MARK: [POST] /user/<username>/passwordReset
+      apiAuthWall((req, auth) async {
+        final user =
+            await (db.select(db.users)
+                  ..where((u) => u.username.equals(req.params["username"]!)))
+                .getSingleOrNull();
+        if (user == null) {
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
+        final password = await generatePlaintextPassword();
+        db.update(db.users)
+          ..where((u) => u.username.equals(user.username))
+          ..write(
+            UsersCompanion(
+              password: Value(await hashPassword(password: password)),
+            ),
+          );
+
+        queueEmail(
+          EmailMessagesTemplates.passwordResetTemporary(
+            user: user,
+            newPassword: password,
+          ).stylized(),
+        );
 
         return Response.ok(null);
       }, minimumRole: UserRole.admin),
     )
     ..get(
-      "/users/<username>/submissions", // MARK: [GET] /users/<username>/submissions
+      "/user/<username>/submissions", // MARK: [GET] /user/<username>/submissions
       apiAuthWall((req, auth) async {
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
                 .getSingleOrNull();
         if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
         }
 
         if (auth!.user.role.index < UserRole.admin.index &&
@@ -439,14 +627,17 @@ void define(Router router) {
       }),
     )
     ..get(
-      "/users/<username>/submissions/live", // MARK: [GET] /users/<username>/submissions/live
+      "/user/<username>/submissions/live", // MARK: [GET] /user/<username>/submissions/live
       apiAuthWall((req, auth) async {
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
                 .getSingleOrNull();
         if (user == null) {
-          return Response.notFound(jsonEncode({"error": "User not found"}));
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
         }
 
         if (auth!.user.role.index < UserRole.admin.index &&

@@ -1,0 +1,2 @@
+intl_messages.arb
+intl_messages_de.arb

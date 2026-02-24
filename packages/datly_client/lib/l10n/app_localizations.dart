@@ -128,47 +128,131 @@ abstract class AppLocalizations {
     String code,
   );
 
+  /// Error message shown when the user enters an invalid email address during login.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get loginInvalidEmail;
+
   /// Error message shown when the server cannot be reached during login.
   ///
   /// In en, this message translates to:
   /// **'Server unreachable. Please check your internet connection.'**
   String get loginError;
 
-  /// Error message shown when the provided login code is not recognized.
+  /// Error message shown when the user's account has been disabled.
   ///
   /// In en, this message translates to:
-  /// **'Unknown login code.'**
+  /// **'Your account has been disabled. Learn about the details in the email sent to your linked email address.'**
+  String get loginAccountDisabled;
+
+  /// Error message shown when the provided user data is not recognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown email or password.'**
   String get loginUnknown;
 
-  /// Label for the login code input field.
+  /// Label for the email address input field during login.
   ///
   /// In en, this message translates to:
-  /// **'Login code'**
-  String get loginCodeLabel;
+  /// **'Email address'**
+  String get loginEmailLabel;
 
-  /// Text prompting new users to request a login code.
+  /// Label for the password input field during login.
   ///
   /// In en, this message translates to:
-  /// **'New here?'**
-  String get loginNewHere;
+  /// **'Password'**
+  String get loginPasswordLabel;
 
-  /// Link text for new users to request a login code.
+  /// Button text to submit the login form.
   ///
   /// In en, this message translates to:
-  /// **'Request a code.'**
-  String get loginNewHereRequest;
+  /// **'Log in'**
+  String get loginSubmit;
+
+  /// Button text to switch to the registration form.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get loginRegister;
+
+  /// Label for the username input field during registration.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get registerUsernameLabel;
+
+  /// Label for the email address input field during registration.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get registerEmailLabel;
+
+  /// Button text to submit the registration form.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get registerSubmit;
+
+  /// Message shown when the registration process is completed successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration successful!'**
+  String get registerSuccess;
+
+  /// Additional information shown after successful registration.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been created successfully. Please check your email for a temporary password and further instructions to complete the registration process.'**
+  String get registerSuccessDescription;
+
+  /// Error message shown when the user enters an invalid username during registration.
+  ///
+  /// In en, this message translates to:
+  /// **'Usernames must be between 3 and 16 characters long and can only contain letters, numbers and underscores.'**
+  String get registerInvalidUsername;
+
+  /// Error message shown when the chosen username is already taken during registration.
+  ///
+  /// In en, this message translates to:
+  /// **'The username is already taken. Please choose a different one.'**
+  String get registerErrorConflictUsername;
+
+  /// Error message shown when the provided email address is already linked to another account during registration.
+  ///
+  /// In en, this message translates to:
+  /// **'The email address is already linked to another account. Please use a different one.'**
+  String get registerErrorConflictEmail;
+
+  /// Button text to switch to the login form from the registration form.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get registerLogin;
 
   /// Link text for the app's privacy policy. This string is formatted in MLA title case.
   ///
   /// In en, this message translates to:
   /// **'Privacy Policy'**
-  String get loginPrivacyPolicy;
+  String get privacyPolicy;
 
   /// Link text for the app's terms of service. This string is formatted in MLA title case.
   ///
   /// In en, this message translates to:
   /// **'Terms of Service'**
-  String get loginTermsOfService;
+  String get termsOfService;
+
+  /// Label for the upload section in the main navigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get navigationUpload;
+
+  /// Label for the validate section in the main navigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate'**
+  String get navigationValidate;
 
   /// Shown when no camera device is found on the system or the permission is denied.
   ///
@@ -182,11 +266,23 @@ abstract class AppLocalizations {
   /// **'Access to the camera was denied.'**
   String get cameraErrorPermission;
 
-  /// Explains that no camera is available on the device.
+  /// Shown when the camera is unavailable on the device, for example because it is being used by another application or there is a hardware issue.
   ///
   /// In en, this message translates to:
   /// **'No camera available on this device.'**
   String get cameraErrorUnavailable;
+
+  /// Additional explanation for the camera unavailable error, providing possible causes and troubleshooting steps.
+  ///
+  /// In en, this message translates to:
+  /// **'# “No camera available on this device” Troubleshoot\n\nDatly right now is unable to access your camera. This can have a variety of causes. The most commons are listed below.\n\n- Another application is using the camera\n\n  - Please close all other applications that might be using the camera and try again.\n\n  - Sometimes other browser tabs can also block the camera, so please also try closing other tabs that might be using the camera.\n\n- Hardware issue or temporary glitch\n\n  - Please check your camera settings to ensure it is properly configured and recognized by your device.\n  - Try restarting your device, as this can often resolve temporary hardware glitches.\n  - If the problem persists, please consult your device documentation or support for further troubleshooting steps.'**
+  String get cameraErrorUnavailableDescription;
+
+  /// Button text to open the troubleshooting information for camera errors.
+  ///
+  /// In en, this message translates to:
+  /// **'Troubleshoot'**
+  String get cameraErrorTroubleshoot;
 
   /// Title for the camera selection dialog.
   ///
@@ -307,6 +403,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid page number.'**
   String get invalidPage;
+
+  /// Text shown above the target title. To be read as 'Please select [something]'.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select:'**
+  String get validatePleaseSelect;
 
   /// The status 'Pending' for a submission. This string is formatted in MLA title case.
   ///

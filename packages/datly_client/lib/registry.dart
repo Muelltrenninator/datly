@@ -113,7 +113,7 @@ class UserRegistry extends _Registry<String, UserData> {
 
   @override
   Uri _uriFromId(String identifier) =>
-      Uri.parse("${ApiManager.baseUri}/users/$identifier");
+      Uri.parse("${ApiManager.baseUri}/user/$identifier");
 
   @override
   UserData _fromJson(json) => UserData.fromJson(json);

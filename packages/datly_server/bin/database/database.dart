@@ -5,6 +5,8 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:sqlite3/open.dart';
 
+import '../email/email.dart';
+import '../helpers.dart';
 import '../server.dart';
 import 'converters.dart';
 import 'tables.dart';
@@ -13,12 +15,12 @@ export 'package:drift/drift.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Projects, Users, LoginCodes, Submissions, Signatures])
+@DriftDatabase(tables: [Projects, Users, Submissions, Signatures])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -56,14 +58,67 @@ class AppDatabase extends _$AppDatabase {
       await customStatement("PRAGMA optimize=0x10002");
     },
     onUpgrade: (m, from, to) async {
+      t.info("Performing database migration from version $from to $to");
+
       if (from < 2) {
         await m.createTable(signatures);
       }
+      if (from < 3) {
+        await m.alterTable(
+          TableMigration(
+            users,
+            newColumns: [
+              users.password,
+              users.disabled,
+              users.activated,
+              users.locale,
+            ],
+            columnTransformer: {
+              users.password: const Constant(""),
+              // default to German for existing users since most are German.
+              // will be overwritten the first time user logs in
+              users.locale: const Constant("de"),
+            },
+          ),
+        );
+        await m.alterTable(TableMigration(submissions));
+        await m.deleteTable("login_codes");
+
+        for (final user in await select(users).get()) {
+          var password = await generatePlaintextPassword();
+          if (user.username == (env["DATLY_ADMIN"] ?? "admin")) {
+            if (env["DATLY_ADMIN_PASSWORD"] != null) {
+              password = env["DATLY_ADMIN_PASSWORD"]!;
+            }
+            if (!(bool.tryParse(
+                  env["DATLY_UNTRUSTED_CONSOLE"] ?? "",
+                  caseSensitive: false,
+                ) ??
+                false)) {
+              t.warn(
+                "Admin user '${user.username}' requires password reset. Temporary password: $password",
+              );
+            }
+          }
+          await update(users).replace(
+            user.copyWith(password: await hashPassword(password: password)),
+          );
+
+          queueEmail(
+            EmailMessagesTemplates.passwordResetMigration(
+              user: user,
+              newPassword: password,
+            ).stylized(),
+          );
+        }
+      }
+
+      t.info("Database migration completed");
     },
   );
 }
 
-enum UserRole { user, admin }
+enum UserRole { external, user, admin }
 
 enum SubmissionStatus { pending, accepted, rejected, censored }
 

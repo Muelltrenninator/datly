@@ -224,13 +224,24 @@ void define(Router router) {
                     (s) => OrderingTerm.desc(s.id),
                   ]))
                 .get();
-        for (var submission in List.from(submissions)) {
+        final signatures = <Submission, Signature>{};
+        for (var submission in List<Submission>.from(submissions)) {
+          final user = await (db.select(
+            db.users,
+          )..where((u) => u.username.equals(submission.user))).getSingle();
+          if (user.disabled != null) {
+            submissions.remove(submission);
+            continue;
+          }
+
           final signature =
               await (db.select(db.signatures)
                     ..where((sg) => sg.submissionId.equals(submission.id)))
                   .getSingleOrNull();
           if (signature == null || signature.revokedAt != null) {
             submissions.remove(submission);
+          } else {
+            signatures[submission] = signature;
           }
         }
 
@@ -242,17 +253,9 @@ void define(Router router) {
                 "datly": GitBaker.currentBranch.commits.last.hash,
                 "generatedAt": DateTime.now().millisecondsSinceEpoch,
                 "project": project.toJson(),
-                "submissions": (await Future.wait(
-                  submissions.map(
-                    (s) async => s.toJson()
-                      ..["signature"] =
-                          (await (db.select(db.signatures)..where(
-                                    (sg) => sg.submissionId.equals(s.id),
-                                  ))
-                                  .getSingle())
-                              .toJson(),
-                  ),
-                )).toList(),
+                "submissions": submissions.map((s) {
+                  return s.toJson()..["signature"] = signatures[s]!.toJson();
+                }).toList(),
               }),
             ),
           )
@@ -320,7 +323,15 @@ void define(Router router) {
                     (s) => OrderingTerm.desc(s.id),
                   ]))
                 .get();
-        for (var submission in List.from(submissions)) {
+        for (var submission in List<Submission>.from(submissions)) {
+          final user = await (db.select(
+            db.users,
+          )..where((u) => u.username.equals(submission.user))).getSingle();
+          if (user.disabled != null) {
+            submissions.remove(submission);
+            continue;
+          }
+
           final signature =
               await (db.select(db.signatures)
                     ..where((sg) => sg.submissionId.equals(submission.id)))
@@ -413,6 +424,13 @@ void define(Router router) {
     ..post(
       "/projects/<id>/submissions", // MARK: [POST] /projects/<id>/submissions
       apiAuthWall((req, auth) async {
+        if (auth!.user.disabled != null) {
+          return Response.forbidden(
+            jsonEncode({"error": "User account is disabled"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
         if (req.headers["content-type"] == null ||
             !req.headers["content-type"]!.startsWith("multipart/")) {
           return Response.badRequest(
@@ -432,7 +450,7 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        if (!auth!.user.projects.contains(project.id)) {
+        if (!auth.user.projects.contains(project.id)) {
           return Response.forbidden(
             jsonEncode({"error": "Insufficient permissions"}),
             headers: {"Content-Type": "application/json"},
@@ -537,7 +555,7 @@ void define(Router router) {
             .insert(
               SubmissionsCompanion.insert(
                 projectId: project.id,
-                user: Value(auth.user.username),
+                user: auth.user.username,
                 assetId: Value(uuid),
                 assetMimeType: Value(mime),
                 assetBlurHash: blurHash,

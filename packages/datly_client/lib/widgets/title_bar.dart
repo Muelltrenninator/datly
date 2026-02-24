@@ -46,7 +46,8 @@ class TitleBarTitle extends StatelessWidget {
 
 class TitleBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
-  const TitleBar({super.key, this.backgroundColor});
+  final bool? scrollUnserElevation;
+  const TitleBar({super.key, this.backgroundColor, this.scrollUnserElevation});
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +57,7 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       title: TitleBarTitle(onTap: () => context.navigateTo(MainRoute())),
       backgroundColor: backgroundColor,
+      scrolledUnderElevation: scrollUnserElevation == false ? 0 : null,
       actions: [
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -116,22 +118,26 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
               ListTile(
                 onTap: () => showMarkdownDialog(
                   context: context,
-                  origin: Uri.parse(
-                    "${ApiManager.baseUri.replace(path: "")}/legal/privacy",
+                  source: MarkdownDialogHttpSource(
+                    Uri.parse(
+                      "${ApiManager.baseUri.replace(path: "")}/legal/privacy",
+                    ),
                   ),
                 ),
                 leading: Icon(Icons.privacy_tip_outlined),
-                title: Text(AppLocalizations.of(context).loginPrivacyPolicy),
+                title: Text(AppLocalizations.of(context).privacyPolicy),
               ),
               ListTile(
                 onTap: () => showMarkdownDialog(
                   context: context,
-                  origin: Uri.parse(
-                    "${ApiManager.baseUri.replace(path: "")}/legal/terms",
+                  source: MarkdownDialogHttpSource(
+                    Uri.parse(
+                      "${ApiManager.baseUri.replace(path: "")}/legal/terms",
+                    ),
                   ),
                 ),
                 leading: Icon(Icons.description_outlined),
-                title: Text(AppLocalizations.of(context).loginTermsOfService),
+                title: Text(AppLocalizations.of(context).termsOfService),
               ),
             ],
           ),
@@ -195,7 +201,7 @@ bool validateEmail(String email) => RegExp(
 String gitBakerWorkspaceFormat(List<WorkspaceEntry> entries) {
   if (entries.isEmpty ||
       (entries.length == 1 && entries[0].path.endsWith("gitbaker.g.dart"))) {
-    return "Clean";
+    return "clean";
   }
   final addedIndex = entries
       .whereType<WorkspaceEntryChange>()

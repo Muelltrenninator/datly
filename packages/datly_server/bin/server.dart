@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:datly/generated/gitbaker.g.dart';
 import 'package:dotenv/dotenv.dart';
 import 'package:mime/mime.dart';
 import 'package:shelf/shelf.dart';
@@ -10,9 +12,11 @@ import 'package:tracer/tracer.dart';
 import 'database/database.dart';
 import 'helpers.dart';
 import 'routes/api.dart';
+import 'email/email.dart';
 
 late final Directory dataDirectory;
 late final Directory assetsDirectory;
+late final Directory certsDirectory;
 
 final t = Tracer(
   "datly_server",
@@ -32,6 +36,13 @@ final _router = Router()
   ..get("/legal/terms", legalHandler)
   ..mount("/", fileHandler);
 
+String jwtIssuer(Request req) =>
+    env["DATLY_CANONICAL_URL"] ?? req.requestedUri.origin;
+final jwtPrivateKeyFile = File("${certsDirectory.path}/jwt");
+final jwtPublicKeyFile = File("${certsDirectory.path}/jwt.pub");
+late final RSAPrivateKey jwtPrivateKey;
+late final RSAPublicKey jwtPublicKey;
+
 Future<Response> fileHandler(Request req) async {
   final path = req.url.path == ""
       ? "index.html"
@@ -44,7 +55,7 @@ Future<Response> fileHandler(Request req) async {
   if (file.path == "public/index.html") {
     contents = (await file.readAsString()).replaceAll(
       "{{CANONICAL}}",
-      "https://datly.con.bz",
+      Uri.parse(env["DATLY_CANONICAL_URL"] ?? "").origin,
     );
   } else {
     contents = await file.readAsBytes();
@@ -108,6 +119,10 @@ void shutdown([String signal = "Signal"]) async {
 }
 
 void main(List<String> args) async {
+  t.info(
+    "Datly Server [${GitBaker.currentBranch.name}@${GitBaker.currentBranch.commits.last.hashAbbreviated} (${gitBakerWorkspaceFormat(GitBaker.workspace)})]",
+  );
+
   pandoc("").onError((e, _) => e.toString()).then((value) {
     if (value.contains("pandoc failed")) {
       t.warn(
@@ -127,12 +142,19 @@ void main(List<String> args) async {
   Directory.current = Platform.script.resolve(".").toFilePath();
   dataDirectory = Directory("${Directory.current.parent.path}/data");
   assetsDirectory = Directory("${dataDirectory.path}/assets");
+  certsDirectory = Directory("${dataDirectory.path}/certs");
 
   env = DotEnv(includePlatformEnvironment: true, quiet: true)
     ..load(["${dataDirectory.path}/.env"]);
+  initializeSmtpServer();
+
+  await generateJwtKeys();
+  jwtPrivateKey = RSAPrivateKey(await jwtPrivateKeyFile.readAsString());
+  jwtPublicKey = RSAPublicKey(await jwtPublicKeyFile.readAsString());
 
   defineApiRouter();
   db = AppDatabase();
+  await db.customSelect("SELECT 1").getSingle(); // await migration
 
   final handler = Pipeline()
       .addMiddleware(
@@ -184,48 +206,34 @@ void main(List<String> args) async {
   final existing = await (db.select(
     db.users,
   )..where((u) => u.username.equals(adminUser))).getSingleOrNull();
+
   if (existing == null) {
     final email = env["DATLY_ADMIN_EMAIL"] ?? "admin@localhost";
+    final adminPassword =
+        env["DATLY_ADMIN_PASSWORD"] ?? await generatePlaintextPassword();
+    final secureContext =
+        !(bool.tryParse(
+              env["DATLY_UNTRUSTED_CONSOLE"] ?? "",
+              caseSensitive: false,
+            ) ??
+            false);
+
     await db
         .into(db.users)
         .insert(
           UsersCompanion.insert(
             username: adminUser,
+            password: adminPassword,
             email: email,
             role: Value(UserRole.admin),
           ),
         );
-    t.warn("Created admin user '$adminUser' ($email)");
+    t.warn(
+      "Created admin user '$adminUser' ($email)${secureContext ? ". Temporary password: $adminPassword" : ""}",
+    );
   } else if (existing.role != UserRole.admin) {
     await (db.update(db.users)..where((u) => u.username.equals(adminUser)))
         .write(UsersCompanion(role: Value(UserRole.admin)));
     t.warn("Updated user '$adminUser' to have admin role");
-  }
-
-  var code =
-      (await (db.select(db.loginCodes)..where(
-                (lc) =>
-                    lc.user.equals(adminUser) &
-                    lc.createdBy.isNull() &
-                    lc.expiresAt.isBiggerOrEqualValue(DateTime.now()),
-              ))
-              .get())
-          .firstOrNull
-          ?.code;
-  if (code == null) {
-    final admin = await (db.select(
-      db.users,
-    )..where((u) => u.username.equals(adminUser))).getSingle();
-    code = generateCode();
-    db
-        .into(db.loginCodes)
-        .insert(LoginCodesCompanion.insert(code: code, user: admin.username));
-  }
-  if (!(bool.tryParse(
-        env["DATLY_UNTRUSTED_CONSOLE"] ?? "",
-        caseSensitive: false,
-      ) ??
-      false)) {
-    t.info("'$adminUser' login code: $code");
   }
 }

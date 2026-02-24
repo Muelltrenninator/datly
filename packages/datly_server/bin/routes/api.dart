@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_limiter/shelf_limiter.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -74,31 +75,63 @@ Future<Object?> _apiAuthInternal(
   UserRole minimumRole = UserRole.user,
 }) async {
   var token = req.headers["authorization"];
-  if ((!(token?.startsWith("Token ") ?? false) || token!.length != (6 + 8))) {
+  if ((!(token?.startsWith("Bearer ") ?? false) || token!.length <= 7)) {
+    if (minimumRole.index == UserRole.external.index) return null;
     return Response.unauthorized(
-      jsonEncode({"error": "Invalid or missing authorization token"}),
+      jsonEncode({"error": "Invalid or missing authorization header"}),
       headers: {"Content-Type": "application/json"},
     );
   }
-  token = token.substring(6);
+  token = token.substring(7);
 
-  final code =
-      await (db.select(db.loginCodes)..where(
-            (lc) =>
-                lc.code.equals(token!.toUpperCase()) &
-                lc.expiresAt.isBiggerThan(currentDateAndTime),
-          ))
-          .getSingleOrNull();
-  if (code == null) {
+  JWT jwt;
+  try {
+    jwt = JWT.verify(
+      token,
+      jwtPublicKey,
+      issuer: jwtIssuer(req),
+      audience: Audience.one("auth"),
+    );
+    if (jwt.subject == null) throw JWTException("");
+  } on JWTExpiredException catch (_) {
     return Response.unauthorized(
-      jsonEncode({"error": "Unknown authorization token"}),
+      jsonEncode({"error": "Authorization token expired"}),
+      headers: {"Content-Type": "application/json"},
+    );
+  } on JWTException catch (_) {
+    return Response.unauthorized(
+      jsonEncode({"error": "Invalid authorization token"}),
       headers: {"Content-Type": "application/json"},
     );
   }
 
   final user = await (db.select(
     db.users,
-  )..where((u) => u.username.equals(code.user))).getSingle();
+  )..where((u) => u.username.equals(jwt.subject!))).getSingleOrNull();
+  if (user == null) {
+    return Response.unauthorized(
+      jsonEncode({"error": "User not found, outdated token"}),
+      headers: {"Content-Type": "application/json"},
+    );
+  }
+
+  if (user.disabled != null) {
+    return Response.forbidden(
+      jsonEncode({"error": "User account is disabled"}),
+      headers: {"Content-Type": "application/json"},
+    );
+  } else if (!user.activated) {
+    (db.users.update()..where((u) => u.username.equals(user.username))).write(
+      UsersCompanion(activated: Value(true)),
+    );
+  }
+
+  final locale = localeFromRequest(req);
+  if (locale != null && user.locale != locale) {
+    await (db.users.update()..where((u) => u.username.equals(user.username)))
+        .write(UsersCompanion(locale: Value(locale)));
+  }
+
   if (user.role.index < minimumRole.index) {
     return Response.forbidden(
       jsonEncode({"error": "Insufficient permissions"}),
@@ -106,7 +139,7 @@ Future<Object?> _apiAuthInternal(
     );
   }
 
-  return (code: code, user: user);
+  return (user: user);
 }
 
 Future<Response?> apiAuth(
@@ -119,10 +152,10 @@ Future<Response?> apiAuth(
 }
 
 Future<Response> Function(Request req) apiAuthWall(
-  Function(Request req, ({LoginCode code, User user})? auth) handler, {
+  Function(Request req, ({User user})? auth) handler, {
   UserRole minimumRole = UserRole.user,
 }) => (Request req) async {
   final result = await _apiAuthInternal(req, minimumRole: minimumRole);
   if (result is Response) return result;
-  return handler.call(req, result as ({LoginCode code, User user})?);
+  return handler.call(req, result as ({User user})?);
 };

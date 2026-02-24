@@ -324,6 +324,17 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _passwordMeta = const VerificationMeta(
+    'password',
+  );
+  @override
+  late final GeneratedColumn<String> password = GeneratedColumn<String>(
+    'password',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _emailMeta = const VerificationMeta('email');
   @override
   late final GeneratedColumn<String> email = GeneratedColumn<String>(
@@ -332,6 +343,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _joinedAtMeta = const VerificationMeta(
     'joinedAt',
@@ -365,13 +377,54 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         requiredDuringInsert: false,
         defaultValue: Constant(UserRole.user.name),
       ).withConverter<UserRole>($UsersTable.$converterrole);
+  static const VerificationMeta _disabledMeta = const VerificationMeta(
+    'disabled',
+  );
+  @override
+  late final GeneratedColumn<String> disabled = GeneratedColumn<String>(
+    'disabled',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(null),
+  );
+  static const VerificationMeta _activatedMeta = const VerificationMeta(
+    'activated',
+  );
+  @override
+  late final GeneratedColumn<bool> activated = GeneratedColumn<bool>(
+    'activated',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activated" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _localeMeta = const VerificationMeta('locale');
+  @override
+  late final GeneratedColumn<String> locale = GeneratedColumn<String>(
+    'locale',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant("en"),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     username,
+    password,
     email,
     joinedAt,
     projects,
     role,
+    disabled,
+    activated,
+    locale,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -393,6 +446,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     } else if (isInserting) {
       context.missing(_usernameMeta);
     }
+    if (data.containsKey('password')) {
+      context.handle(
+        _passwordMeta,
+        password.isAcceptableOrUnknown(data['password']!, _passwordMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_passwordMeta);
+    }
     if (data.containsKey('email')) {
       context.handle(
         _emailMeta,
@@ -407,6 +468,24 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         joinedAt.isAcceptableOrUnknown(data['joined_at']!, _joinedAtMeta),
       );
     }
+    if (data.containsKey('disabled')) {
+      context.handle(
+        _disabledMeta,
+        disabled.isAcceptableOrUnknown(data['disabled']!, _disabledMeta),
+      );
+    }
+    if (data.containsKey('activated')) {
+      context.handle(
+        _activatedMeta,
+        activated.isAcceptableOrUnknown(data['activated']!, _activatedMeta),
+      );
+    }
+    if (data.containsKey('locale')) {
+      context.handle(
+        _localeMeta,
+        locale.isAcceptableOrUnknown(data['locale']!, _localeMeta),
+      );
+    }
     return context;
   }
 
@@ -419,6 +498,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       username: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}username'],
+      )!,
+      password: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}password'],
       )!,
       email: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -440,6 +523,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           data['${effectivePrefix}role'],
         )!,
       ),
+      disabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}disabled'],
+      ),
+      activated: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activated'],
+      )!,
+      locale: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}locale'],
+      )!,
     );
   }
 
@@ -456,21 +551,30 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
 
 class User extends DataClass implements Insertable<User> {
   final String username;
+  final String password;
   final String email;
   final DateTime joinedAt;
   final List<int> projects;
   final UserRole role;
+  final String? disabled;
+  final bool activated;
+  final String locale;
   const User({
     required this.username,
+    required this.password,
     required this.email,
     required this.joinedAt,
     required this.projects,
     required this.role,
+    this.disabled,
+    required this.activated,
+    required this.locale,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['username'] = Variable<String>(username);
+    map['password'] = Variable<String>(password);
     map['email'] = Variable<String>(email);
     map['joined_at'] = Variable<DateTime>(joinedAt);
     {
@@ -481,16 +585,27 @@ class User extends DataClass implements Insertable<User> {
     {
       map['role'] = Variable<String>($UsersTable.$converterrole.toSql(role));
     }
+    if (!nullToAbsent || disabled != null) {
+      map['disabled'] = Variable<String>(disabled);
+    }
+    map['activated'] = Variable<bool>(activated);
+    map['locale'] = Variable<String>(locale);
     return map;
   }
 
   UsersCompanion toCompanion(bool nullToAbsent) {
     return UsersCompanion(
       username: Value(username),
+      password: Value(password),
       email: Value(email),
       joinedAt: Value(joinedAt),
       projects: Value(projects),
       role: Value(role),
+      disabled: disabled == null && nullToAbsent
+          ? const Value.absent()
+          : Value(disabled),
+      activated: Value(activated),
+      locale: Value(locale),
     );
   }
 
@@ -501,12 +616,16 @@ class User extends DataClass implements Insertable<User> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return User(
       username: serializer.fromJson<String>(json['username']),
+      password: serializer.fromJson<String>(json['password']),
       email: serializer.fromJson<String>(json['email']),
       joinedAt: serializer.fromJson<DateTime>(json['joinedAt']),
       projects: serializer.fromJson<List<int>>(json['projects']),
       role: $UsersTable.$converterrole.fromJson(
         serializer.fromJson<String>(json['role']),
       ),
+      disabled: serializer.fromJson<String?>(json['disabled']),
+      activated: serializer.fromJson<bool>(json['activated']),
+      locale: serializer.fromJson<String>(json['locale']),
     );
   }
   @override
@@ -514,35 +633,51 @@ class User extends DataClass implements Insertable<User> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'username': serializer.toJson<String>(username),
+      'password': serializer.toJson<String>(password),
       'email': serializer.toJson<String>(email),
       'joinedAt': serializer.toJson<DateTime>(joinedAt),
       'projects': serializer.toJson<List<int>>(projects),
       'role': serializer.toJson<String>(
         $UsersTable.$converterrole.toJson(role),
       ),
+      'disabled': serializer.toJson<String?>(disabled),
+      'activated': serializer.toJson<bool>(activated),
+      'locale': serializer.toJson<String>(locale),
     };
   }
 
   User copyWith({
     String? username,
+    String? password,
     String? email,
     DateTime? joinedAt,
     List<int>? projects,
     UserRole? role,
+    Value<String?> disabled = const Value.absent(),
+    bool? activated,
+    String? locale,
   }) => User(
     username: username ?? this.username,
+    password: password ?? this.password,
     email: email ?? this.email,
     joinedAt: joinedAt ?? this.joinedAt,
     projects: projects ?? this.projects,
     role: role ?? this.role,
+    disabled: disabled.present ? disabled.value : this.disabled,
+    activated: activated ?? this.activated,
+    locale: locale ?? this.locale,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
       username: data.username.present ? data.username.value : this.username,
+      password: data.password.present ? data.password.value : this.password,
       email: data.email.present ? data.email.value : this.email,
       joinedAt: data.joinedAt.present ? data.joinedAt.value : this.joinedAt,
       projects: data.projects.present ? data.projects.value : this.projects,
       role: data.role.present ? data.role.value : this.role,
+      disabled: data.disabled.present ? data.disabled.value : this.disabled,
+      activated: data.activated.present ? data.activated.value : this.activated,
+      locale: data.locale.present ? data.locale.value : this.locale,
     );
   }
 
@@ -550,83 +685,130 @@ class User extends DataClass implements Insertable<User> {
   String toString() {
     return (StringBuffer('User(')
           ..write('username: $username, ')
+          ..write('password: $password, ')
           ..write('email: $email, ')
           ..write('joinedAt: $joinedAt, ')
           ..write('projects: $projects, ')
-          ..write('role: $role')
+          ..write('role: $role, ')
+          ..write('disabled: $disabled, ')
+          ..write('activated: $activated, ')
+          ..write('locale: $locale')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(username, email, joinedAt, projects, role);
+  int get hashCode => Object.hash(
+    username,
+    password,
+    email,
+    joinedAt,
+    projects,
+    role,
+    disabled,
+    activated,
+    locale,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is User &&
           other.username == this.username &&
+          other.password == this.password &&
           other.email == this.email &&
           other.joinedAt == this.joinedAt &&
           other.projects == this.projects &&
-          other.role == this.role);
+          other.role == this.role &&
+          other.disabled == this.disabled &&
+          other.activated == this.activated &&
+          other.locale == this.locale);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> username;
+  final Value<String> password;
   final Value<String> email;
   final Value<DateTime> joinedAt;
   final Value<List<int>> projects;
   final Value<UserRole> role;
+  final Value<String?> disabled;
+  final Value<bool> activated;
+  final Value<String> locale;
   final Value<int> rowid;
   const UsersCompanion({
     this.username = const Value.absent(),
+    this.password = const Value.absent(),
     this.email = const Value.absent(),
     this.joinedAt = const Value.absent(),
     this.projects = const Value.absent(),
     this.role = const Value.absent(),
+    this.disabled = const Value.absent(),
+    this.activated = const Value.absent(),
+    this.locale = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UsersCompanion.insert({
     required String username,
+    required String password,
     required String email,
     this.joinedAt = const Value.absent(),
     this.projects = const Value.absent(),
     this.role = const Value.absent(),
+    this.disabled = const Value.absent(),
+    this.activated = const Value.absent(),
+    this.locale = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : username = Value(username),
+       password = Value(password),
        email = Value(email);
   static Insertable<User> custom({
     Expression<String>? username,
+    Expression<String>? password,
     Expression<String>? email,
     Expression<DateTime>? joinedAt,
     Expression<String>? projects,
     Expression<String>? role,
+    Expression<String>? disabled,
+    Expression<bool>? activated,
+    Expression<String>? locale,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (username != null) 'username': username,
+      if (password != null) 'password': password,
       if (email != null) 'email': email,
       if (joinedAt != null) 'joined_at': joinedAt,
       if (projects != null) 'projects': projects,
       if (role != null) 'role': role,
+      if (disabled != null) 'disabled': disabled,
+      if (activated != null) 'activated': activated,
+      if (locale != null) 'locale': locale,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   UsersCompanion copyWith({
     Value<String>? username,
+    Value<String>? password,
     Value<String>? email,
     Value<DateTime>? joinedAt,
     Value<List<int>>? projects,
     Value<UserRole>? role,
+    Value<String?>? disabled,
+    Value<bool>? activated,
+    Value<String>? locale,
     Value<int>? rowid,
   }) {
     return UsersCompanion(
       username: username ?? this.username,
+      password: password ?? this.password,
       email: email ?? this.email,
       joinedAt: joinedAt ?? this.joinedAt,
       projects: projects ?? this.projects,
       role: role ?? this.role,
+      disabled: disabled ?? this.disabled,
+      activated: activated ?? this.activated,
+      locale: locale ?? this.locale,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -636,6 +818,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     final map = <String, Expression>{};
     if (username.present) {
       map['username'] = Variable<String>(username.value);
+    }
+    if (password.present) {
+      map['password'] = Variable<String>(password.value);
     }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
@@ -653,6 +838,15 @@ class UsersCompanion extends UpdateCompanion<User> {
         $UsersTable.$converterrole.toSql(role.value),
       );
     }
+    if (disabled.present) {
+      map['disabled'] = Variable<String>(disabled.value);
+    }
+    if (activated.present) {
+      map['activated'] = Variable<bool>(activated.value);
+    }
+    if (locale.present) {
+      map['locale'] = Variable<String>(locale.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -663,382 +857,14 @@ class UsersCompanion extends UpdateCompanion<User> {
   String toString() {
     return (StringBuffer('UsersCompanion(')
           ..write('username: $username, ')
+          ..write('password: $password, ')
           ..write('email: $email, ')
           ..write('joinedAt: $joinedAt, ')
           ..write('projects: $projects, ')
           ..write('role: $role, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $LoginCodesTable extends LoginCodes
-    with TableInfo<$LoginCodesTable, LoginCode> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $LoginCodesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _codeMeta = const VerificationMeta('code');
-  @override
-  late final GeneratedColumn<String> code = GeneratedColumn<String>(
-    'code',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 8,
-      maxTextLength: 8,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _userMeta = const VerificationMeta('user');
-  @override
-  late final GeneratedColumn<String> user = GeneratedColumn<String>(
-    'user',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (username) ON UPDATE CASCADE ON DELETE CASCADE',
-    ),
-  );
-  static const VerificationMeta _createdByMeta = const VerificationMeta(
-    'createdBy',
-  );
-  @override
-  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
-    'created_by',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (username) ON UPDATE SET DEFAULT ON DELETE SET DEFAULT',
-    ),
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
-  );
-  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
-    'expiresAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
-    'expires_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: DateTimeExpressions(
-      currentDateAndTime,
-    ).modify(DateTimeModifier.days(180)),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    code,
-    user,
-    createdBy,
-    createdAt,
-    expiresAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'login_codes';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<LoginCode> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('code')) {
-      context.handle(
-        _codeMeta,
-        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_codeMeta);
-    }
-    if (data.containsKey('user')) {
-      context.handle(
-        _userMeta,
-        user.isAcceptableOrUnknown(data['user']!, _userMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_userMeta);
-    }
-    if (data.containsKey('created_by')) {
-      context.handle(
-        _createdByMeta,
-        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
-      );
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    if (data.containsKey('expires_at')) {
-      context.handle(
-        _expiresAtMeta,
-        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {code};
-  @override
-  LoginCode map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return LoginCode(
-      code: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}code'],
-      )!,
-      user: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}user'],
-      )!,
-      createdBy: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}created_by'],
-      ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-      expiresAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}expires_at'],
-      )!,
-    );
-  }
-
-  @override
-  $LoginCodesTable createAlias(String alias) {
-    return $LoginCodesTable(attachedDatabase, alias);
-  }
-}
-
-class LoginCode extends DataClass implements Insertable<LoginCode> {
-  final String code;
-  final String user;
-  final String? createdBy;
-  final DateTime createdAt;
-  final DateTime expiresAt;
-  const LoginCode({
-    required this.code,
-    required this.user,
-    this.createdBy,
-    required this.createdAt,
-    required this.expiresAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['code'] = Variable<String>(code);
-    map['user'] = Variable<String>(user);
-    if (!nullToAbsent || createdBy != null) {
-      map['created_by'] = Variable<String>(createdBy);
-    }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['expires_at'] = Variable<DateTime>(expiresAt);
-    return map;
-  }
-
-  LoginCodesCompanion toCompanion(bool nullToAbsent) {
-    return LoginCodesCompanion(
-      code: Value(code),
-      user: Value(user),
-      createdBy: createdBy == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdBy),
-      createdAt: Value(createdAt),
-      expiresAt: Value(expiresAt),
-    );
-  }
-
-  factory LoginCode.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return LoginCode(
-      code: serializer.fromJson<String>(json['code']),
-      user: serializer.fromJson<String>(json['user']),
-      createdBy: serializer.fromJson<String?>(json['createdBy']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      expiresAt: serializer.fromJson<DateTime>(json['expiresAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'code': serializer.toJson<String>(code),
-      'user': serializer.toJson<String>(user),
-      'createdBy': serializer.toJson<String?>(createdBy),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'expiresAt': serializer.toJson<DateTime>(expiresAt),
-    };
-  }
-
-  LoginCode copyWith({
-    String? code,
-    String? user,
-    Value<String?> createdBy = const Value.absent(),
-    DateTime? createdAt,
-    DateTime? expiresAt,
-  }) => LoginCode(
-    code: code ?? this.code,
-    user: user ?? this.user,
-    createdBy: createdBy.present ? createdBy.value : this.createdBy,
-    createdAt: createdAt ?? this.createdAt,
-    expiresAt: expiresAt ?? this.expiresAt,
-  );
-  LoginCode copyWithCompanion(LoginCodesCompanion data) {
-    return LoginCode(
-      code: data.code.present ? data.code.value : this.code,
-      user: data.user.present ? data.user.value : this.user,
-      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('LoginCode(')
-          ..write('code: $code, ')
-          ..write('user: $user, ')
-          ..write('createdBy: $createdBy, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('expiresAt: $expiresAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(code, user, createdBy, createdAt, expiresAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is LoginCode &&
-          other.code == this.code &&
-          other.user == this.user &&
-          other.createdBy == this.createdBy &&
-          other.createdAt == this.createdAt &&
-          other.expiresAt == this.expiresAt);
-}
-
-class LoginCodesCompanion extends UpdateCompanion<LoginCode> {
-  final Value<String> code;
-  final Value<String> user;
-  final Value<String?> createdBy;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> expiresAt;
-  final Value<int> rowid;
-  const LoginCodesCompanion({
-    this.code = const Value.absent(),
-    this.user = const Value.absent(),
-    this.createdBy = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.expiresAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  LoginCodesCompanion.insert({
-    required String code,
-    required String user,
-    this.createdBy = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.expiresAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : code = Value(code),
-       user = Value(user);
-  static Insertable<LoginCode> custom({
-    Expression<String>? code,
-    Expression<String>? user,
-    Expression<String>? createdBy,
-    Expression<DateTime>? createdAt,
-    Expression<DateTime>? expiresAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (code != null) 'code': code,
-      if (user != null) 'user': user,
-      if (createdBy != null) 'created_by': createdBy,
-      if (createdAt != null) 'created_at': createdAt,
-      if (expiresAt != null) 'expires_at': expiresAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  LoginCodesCompanion copyWith({
-    Value<String>? code,
-    Value<String>? user,
-    Value<String?>? createdBy,
-    Value<DateTime>? createdAt,
-    Value<DateTime>? expiresAt,
-    Value<int>? rowid,
-  }) {
-    return LoginCodesCompanion(
-      code: code ?? this.code,
-      user: user ?? this.user,
-      createdBy: createdBy ?? this.createdBy,
-      createdAt: createdAt ?? this.createdAt,
-      expiresAt: expiresAt ?? this.expiresAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (code.present) {
-      map['code'] = Variable<String>(code.value);
-    }
-    if (user.present) {
-      map['user'] = Variable<String>(user.value);
-    }
-    if (createdBy.present) {
-      map['created_by'] = Variable<String>(createdBy.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (expiresAt.present) {
-      map['expires_at'] = Variable<DateTime>(expiresAt.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('LoginCodesCompanion(')
-          ..write('code: $code, ')
-          ..write('user: $user, ')
-          ..write('createdBy: $createdBy, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('expiresAt: $expiresAt, ')
+          ..write('disabled: $disabled, ')
+          ..write('activated: $activated, ')
+          ..write('locale: $locale, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1075,7 +901,7 @@ class $SubmissionsTable extends Submissions
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES projects (id) ON UPDATE CASCADE ON DELETE CASCADE',
+      'REFERENCES projects (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _userMeta = const VerificationMeta('user');
@@ -1083,11 +909,11 @@ class $SubmissionsTable extends Submissions
   late final GeneratedColumn<String> user = GeneratedColumn<String>(
     'user',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (username) ON UPDATE SET DEFAULT ON DELETE CASCADE',
+      'REFERENCES users (username) ON DELETE CASCADE',
     ),
   );
   @override
@@ -1188,6 +1014,8 @@ class $SubmissionsTable extends Submissions
         _userMeta,
         user.isAcceptableOrUnknown(data['user']!, _userMeta),
       );
+    } else if (isInserting) {
+      context.missing(_userMeta);
     }
     if (data.containsKey('submitted_at')) {
       context.handle(
@@ -1244,7 +1072,7 @@ class $SubmissionsTable extends Submissions
       user: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}user'],
-      ),
+      )!,
       status: $SubmissionsTable.$converterstatus.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -1282,7 +1110,7 @@ class $SubmissionsTable extends Submissions
 class Submission extends DataClass implements Insertable<Submission> {
   final int id;
   final int projectId;
-  final String? user;
+  final String user;
   final SubmissionStatus status;
   final DateTime submittedAt;
   final String? assetId;
@@ -1291,7 +1119,7 @@ class Submission extends DataClass implements Insertable<Submission> {
   const Submission({
     required this.id,
     required this.projectId,
-    this.user,
+    required this.user,
     required this.status,
     required this.submittedAt,
     this.assetId,
@@ -1303,9 +1131,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['project_id'] = Variable<int>(projectId);
-    if (!nullToAbsent || user != null) {
-      map['user'] = Variable<String>(user);
-    }
+    map['user'] = Variable<String>(user);
     {
       map['status'] = Variable<String>(
         $SubmissionsTable.$converterstatus.toSql(status),
@@ -1326,7 +1152,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     return SubmissionsCompanion(
       id: Value(id),
       projectId: Value(projectId),
-      user: user == null && nullToAbsent ? const Value.absent() : Value(user),
+      user: Value(user),
       status: Value(status),
       submittedAt: Value(submittedAt),
       assetId: assetId == null && nullToAbsent
@@ -1347,7 +1173,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     return Submission(
       id: serializer.fromJson<int>(json['id']),
       projectId: serializer.fromJson<int>(json['projectId']),
-      user: serializer.fromJson<String?>(json['user']),
+      user: serializer.fromJson<String>(json['user']),
       status: $SubmissionsTable.$converterstatus.fromJson(
         serializer.fromJson<String>(json['status']),
       ),
@@ -1363,7 +1189,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'projectId': serializer.toJson<int>(projectId),
-      'user': serializer.toJson<String?>(user),
+      'user': serializer.toJson<String>(user),
       'status': serializer.toJson<String>(
         $SubmissionsTable.$converterstatus.toJson(status),
       ),
@@ -1377,7 +1203,7 @@ class Submission extends DataClass implements Insertable<Submission> {
   Submission copyWith({
     int? id,
     int? projectId,
-    Value<String?> user = const Value.absent(),
+    String? user,
     SubmissionStatus? status,
     DateTime? submittedAt,
     Value<String?> assetId = const Value.absent(),
@@ -1386,7 +1212,7 @@ class Submission extends DataClass implements Insertable<Submission> {
   }) => Submission(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
-    user: user.present ? user.value : this.user,
+    user: user ?? this.user,
     status: status ?? this.status,
     submittedAt: submittedAt ?? this.submittedAt,
     assetId: assetId.present ? assetId.value : this.assetId,
@@ -1457,7 +1283,7 @@ class Submission extends DataClass implements Insertable<Submission> {
 class SubmissionsCompanion extends UpdateCompanion<Submission> {
   final Value<int> id;
   final Value<int> projectId;
-  final Value<String?> user;
+  final Value<String> user;
   final Value<SubmissionStatus> status;
   final Value<DateTime> submittedAt;
   final Value<String?> assetId;
@@ -1476,13 +1302,14 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   SubmissionsCompanion.insert({
     this.id = const Value.absent(),
     required int projectId,
-    this.user = const Value.absent(),
+    required String user,
     this.status = const Value.absent(),
     this.submittedAt = const Value.absent(),
     this.assetId = const Value.absent(),
     this.assetMimeType = const Value.absent(),
     required String assetBlurHash,
   }) : projectId = Value(projectId),
+       user = Value(user),
        assetBlurHash = Value(assetBlurHash);
   static Insertable<Submission> custom({
     Expression<int>? id,
@@ -1509,7 +1336,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   SubmissionsCompanion copyWith({
     Value<int>? id,
     Value<int>? projectId,
-    Value<String?>? user,
+    Value<String>? user,
     Value<SubmissionStatus>? status,
     Value<DateTime>? submittedAt,
     Value<String?>? assetId,
@@ -2426,7 +2253,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ProjectsTable projects = $ProjectsTable(this);
   late final $UsersTable users = $UsersTable(this);
-  late final $LoginCodesTable loginCodes = $LoginCodesTable(this);
   late final $SubmissionsTable submissions = $SubmissionsTable(this);
   late final $SignaturesTable signatures = $SignaturesTable(this);
   @override
@@ -2436,7 +2262,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     projects,
     users,
-    loginCodes,
     submissions,
     signatures,
   ];
@@ -2444,34 +2269,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
     WritePropagation(
       on: TableUpdateQuery.onTableName(
-        'users',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('login_codes', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'users',
-        limitUpdateKind: UpdateKind.update,
-      ),
-      result: [TableUpdate('login_codes', kind: UpdateKind.update)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'users',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('login_codes', kind: UpdateKind.update)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'users',
-        limitUpdateKind: UpdateKind.update,
-      ),
-      result: [TableUpdate('login_codes', kind: UpdateKind.update)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
         'projects',
         limitUpdateKind: UpdateKind.delete,
       ),
@@ -2479,24 +2276,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
-        'projects',
-        limitUpdateKind: UpdateKind.update,
-      ),
-      result: [TableUpdate('submissions', kind: UpdateKind.update)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
         'users',
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('submissions', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'users',
-        limitUpdateKind: UpdateKind.update,
-      ),
-      result: [TableUpdate('submissions', kind: UpdateKind.update)],
     ),
   ]);
 }
@@ -2781,59 +2564,33 @@ typedef $$ProjectsTableProcessedTableManager =
 typedef $$UsersTableCreateCompanionBuilder =
     UsersCompanion Function({
       required String username,
+      required String password,
       required String email,
       Value<DateTime> joinedAt,
       Value<List<int>> projects,
       Value<UserRole> role,
+      Value<String?> disabled,
+      Value<bool> activated,
+      Value<String> locale,
       Value<int> rowid,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
     UsersCompanion Function({
       Value<String> username,
+      Value<String> password,
       Value<String> email,
       Value<DateTime> joinedAt,
       Value<List<int>> projects,
       Value<UserRole> role,
+      Value<String?> disabled,
+      Value<bool> activated,
+      Value<String> locale,
       Value<int> rowid,
     });
 
 final class $$UsersTableReferences
     extends BaseReferences<_$AppDatabase, $UsersTable, User> {
   $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$LoginCodesTable, List<LoginCode>>
-  _loginCodeOfUserTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.loginCodes,
-    aliasName: $_aliasNameGenerator(db.users.username, db.loginCodes.user),
-  );
-
-  $$LoginCodesTableProcessedTableManager get loginCodeOfUser {
-    final manager = $$LoginCodesTableTableManager($_db, $_db.loginCodes).filter(
-      (f) => f.user.username.sqlEquals($_itemColumn<String>('username')!),
-    );
-
-    final cache = $_typedResult.readTableOrNull(_loginCodeOfUserTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$LoginCodesTable, List<LoginCode>>
-  _loginCodeCreatedByTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.loginCodes,
-    aliasName: $_aliasNameGenerator(db.users.username, db.loginCodes.createdBy),
-  );
-
-  $$LoginCodesTableProcessedTableManager get loginCodeCreatedBy {
-    final manager = $$LoginCodesTableTableManager($_db, $_db.loginCodes).filter(
-      (f) => f.createdBy.username.sqlEquals($_itemColumn<String>('username')!),
-    );
-
-    final cache = $_typedResult.readTableOrNull(_loginCodeCreatedByTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
 
   static MultiTypedResultKey<$SubmissionsTable, List<Submission>>
   _submissionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -2867,6 +2624,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnFilters(column),
@@ -2889,55 +2651,20 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  Expression<bool> loginCodeOfUser(
-    Expression<bool> Function($$LoginCodesTableFilterComposer f) f,
-  ) {
-    final $$LoginCodesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.username,
-      referencedTable: $db.loginCodes,
-      getReferencedColumn: (t) => t.user,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$LoginCodesTableFilterComposer(
-            $db: $db,
-            $table: $db.loginCodes,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
+  ColumnFilters<String> get disabled => $composableBuilder(
+    column: $table.disabled,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  Expression<bool> loginCodeCreatedBy(
-    Expression<bool> Function($$LoginCodesTableFilterComposer f) f,
-  ) {
-    final $$LoginCodesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.username,
-      referencedTable: $db.loginCodes,
-      getReferencedColumn: (t) => t.createdBy,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$LoginCodesTableFilterComposer(
-            $db: $db,
-            $table: $db.loginCodes,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
+  ColumnFilters<bool> get activated => $composableBuilder(
+    column: $table.activated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get locale => $composableBuilder(
+    column: $table.locale,
+    builder: (column) => ColumnFilters(column),
+  );
 
   Expression<bool> submissionsRefs(
     Expression<bool> Function($$SubmissionsTableFilterComposer f) f,
@@ -2979,6 +2706,11 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnOrderings(column),
@@ -2998,6 +2730,21 @@ class $$UsersTableOrderingComposer
     column: $table.role,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get disabled => $composableBuilder(
+    column: $table.disabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activated => $composableBuilder(
+    column: $table.activated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get locale => $composableBuilder(
+    column: $table.locale,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -3012,6 +2759,9 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<String> get username =>
       $composableBuilder(column: $table.username, builder: (column) => column);
 
+  GeneratedColumn<String> get password =>
+      $composableBuilder(column: $table.password, builder: (column) => column);
+
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
 
@@ -3024,55 +2774,14 @@ class $$UsersTableAnnotationComposer
   GeneratedColumnWithTypeConverter<UserRole, String> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
 
-  Expression<T> loginCodeOfUser<T extends Object>(
-    Expression<T> Function($$LoginCodesTableAnnotationComposer a) f,
-  ) {
-    final $$LoginCodesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.username,
-      referencedTable: $db.loginCodes,
-      getReferencedColumn: (t) => t.user,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$LoginCodesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.loginCodes,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
+  GeneratedColumn<String> get disabled =>
+      $composableBuilder(column: $table.disabled, builder: (column) => column);
 
-  Expression<T> loginCodeCreatedBy<T extends Object>(
-    Expression<T> Function($$LoginCodesTableAnnotationComposer a) f,
-  ) {
-    final $$LoginCodesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.username,
-      referencedTable: $db.loginCodes,
-      getReferencedColumn: (t) => t.createdBy,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$LoginCodesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.loginCodes,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
+  GeneratedColumn<bool> get activated =>
+      $composableBuilder(column: $table.activated, builder: (column) => column);
+
+  GeneratedColumn<String> get locale =>
+      $composableBuilder(column: $table.locale, builder: (column) => column);
 
   Expression<T> submissionsRefs<T extends Object>(
     Expression<T> Function($$SubmissionsTableAnnotationComposer a) f,
@@ -3113,11 +2822,7 @@ class $$UsersTableTableManager
           $$UsersTableUpdateCompanionBuilder,
           (User, $$UsersTableReferences),
           User,
-          PrefetchHooks Function({
-            bool loginCodeOfUser,
-            bool loginCodeCreatedBy,
-            bool submissionsRefs,
-          })
+          PrefetchHooks Function({bool submissionsRefs})
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
     : super(
@@ -3133,33 +2838,49 @@ class $$UsersTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> username = const Value.absent(),
+                Value<String> password = const Value.absent(),
                 Value<String> email = const Value.absent(),
                 Value<DateTime> joinedAt = const Value.absent(),
                 Value<List<int>> projects = const Value.absent(),
                 Value<UserRole> role = const Value.absent(),
+                Value<String?> disabled = const Value.absent(),
+                Value<bool> activated = const Value.absent(),
+                Value<String> locale = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion(
                 username: username,
+                password: password,
                 email: email,
                 joinedAt: joinedAt,
                 projects: projects,
                 role: role,
+                disabled: disabled,
+                activated: activated,
+                locale: locale,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String username,
+                required String password,
                 required String email,
                 Value<DateTime> joinedAt = const Value.absent(),
                 Value<List<int>> projects = const Value.absent(),
                 Value<UserRole> role = const Value.absent(),
+                Value<String?> disabled = const Value.absent(),
+                Value<bool> activated = const Value.absent(),
+                Value<String> locale = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion.insert(
                 username: username,
+                password: password,
                 email: email,
                 joinedAt: joinedAt,
                 projects: projects,
                 role: role,
+                disabled: disabled,
+                activated: activated,
+                locale: locale,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3168,81 +2889,28 @@ class $$UsersTableTableManager
                     (e.readTable(table), $$UsersTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback:
-              ({
-                loginCodeOfUser = false,
-                loginCodeCreatedBy = false,
-                submissionsRefs = false,
-              }) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (loginCodeOfUser) db.loginCodes,
-                    if (loginCodeCreatedBy) db.loginCodes,
-                    if (submissionsRefs) db.submissions,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (loginCodeOfUser)
-                        await $_getPrefetchedData<User, $UsersTable, LoginCode>(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._loginCodeOfUserTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).loginCodeOfUser,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.user == item.username,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (loginCodeCreatedBy)
-                        await $_getPrefetchedData<User, $UsersTable, LoginCode>(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._loginCodeCreatedByTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).loginCodeCreatedBy,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.createdBy == item.username,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (submissionsRefs)
-                        await $_getPrefetchedData<
-                          User,
-                          $UsersTable,
-                          Submission
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._submissionsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).submissionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.user == item.username,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
+          prefetchHooksCallback: ({submissionsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (submissionsRefs) db.submissions],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (submissionsRefs)
+                    await $_getPrefetchedData<User, $UsersTable, Submission>(
+                      currentTable: table,
+                      referencedTable: $$UsersTableReferences
+                          ._submissionsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$UsersTableReferences(db, table, p0).submissionsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.user == item.username),
+                      typedResults: items,
+                    ),
+                ];
               },
+            );
+          },
         ),
       );
 }
@@ -3259,422 +2927,13 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableUpdateCompanionBuilder,
       (User, $$UsersTableReferences),
       User,
-      PrefetchHooks Function({
-        bool loginCodeOfUser,
-        bool loginCodeCreatedBy,
-        bool submissionsRefs,
-      })
-    >;
-typedef $$LoginCodesTableCreateCompanionBuilder =
-    LoginCodesCompanion Function({
-      required String code,
-      required String user,
-      Value<String?> createdBy,
-      Value<DateTime> createdAt,
-      Value<DateTime> expiresAt,
-      Value<int> rowid,
-    });
-typedef $$LoginCodesTableUpdateCompanionBuilder =
-    LoginCodesCompanion Function({
-      Value<String> code,
-      Value<String> user,
-      Value<String?> createdBy,
-      Value<DateTime> createdAt,
-      Value<DateTime> expiresAt,
-      Value<int> rowid,
-    });
-
-final class $$LoginCodesTableReferences
-    extends BaseReferences<_$AppDatabase, $LoginCodesTable, LoginCode> {
-  $$LoginCodesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $UsersTable _userTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.loginCodes.user, db.users.username),
-  );
-
-  $$UsersTableProcessedTableManager get user {
-    final $_column = $_itemColumn<String>('user')!;
-
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.username.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_userTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $UsersTable _createdByTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.loginCodes.createdBy, db.users.username),
-  );
-
-  $$UsersTableProcessedTableManager? get createdBy {
-    final $_column = $_itemColumn<String>('created_by');
-    if ($_column == null) return null;
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.username.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_createdByTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
-class $$LoginCodesTableFilterComposer
-    extends Composer<_$AppDatabase, $LoginCodesTable> {
-  $$LoginCodesTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get code => $composableBuilder(
-    column: $table.code,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
-    column: $table.expiresAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$UsersTableFilterComposer get user {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.user,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.username,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$UsersTableFilterComposer get createdBy {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.createdBy,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.username,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$LoginCodesTableOrderingComposer
-    extends Composer<_$AppDatabase, $LoginCodesTable> {
-  $$LoginCodesTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get code => $composableBuilder(
-    column: $table.code,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
-    column: $table.expiresAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$UsersTableOrderingComposer get user {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.user,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.username,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$UsersTableOrderingComposer get createdBy {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.createdBy,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.username,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$LoginCodesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $LoginCodesTable> {
-  $$LoginCodesTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get code =>
-      $composableBuilder(column: $table.code, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get expiresAt =>
-      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
-
-  $$UsersTableAnnotationComposer get user {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.user,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.username,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$UsersTableAnnotationComposer get createdBy {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.createdBy,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.username,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$LoginCodesTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $LoginCodesTable,
-          LoginCode,
-          $$LoginCodesTableFilterComposer,
-          $$LoginCodesTableOrderingComposer,
-          $$LoginCodesTableAnnotationComposer,
-          $$LoginCodesTableCreateCompanionBuilder,
-          $$LoginCodesTableUpdateCompanionBuilder,
-          (LoginCode, $$LoginCodesTableReferences),
-          LoginCode,
-          PrefetchHooks Function({bool user, bool createdBy})
-        > {
-  $$LoginCodesTableTableManager(_$AppDatabase db, $LoginCodesTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$LoginCodesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$LoginCodesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$LoginCodesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> code = const Value.absent(),
-                Value<String> user = const Value.absent(),
-                Value<String?> createdBy = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> expiresAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => LoginCodesCompanion(
-                code: code,
-                user: user,
-                createdBy: createdBy,
-                createdAt: createdAt,
-                expiresAt: expiresAt,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String code,
-                required String user,
-                Value<String?> createdBy = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> expiresAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => LoginCodesCompanion.insert(
-                code: code,
-                user: user,
-                createdBy: createdBy,
-                createdAt: createdAt,
-                expiresAt: expiresAt,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$LoginCodesTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: ({user = false, createdBy = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (user) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.user,
-                                referencedTable: $$LoginCodesTableReferences
-                                    ._userTable(db),
-                                referencedColumn: $$LoginCodesTableReferences
-                                    ._userTable(db)
-                                    .username,
-                              )
-                              as T;
-                    }
-                    if (createdBy) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.createdBy,
-                                referencedTable: $$LoginCodesTableReferences
-                                    ._createdByTable(db),
-                                referencedColumn: $$LoginCodesTableReferences
-                                    ._createdByTable(db)
-                                    .username,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
-        ),
-      );
-}
-
-typedef $$LoginCodesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $LoginCodesTable,
-      LoginCode,
-      $$LoginCodesTableFilterComposer,
-      $$LoginCodesTableOrderingComposer,
-      $$LoginCodesTableAnnotationComposer,
-      $$LoginCodesTableCreateCompanionBuilder,
-      $$LoginCodesTableUpdateCompanionBuilder,
-      (LoginCode, $$LoginCodesTableReferences),
-      LoginCode,
-      PrefetchHooks Function({bool user, bool createdBy})
+      PrefetchHooks Function({bool submissionsRefs})
     >;
 typedef $$SubmissionsTableCreateCompanionBuilder =
     SubmissionsCompanion Function({
       Value<int> id,
       required int projectId,
-      Value<String?> user,
+      required String user,
       Value<SubmissionStatus> status,
       Value<DateTime> submittedAt,
       Value<String?> assetId,
@@ -3685,7 +2944,7 @@ typedef $$SubmissionsTableUpdateCompanionBuilder =
     SubmissionsCompanion Function({
       Value<int> id,
       Value<int> projectId,
-      Value<String?> user,
+      Value<String> user,
       Value<SubmissionStatus> status,
       Value<DateTime> submittedAt,
       Value<String?> assetId,
@@ -3720,9 +2979,9 @@ final class $$SubmissionsTableReferences
     $_aliasNameGenerator(db.submissions.user, db.users.username),
   );
 
-  $$UsersTableProcessedTableManager? get user {
-    final $_column = $_itemColumn<String>('user');
-    if ($_column == null) return null;
+  $$UsersTableProcessedTableManager get user {
+    final $_column = $_itemColumn<String>('user')!;
+
     final manager = $$UsersTableTableManager(
       $_db,
       $_db.users,
@@ -4018,7 +3277,7 @@ class $$SubmissionsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> projectId = const Value.absent(),
-                Value<String?> user = const Value.absent(),
+                Value<String> user = const Value.absent(),
                 Value<SubmissionStatus> status = const Value.absent(),
                 Value<DateTime> submittedAt = const Value.absent(),
                 Value<String?> assetId = const Value.absent(),
@@ -4038,7 +3297,7 @@ class $$SubmissionsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required int projectId,
-                Value<String?> user = const Value.absent(),
+                required String user,
                 Value<SubmissionStatus> status = const Value.absent(),
                 Value<DateTime> submittedAt = const Value.absent(),
                 Value<String?> assetId = const Value.absent(),
@@ -4522,8 +3781,6 @@ class $AppDatabaseManager {
       $$ProjectsTableTableManager(_db, _db.projects);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db, _db.users);
-  $$LoginCodesTableTableManager get loginCodes =>
-      $$LoginCodesTableTableManager(_db, _db.loginCodes);
   $$SubmissionsTableTableManager get submissions =>
       $$SubmissionsTableTableManager(_db, _db.submissions);
   $$SignaturesTableTableManager get signatures =>

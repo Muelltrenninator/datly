@@ -1,0 +1,49 @@
+<!-- ignore this file, it's an absolute mess -->
+
+<mjml>
+  <mj-head>
+    <mj-title>{{summary}}</mj-title>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Arial, sans-serif" />
+
+      <mj-text color="#e0e0e0" font-size="16px" line-height="24px" />
+    </mj-attributes>
+  </mj-head>
+
+  <mj-body>
+
+    <mj-wrapper background-color="#1e1e1e" padding="30px 20px" border-radius="8px">
+
+      <mj-section padding="0px" padding-top="0px">
+        <mj-column vertical-align="middle">
+
+          <mj-image src="https://datly.con.bz/assets/assets/emailLogo.png" href="{{canonical}}" alt="Datly Logo" width="110px" height="30px" align="left" />
+
+        </mj-column>
+      </mj-section>
+
+      <mj-section padding-top="6px" padding-bottom="0px">
+        <mj-column>
+
+          <mj-text>{%hello%}</mj-text>
+
+          <mj-raw>{%content%}</mj-raw>
+
+        </mj-column>
+      </mj-section>
+
+      <mj-section padding-top="12px" padding-bottom="0px">
+        <mj-column>
+
+          <mj-divider border-width="1px" border-color="#333333" padding-bottom="28px" />
+
+          <mj-text color="#999999" font-size="9px" line-height="14px" align="center" padding="0px">
+            {%footer%}
+          </mj-text>
+
+        </mj-column>
+      </mj-section>
+
+    </mj-wrapper>
+  </mj-body>
+</mjml>

@@ -47,40 +47,110 @@
             }
         }
     },
+    "loginInvalidEmail": "Please enter a valid email address.",
+    "@loginInvalidEmail": {
+        "description": "Error message shown when the user enters an invalid email address during login.",
+        "context": "login"
+    },
     "loginError": "Server unreachable. Please check your internet connection.",
     "@loginError": {
         "description": "Error message shown when the server cannot be reached during login.",
         "context": "login"
     },
-    "loginUnknown": "Unknown login code.",
+    "loginAccountDisabled": "Your account has been disabled. Learn about the details in the email sent to your linked email address.",
+    "@loginAccountDisabled": {
+        "description": "Error message shown when the user's account has been disabled.",
+        "context": "login"
+    },
+    "loginUnknown": "Unknown email or password.",
     "@loginUnknown": {
-        "description": "Error message shown when the provided login code is not recognized.",
+        "description": "Error message shown when the provided user data is not recognized.",
         "context": "login"
     },
-    "loginCodeLabel": "Login code",
-    "@loginCodeLabel": {
-        "description": "Label for the login code input field.",
+    "loginEmailLabel": "Email address",
+    "@loginEmailLabel": {
+        "description": "Label for the email address input field during login.",
         "context": "login"
     },
-    "loginNewHere": "New here?",
-    "@loginNewHere": {
-        "description": "Text prompting new users to request a login code.",
+    "loginPasswordLabel": "Password",
+    "@loginPasswordLabel": {
+        "description": "Label for the password input field during login.",
         "context": "login"
     },
-    "loginNewHereRequest": "Request a code.",
-    "@loginNewHereRequest": {
-        "description": "Link text for new users to request a login code.",
+    "loginSubmit": "Log in",
+    "@loginSubmit": {
+        "description": "Button text to submit the login form.",
         "context": "login"
     },
-    "loginPrivacyPolicy": "Privacy Policy",
-    "@loginPrivacyPolicy": {
+    "loginRegister": "Sign up",
+    "@loginRegister": {
+        "description": "Button text to switch to the registration form.",
+        "context": "login"
+    },
+    "registerUsernameLabel": "Username",
+    "@registerUsernameLabel": {
+        "description": "Label for the username input field during registration.",
+        "context": "login"
+    },
+    "registerEmailLabel": "Email address",
+    "@registerEmailLabel": {
+        "description": "Label for the email address input field during registration.",
+        "context": "login"
+    },
+    "registerSubmit": "Register",
+    "@registerSubmit": {
+        "description": "Button text to submit the registration form.",
+        "context": "login"
+    },
+    "registerSuccess": "Registration successful!",
+    "@registerSuccess": {
+        "description": "Message shown when the registration process is completed successfully.",
+        "context": "login"
+    },
+    "registerSuccessDescription": "Your account has been created successfully. Please check your email for a temporary password and further instructions to complete the registration process.",
+    "@registerSuccessDescription": {
+        "description": "Additional information shown after successful registration.",
+        "context": "login"
+    },
+    "registerInvalidUsername": "Usernames must be between 3 and 16 characters long and can only contain letters, numbers and underscores.",
+    "@registerInvalidUsername": {
+        "description": "Error message shown when the user enters an invalid username during registration.",
+        "context": "login"
+    },
+    "registerErrorConflictUsername": "The username is already taken. Please choose a different one.",
+    "@registerErrorConflictUsername": {
+        "description": "Error message shown when the chosen username is already taken during registration.",
+        "context": "login"
+    },
+    "registerErrorConflictEmail": "The email address is already linked to another account. Please use a different one.",
+    "@registerErrorConflictEmail": {
+        "description": "Error message shown when the provided email address is already linked to another account during registration.",
+        "context": "login"
+    },
+    "registerLogin": "Log in",
+    "@registerLogin": {
+        "description": "Button text to switch to the login form from the registration form.",
+        "context": "login"
+    },
+    "privacyPolicy": "Privacy Policy",
+    "@privacyPolicy": {
         "description": "Link text for the app's privacy policy. This string is formatted in MLA title case.",
         "context": "login"
     },
-    "loginTermsOfService": "Terms of Service",
-    "@loginTermsOfService": {
+    "termsOfService": "Terms of Service",
+    "@termsOfService": {
         "description": "Link text for the app's terms of service. This string is formatted in MLA title case.",
         "context": "login"
+    },
+    "navigationUpload": "Upload",
+    "@navigationUpload": {
+        "description": "Label for the upload section in the main navigation.",
+        "context": "navigation"
+    },
+    "navigationValidate": "Validate",
+    "@navigationValidate": {
+        "description": "Label for the validate section in the main navigation.",
+        "context": "navigation"
     },
     "cameraNotFound": "No camera found",
     "@cameraNotFound": {
@@ -94,7 +164,17 @@
     },
     "cameraErrorUnavailable": "No camera available on this device.",
     "@cameraErrorUnavailable": {
-        "description": "Explains that no camera is available on the device.",
+        "description": "Shown when the camera is unavailable on the device, for example because it is being used by another application or there is a hardware issue.",
+        "context": "upload:error"
+    },
+    "cameraErrorUnavailableDescription": "# “No camera available on this device” Troubleshoot\n\nDatly right now is unable to access your camera. This can have a variety of causes. The most commons are listed below.\n\n- Another application is using the camera\n\n  - Please close all other applications that might be using the camera and try again.\n\n  - Sometimes other browser tabs can also block the camera, so please also try closing other tabs that might be using the camera.\n\n- Hardware issue or temporary glitch\n\n  - Please check your camera settings to ensure it is properly configured and recognized by your device.\n  - Try restarting your device, as this can often resolve temporary hardware glitches.\n  - If the problem persists, please consult your device documentation or support for further troubleshooting steps.",
+    "@cameraErrorUnavailableDescription": {
+        "description": "Additional explanation for the camera unavailable error, providing possible causes and troubleshooting steps.",
+        "context": "upload:error"
+    },
+    "cameraErrorTroubleshoot": "Troubleshoot",
+    "@cameraErrorTroubleshoot": {
+        "description": "Button text to open the troubleshooting information for camera errors.",
         "context": "upload:error"
     },
     "selectCamera": "Select camera",
@@ -164,12 +244,12 @@
         "placeholders": {
             "privacyPolicy": {
                 "type": "String",
-                "description": "See key `loginPrivacyPolicy`",
+                "description": "See key `privacyPolicy`",
                 "example": "Privacy Policy"
             },
             "termsOfService": {
                 "type": "String",
-                "description": "See key `loginTermsOfService`",
+                "description": "See key `termsOfService`",
                 "example": "Terms of Service"
             }
         }
@@ -224,6 +304,11 @@
     "@invalidPage": {
         "description": "Shown when the user tries to access a page number that is out of range.",
         "context": "submissions"
+    },
+    "validatePleaseSelect": "Please select:",
+    "@validatePleaseSelect": {
+        "description": "Text shown above the target title. To be read as 'Please select [something]'.",
+        "context": "validate"
     },
     "submissionStatusPending": "Pending",
     "@submissionStatusPending": {

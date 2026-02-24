@@ -37,26 +37,73 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get loginInvalidEmail => 'Please enter a valid email address.';
+
+  @override
   String get loginError =>
       'Server unreachable. Please check your internet connection.';
 
   @override
-  String get loginUnknown => 'Unknown login code.';
+  String get loginAccountDisabled =>
+      'Your account has been disabled. Learn about the details in the email sent to your linked email address.';
 
   @override
-  String get loginCodeLabel => 'Login code';
+  String get loginUnknown => 'Unknown email or password.';
 
   @override
-  String get loginNewHere => 'New here?';
+  String get loginEmailLabel => 'Email address';
 
   @override
-  String get loginNewHereRequest => 'Request a code.';
+  String get loginPasswordLabel => 'Password';
 
   @override
-  String get loginPrivacyPolicy => 'Privacy Policy';
+  String get loginSubmit => 'Log in';
 
   @override
-  String get loginTermsOfService => 'Terms of Service';
+  String get loginRegister => 'Sign up';
+
+  @override
+  String get registerUsernameLabel => 'Username';
+
+  @override
+  String get registerEmailLabel => 'Email address';
+
+  @override
+  String get registerSubmit => 'Register';
+
+  @override
+  String get registerSuccess => 'Registration successful!';
+
+  @override
+  String get registerSuccessDescription =>
+      'Your account has been created successfully. Please check your email for a temporary password and further instructions to complete the registration process.';
+
+  @override
+  String get registerInvalidUsername =>
+      'Usernames must be between 3 and 16 characters long and can only contain letters, numbers and underscores.';
+
+  @override
+  String get registerErrorConflictUsername =>
+      'The username is already taken. Please choose a different one.';
+
+  @override
+  String get registerErrorConflictEmail =>
+      'The email address is already linked to another account. Please use a different one.';
+
+  @override
+  String get registerLogin => 'Log in';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get navigationUpload => 'Upload';
+
+  @override
+  String get navigationValidate => 'Validate';
 
   @override
   String get cameraNotFound => 'No camera found';
@@ -66,6 +113,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cameraErrorUnavailable => 'No camera available on this device.';
+
+  @override
+  String get cameraErrorUnavailableDescription =>
+      '# “No camera available on this device” Troubleshoot\n\nDatly right now is unable to access your camera. This can have a variety of causes. The most commons are listed below.\n\n- Another application is using the camera\n\n  - Please close all other applications that might be using the camera and try again.\n\n  - Sometimes other browser tabs can also block the camera, so please also try closing other tabs that might be using the camera.\n\n- Hardware issue or temporary glitch\n\n  - Please check your camera settings to ensure it is properly configured and recognized by your device.\n  - Try restarting your device, as this can often resolve temporary hardware glitches.\n  - If the problem persists, please consult your device documentation or support for further troubleshooting steps.';
+
+  @override
+  String get cameraErrorTroubleshoot => 'Troubleshoot';
 
   @override
   String get selectCamera => 'Select camera';
@@ -136,6 +190,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidPage => 'Invalid page number.';
+
+  @override
+  String get validatePleaseSelect => 'Please select:';
 
   @override
   String get submissionStatusPending => 'Pending';

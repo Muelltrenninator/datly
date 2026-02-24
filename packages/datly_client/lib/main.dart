@@ -23,16 +23,27 @@ class AppRouter extends RootStackRouter {
       path: "/",
       guards: [AuthenticationGuard()],
       children: [
-        AutoRoute(page: UploadRoute.page, path: ""),
+        AutoRoute(
+          page: UploadValidateParentRoute.page,
+          path: "",
+          children: [
+            AutoRoute(page: UploadRoute.page, path: ""),
+            AutoRoute(page: ValidateRoute.page, path: "validate"),
+          ],
+        ),
         AutoRoute(page: SubmissionsRoute.page, path: "submissions"),
         AutoRoute(page: ListUsersRoute.page, path: "users"),
         AutoRoute(page: ListProjectsRoute.page, path: "projects"),
       ],
     ),
     AutoRoute(
-      page: LoginRoute.page,
-      path: "/login",
+      page: LoginRegisterParentRoute.page,
+      path: "/",
       guards: [ReverseAuthenticationGuard()],
+      children: [
+        AutoRoute(page: LoginRoute.page, path: "login"),
+        AutoRoute(page: RegisterRoute.page, path: "register"),
+      ],
     ),
     AutoRoute(page: ErrorRoute.page, path: "*"),
   ];
@@ -125,6 +136,7 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: "Datly",
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(colorScheme: colorSchemeLight).modified(),
       darkTheme: ThemeData(colorScheme: colorSchemeDark).modified(),
       themeMode: ThemeMode.system,
@@ -146,23 +158,20 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late final ValueNotifier<bool> _immersiveMode;
-
   @override
   void initState() {
     super.initState();
-    _immersiveMode = ValueNotifier(prefs.getBool("immersiveMode") ?? false);
-    _immersiveMode.addListener(onUpdate);
+    ImmersiveModeAction.enabledNotifier.addListener(onUpdate);
   }
 
   @override
   void dispose() {
-    _immersiveMode.removeListener(onUpdate);
+    ImmersiveModeAction.enabledNotifier.removeListener(onUpdate);
     super.dispose();
   }
 
   void onUpdate() {
-    if (_immersiveMode.value == true) {
+    if (ImmersiveModeAction.enabledNotifier.value == true) {
       if (kIsWeb) web.document.documentElement?.requestFullscreen();
       prefs.setBool("immersiveMode", true);
     } else {
@@ -173,37 +182,141 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Shortcuts(
-    shortcuts: {
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.alt,
-        LogicalKeyboardKey.keyI,
-      ): ImmersiveModeIntent(),
-      LogicalKeySet(LogicalKeyboardKey.altGraph, LogicalKeyboardKey.keyI):
-          ImmersiveModeIntent(),
-    },
-    child: Actions(
-      actions: {ImmersiveModeIntent: ImmersiveModeAction(_immersiveMode)},
-      child: Scaffold(
-        appBar: TitleBar(
-          backgroundColor: _immersiveMode.value ? Colors.transparent : null,
+  Widget build(BuildContext context) {
+    final immersiveMode = ImmersiveModeAction.enabledNotifier.value;
+    return Shortcuts(
+      shortcuts: {
+        LogicalKeySet(
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.alt,
+          LogicalKeyboardKey.keyI,
+        ): ImmersiveModeIntent(),
+        LogicalKeySet(LogicalKeyboardKey.altGraph, LogicalKeyboardKey.keyI):
+            ImmersiveModeIntent(),
+      },
+      child: Actions(
+        actions: {ImmersiveModeIntent: ImmersiveModeAction()},
+        child: Scaffold(
+          appBar: TitleBar(
+            backgroundColor: immersiveMode ? Colors.transparent : null,
+            scrollUnserElevation:
+                context.router.currentUrl != "/" &&
+                context.router.currentUrl != "/validate",
+          ),
+          extendBodyBehindAppBar: immersiveMode,
+          body: AutoRouter(),
         ),
-        extendBodyBehindAppBar: _immersiveMode.value,
-        body: AutoRouter(),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class ImmersiveModeIntent extends Intent {}
 
 class ImmersiveModeAction extends Action<ImmersiveModeIntent> {
-  final ValueNotifier<bool> enabledNotifier;
-  ImmersiveModeAction(this.enabledNotifier);
+  static ValueNotifier<bool> enabledNotifier = ValueNotifier(
+    prefs.getBool("immersiveMode") ?? false,
+  );
 
   @override
   void invoke(_) => enabledNotifier.value = !enabledNotifier.value;
+}
+
+@RoutePage()
+class UploadValidateParentPage extends StatefulWidget {
+  const UploadValidateParentPage({super.key});
+
+  @override
+  State<UploadValidateParentPage> createState() =>
+      _UploadValidateParentPageState();
+}
+
+class _UploadValidateParentPageState extends State<UploadValidateParentPage> {
+  @override
+  void initState() {
+    super.initState();
+    ImmersiveModeAction.enabledNotifier.addListener(onUpdate);
+  }
+
+  @override
+  void dispose() {
+    ImmersiveModeAction.enabledNotifier.removeListener(onUpdate);
+    super.dispose();
+  }
+
+  void onUpdate() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mobile = WindowSizeClass.of(context) <= WindowSizeClass.medium;
+    final narrowHeight = MediaQuery.sizeOf(context).height <= 800;
+    return AutoTabsRouter.pageView(
+      routes: [UploadRoute(), ValidateRoute()],
+      physics: NeverScrollableScrollPhysics(),
+      builder: (context, child, pageController) {
+        final tabsRouter = AutoTabsRouter.of(context);
+        final immersiveMode = ImmersiveModeAction.enabledNotifier.value;
+        if (immersiveMode) return child;
+        return Scaffold(
+          body: !mobile
+              ? Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    NavigationRail(
+                      backgroundColor: Colors.transparent,
+                      selectedIndex: tabsRouter.activeIndex,
+                      onDestinationSelected: tabsRouter.setActiveIndex,
+                      leadingAtTop: true,
+                      labelType: NavigationRailLabelType.selected,
+                      destinations: [
+                        NavigationRailDestination(
+                          icon: Icon(Icons.upload_file),
+                          label: Text(
+                            AppLocalizations.of(context).navigationUpload,
+                          ),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.check),
+                          label: Text(
+                            AppLocalizations.of(context).navigationValidate,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: Card.outlined(
+                        margin: EdgeInsets.only(bottom: 4, right: 4),
+                        child: child,
+                      ),
+                    ),
+                  ],
+                )
+              : child,
+          bottomNavigationBar: mobile
+              ? NavigationBar(
+                  selectedIndex: tabsRouter.activeIndex,
+                  onDestinationSelected: tabsRouter.setActiveIndex,
+                  labelBehavior:
+                      NavigationDestinationLabelBehavior.onlyShowSelected,
+                  height: narrowHeight ? 60 : null,
+                  destinations: [
+                    NavigationDestination(
+                      icon: Icon(Icons.upload_file),
+                      label: AppLocalizations.of(context).navigationUpload,
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.approval),
+                      label: AppLocalizations.of(context).navigationValidate,
+                    ),
+                  ],
+                )
+              : null,
+        );
+      },
+    );
+  }
 }
 
 extension OnColor on Color {

@@ -1,0 +1,222 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-02-23T22:48:37.191049",
+  "emailWelcomeSubject": "Welcome to Datly",
+  "@emailWelcomeSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailWelcomeSummary": "Your account has been created.",
+  "@emailWelcomeSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailWelcomePart1": "we're excited to have you on board! Your account has been created and is ready to go. Please use the temporary password below to log in for the first time, then change it to something of your choice.",
+  "@emailWelcomePart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailWelcomePart2": "You can now take your first photo and start contributing to our crowdsourcing efforts. If you have any questions or need help, feel free to ",
+  "@emailWelcomePart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailWelcomePart3": "reach out to our support team",
+  "@emailWelcomePart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailWelcomePart4": ". We're here to help you get the most out of Datly.",
+  "@emailWelcomePart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailWelcomeContentExtra1": "Log in now",
+  "@emailWelcomeContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetWelcomeSubject": "Welcome to Datly",
+  "@emailPasswordResetWelcomeSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetWelcomeSummary": "Please log in with the temporary password we've created for you.",
+  "@emailPasswordResetWelcomeSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetWelcomePart1": "you've been invited to join the Datly Collectors! We collect photos of trash to better classify and understand it — and we're glad to have you on board.",
+  "@emailPasswordResetWelcomePart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetWelcomePart2": "An account has been created for you on Datly. Please use the temporary password below along with your email address ({email}) to log in, then change it to something of your choice.",
+  "@emailPasswordResetWelcomePart2": {
+    "type": "text",
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "emailPasswordResetWelcomeContentExtra1": "Log in now",
+  "@emailPasswordResetWelcomeContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetMigrationSubject": "Important changes to your Datly login",
+  "@emailPasswordResetMigrationSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetMigrationSummary": "You can now log in using your email address and a password.",
+  "@emailPasswordResetMigrationSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetMigrationPart1": "we've recently switched to a new login system. The old login codes will no longer work. Instead, you can now log in using your email address ({email}) and the temporary password below.",
+  "@emailPasswordResetMigrationPart1": {
+    "type": "text",
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "emailPasswordResetMigrationPart2": "This change was necessary to open the platform to a wider audience, making the old invite code system no longer feasible. We apologize for any inconvenience and thank you for your understanding.",
+  "@emailPasswordResetMigrationPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetMigrationContentExtra1": "Log in now",
+  "@emailPasswordResetMigrationContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetTemporarySubject": "Your Datly password has been reset",
+  "@emailPasswordResetTemporarySubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetTemporarySummary": "Your Datly password has been reset.",
+  "@emailPasswordResetTemporarySummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetTemporaryPart1": "your password has been reset. Please use the temporary password below to log in and then change it to something of your choice.",
+  "@emailPasswordResetTemporaryPart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailPasswordResetTemporaryContentExtra1": "Log in now",
+  "@emailPasswordResetTemporaryContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledSubject": "Your Datly account has been suspended",
+  "@emailAccountDisabledSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledSummary": "Your Datly account has been suspended.",
+  "@emailAccountDisabledSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledPart1": "we regret to inform you that your account has been suspended due to a potential violation of our terms of service.",
+  "@emailAccountDisabledPart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledPart2": "If you believe this was a mistake, please ",
+  "@emailAccountDisabledPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledPart3": "contact our support team",
+  "@emailAccountDisabledPart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledPart4": " to request a review.",
+  "@emailAccountDisabledPart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledContentExtra1": "Reason:<br>{reason}",
+  "@emailAccountDisabledContentExtra1": {
+    "type": "text",
+    "placeholders": {
+      "reason": {}
+    }
+  },
+  "emailAccountReenabledSubject": "Your Datly account has been reactivated",
+  "@emailAccountReenabledSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountReenabledSummary": "Your Datly account has been reactivated.",
+  "@emailAccountReenabledSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountReenabledPart1": "great news — your account has been reactivated! We apologize for the inconvenience and thank you for your patience during the review process.",
+  "@emailAccountReenabledPart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountReenabledPart2": "You can now log in and continue using Datly as before. Welcome back!",
+  "@emailAccountReenabledPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountReenabledContentExtra1": "Open Datly",
+  "@emailAccountReenabledContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDeletedSubject": "Your Datly account has been deleted",
+  "@emailAccountDeletedSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDeletedSummary": "Your Datly account has been fully deleted.",
+  "@emailAccountDeletedSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDeletedPart1": "your account has been permanently deleted. We're sorry to see you go, but we fully respect your decision.",
+  "@emailAccountDeletedPart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDeletedPart2": "Please note that signatures and their metadata are retained for legal reasons. All other personal data has been permanently deleted.",
+  "@emailAccountDeletedPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDeletedPart3": "If you have any feedback or suggestions, please don't hesitate to ",
+  "@emailAccountDeletedPart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDeletedPart4": "contact our support team",
+  "@emailAccountDeletedPart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDeletedPart5": " and let us know. We wish you all the best!",
+  "@emailAccountDeletedPart5": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailHello": "Hello {username},",
+  "@emailHello": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "emailFooter": "You are receiving this email because you registered at our service.<br>To unsubscribe, please <a href=\"mailto:me@jhubi1.com\" style=\"color: #999999;text-decoration: underline;\">contact the admin</a> for removal from the app.<br><br>&copy; 2025–2026 JHubi1. All rights reserved.",
+  "@emailFooter": {
+    "type": "text",
+    "placeholders": {}
+  }
+}

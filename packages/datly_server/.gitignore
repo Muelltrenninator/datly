@@ -7,3 +7,4 @@ bin/public/
 
 **/*.env
 data/
+_data/

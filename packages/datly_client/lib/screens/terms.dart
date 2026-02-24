@@ -1,10 +1,39 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:markdown_widget/markdown_widget.dart';
 
-class MarkdownDialog extends StatefulWidget {
+abstract class MarkdownDialogSource {
+  FutureOr<String> getMarkdown();
+}
+
+class MarkdownDialogStringSource extends MarkdownDialogSource {
+  final String data;
+  MarkdownDialogStringSource(this.data);
+
+  @override
+  String getMarkdown() => data;
+}
+
+class MarkdownDialogHttpSource extends MarkdownDialogSource {
   final Uri origin;
-  const MarkdownDialog({super.key, required this.origin});
+  MarkdownDialogHttpSource(this.origin);
+
+  @override
+  Future<String> getMarkdown() async {
+    final response = await http.get(origin);
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return response.body;
+    } else {
+      throw Exception("Failed to load document.");
+    }
+  }
+}
+
+class MarkdownDialog extends StatefulWidget {
+  final MarkdownDialogSource source;
+  const MarkdownDialog({super.key, required this.source});
 
   @override
   State<MarkdownDialog> createState() => _MarkdownDialogState();
@@ -17,14 +46,15 @@ class _MarkdownDialogState extends State<MarkdownDialog> {
   @override
   void initState() {
     super.initState();
-    http.get(widget.origin).then((response) {
-      if (response.statusCode == 200 && response.body.isNotEmpty) {
-        data = response.body;
-      } else {
-        error = true;
-      }
-      if (mounted) setState(() {});
-    });
+    Future<String?>.value(widget.source.getMarkdown())
+        .catchError((_) {
+          error = true;
+          return null;
+        })
+        .then((markdown) {
+          data = markdown;
+          if (mounted) setState(() {});
+        });
   }
 
   @override
@@ -81,9 +111,9 @@ class _MarkdownDialogState extends State<MarkdownDialog> {
 
 Future<void> showMarkdownDialog({
   required BuildContext context,
-  required Uri origin,
+  required MarkdownDialogSource source,
 }) async => showDialog<void>(
   context: context,
   fullscreenDialog: true,
-  builder: (_) => MarkdownDialog(origin: origin),
+  builder: (_) => MarkdownDialog(source: source),
 );

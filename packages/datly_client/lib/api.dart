@@ -10,6 +10,11 @@ import 'main.dart';
 import 'registry.dart';
 import 'widgets/title_bar.dart';
 
+typedef AuthUser = ({String email, String password});
+final emailRegex = RegExp(
+  r"""^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$""",
+);
+
 class ApiManager {
   ApiManager._();
 
@@ -19,6 +24,8 @@ class ApiManager {
         ? "https://datly.con.bz/api"
         : (kDebugMode ? "http://localhost:33552/api" : "/api"),
   );
+
+  static final turnstileKey = "0x4AAAAAAChDHJ4ogHeFbGfK";
 }
 
 class AuthManager extends ChangeNotifier {
@@ -32,17 +39,42 @@ class AuthManager extends ChangeNotifier {
 
   UserData? _authenticatedUser;
   UserData? get authenticatedUser => _authenticatedUser;
-  Future<void> fetchAuthenticatedUser({String? token}) async {
-    if (authToken == null && token == null) {
+  Future<void> fetchAuthenticatedUser({AuthUser? user}) async {
+    if (authToken == null && user == null) {
       final valueBefore = _authenticatedUser;
       _authenticatedUser = null;
       if (valueBefore != null) notifyListeners();
       return;
     }
 
+    String? newToken;
+    if (user != null) {
+      try {
+        final response = await http.post(
+          Uri.parse("${ApiManager.baseUri}/users/login"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"email": user.email, "password": user.password}),
+        );
+        newToken = jsonDecode(response.body)["token"];
+        _wasLastFetchNetworkError = false;
+
+        if (response.statusCode == 403) {
+          _wasLastFetchAccountDisabledError = true;
+        }
+        _wasLastFetchAccountDisabledError = false;
+
+        if (response.statusCode != 200 || newToken == null) {
+          return;
+        }
+      } catch (_) {
+        _wasLastFetchNetworkError = true;
+        return;
+      }
+    }
+
     final response = await fetch(
       http.Request("GET", Uri.parse("${ApiManager.baseUri}/users/whoami")),
-      token: token,
+      token: newToken,
     );
 
     final body = response?.body;
@@ -53,7 +85,7 @@ class AuthManager extends ChangeNotifier {
         _authenticatedUser!.username,
         _authenticatedUser!,
       );
-      if (authToken == null) prefs.setString("token", token!);
+      if (authToken == null) prefs.setString("token", newToken!);
       if (valueBefore != _authenticatedUser) notifyListeners();
     }
   }
@@ -73,6 +105,10 @@ class AuthManager extends ChangeNotifier {
   bool _wasLastFetchNetworkError = false;
   bool get wasLastFetchNetworkError => _wasLastFetchNetworkError;
 
+  bool _wasLastFetchAccountDisabledError = false;
+  bool get wasLastFetchAccountDisabledError =>
+      _wasLastFetchAccountDisabledError;
+
   Future<http.Response?> fetch(
     http.BaseRequest request, {
     String? token,
@@ -91,10 +127,11 @@ class AuthManager extends ChangeNotifier {
     }
     _wasLastFetchNetworkError = false;
 
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 || response.statusCode == 403) {
       final valueBefore = _authenticatedUser;
       _authenticatedUser = null;
       prefs.remove("token");
+      if (response.statusCode == 403) _wasLastFetchAccountDisabledError = true;
       if (valueBefore != null) notifyListeners();
     }
 
@@ -107,7 +144,7 @@ class AuthManager extends ChangeNotifier {
       effectiveToken != null,
       "[AuthManager.fetchPrepare] must never be called with no auth token set.",
     );
-    return request..headers["Authorization"] = "Token $effectiveToken";
+    return request..headers["Authorization"] = "Bearer $effectiveToken";
   }
 }
 

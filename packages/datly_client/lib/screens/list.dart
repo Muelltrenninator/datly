@@ -243,7 +243,7 @@ class _ListScreenState extends State<ListScreen> {
                 final response = await AuthManager.instance.fetch(
                   http.Request(
                       "POST",
-                      Uri.parse("${ApiManager.baseUri}/users/$username"),
+                      Uri.parse("${ApiManager.baseUri}/user/$username"),
                     )
                     ..headers["Content-Type"] = "application/json"
                     ..body = jsonEncode(input),
@@ -254,7 +254,7 @@ class _ListScreenState extends State<ListScreen> {
                     http.Request(
                       "POST",
                       Uri.parse(
-                        "${ApiManager.baseUri}/users/$username/loginCode",
+                        "${ApiManager.baseUri}/user/$username/loginCode",
                       ),
                     ),
                   );
@@ -950,7 +950,7 @@ class _ListWidgetState extends State<ListWidget> {
 
   Uri get uri => widget.isProject
       ? Uri.parse("${ApiManager.baseUri}/projects/${project!.id}")
-      : Uri.parse("${ApiManager.baseUri}/users/${user!.username}");
+      : Uri.parse("${ApiManager.baseUri}/user/${user!.username}");
 }
 
 Future<void> showLoginCodeDialog(
