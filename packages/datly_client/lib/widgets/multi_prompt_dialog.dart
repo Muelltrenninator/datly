@@ -1,9 +1,11 @@
 /// Radio dialog widget and helper functions from Material Apps project.
 ///
 /// Source: https://github.com/JHubi1/material/blob/main/packages/material_helper/lib/src/components/radio_dialog.dart
+/// @docImport 'password_change_dialog.dart';
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'prompt_dialog.dart';
@@ -45,6 +47,16 @@ class MultiPromptDialog extends StatefulWidget {
   /// {@macro flutter.material.dialog.alignment}
   final AlignmentGeometry? alignment;
 
+  /// The maximum width of the dialog.
+  ///
+  /// Must be smaller than 560, which is the default max width of the dialog.
+  /// Otherwise it will be ignored.
+  ///
+  /// This should not be used and is only present for the [showPasswordChangeDialog]
+  /// to not look weird on larger screens.
+  final double? maxWidth;
+
+  /// The prompts to display in the dialog.
   final Map<String, MultiPromptPrompt> prompts;
 
   MultiPromptDialog({
@@ -55,6 +67,7 @@ class MultiPromptDialog extends StatefulWidget {
     this.description,
     this.semanticLabel,
     this.alignment,
+    this.maxWidth,
     required this.prompts,
   }) : assert(prompts.isNotEmpty, "At least one prompt is required");
 
@@ -189,7 +202,12 @@ class _MultiPromptDialogState extends State<MultiPromptDialog> {
         alignment: widget.alignment,
         scrollable: true,
         contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
+        constraints: BoxConstraints(
+          minWidth: 280,
+          maxWidth: widget.maxWidth != null
+              ? math.min(widget.maxWidth!, 560)
+              : 560,
+        ),
 
         content: SizedBox(
           width: MediaQuery.sizeOf(context).width,
@@ -341,6 +359,7 @@ Future<Map<String, String>?> showMultiPromptDialog({
   String? description,
   String? semanticLabel,
   AlignmentGeometry? alignment,
+  double? maxWidth,
   required Map<String, MultiPromptPrompt> prompts,
 }) async {
   return await showDialog<Map<String, String>?>(
@@ -352,6 +371,7 @@ Future<Map<String, String>?> showMultiPromptDialog({
       description: description,
       semanticLabel: semanticLabel,
       alignment: alignment,
+      maxWidth: maxWidth,
       prompts: prompts,
     ),
   );

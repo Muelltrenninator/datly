@@ -224,6 +224,12 @@ abstract class AppLocalizations {
   /// **'The email address is already linked to another account. Please use a different one.'**
   String get registerErrorConflictEmail;
 
+  /// Error message shown when the captcha verification fails during registration.
+  ///
+  /// In en, this message translates to:
+  /// **'Captcha verification failed. Please try again.'**
+  String get registerErrorCaptcha;
+
   /// Button text to switch to the login form from the registration form.
   ///
   /// In en, this message translates to:
@@ -392,6 +398,108 @@ abstract class AppLocalizations {
   /// **'Give consent and submit'**
   String get consentButton;
 
+  /// Message shown to users who log in for the first time with a temporary password, prompting them to change their password.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current password is temporary and we highly recommend changing it to something only you know. Please choose a new password to secure your account.'**
+  String get passwordChangeFirstTimeLogin;
+
+  /// Title for the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get passwordChangeTitle;
+
+  /// Label for the current password input field in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get passwordChangeCurrent;
+
+  /// Label for the new password input field in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get passwordChangeNew;
+
+  /// Label for the confirm new password input field in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get passwordChangeConfirm;
+
+  /// Button text to submit the change password form.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get passwordChangeSubmit;
+
+  /// Error message shown when the user enters an incorrect current password in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is incorrect.'**
+  String get passwordChangeErrorWrongPassword;
+
+  /// Error message shown when the new password and confirmation do not match in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'New password and confirmation do not match.'**
+  String get passwordChangeErrorMismatch;
+
+  /// Error message shown when the new password does not meet the strength requirements in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The password must be at least 12 characters long and include uppercase letters, lowercase letters, numbers, and special characters.'**
+  String get passwordChangeErrorWeak;
+
+  /// Generic error message shown when the new password does not meet the security requirements in the change password dialog. The specific reason is provided in the {message} placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'This password does not meet the security requirements. {message}.'**
+  String passwordChangeErrorInsecure(String message);
+
+  /// Error message shown when the new password is too short in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords must be at least 12 characters long'**
+  String get passwordChangeErrorInsecureCodeShort;
+
+  /// Error message shown when the new password is too long in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords must be at most 128 characters long'**
+  String get passwordChangeErrorInsecureCodeLong;
+
+  /// Error message shown when the new password does not contain an uppercase letter in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords must contain at least one uppercase letter'**
+  String get passwordChangeErrorInsecureCodeUppercase;
+
+  /// Error message shown when the new password does not contain a lowercase letter in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords must contain at least one lowercase letter'**
+  String get passwordChangeErrorInsecureCodeLowercase;
+
+  /// Error message shown when the new password does not contain a digit in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords must contain at least one digit'**
+  String get passwordChangeErrorInsecureCodeDigit;
+
+  /// Error message shown when the new password does not contain a special character in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords must contain at least one special character'**
+  String get passwordChangeErrorInsecureCodeSpecial;
+
+  /// Error message shown when the new password has appeared in a data breach in the change password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'It has appeared in a data breach is not to be considered secure'**
+  String get passwordChangeErrorInsecureCodeCompromised;
+
   /// Shown when there are no submissions available for the selected project.
   ///
   /// In en, this message translates to:
@@ -458,17 +566,23 @@ abstract class AppLocalizations {
   /// **'for {username}'**
   String accountOverviewFor(String username);
 
-  /// Label for a button that leads to more information about the app.
+  /// Label for a button that allows the user to change their password.
   ///
   /// In en, this message translates to:
-  /// **'Learn more'**
-  String get aboutAppLearnMore;
+  /// **'Change password'**
+  String get aboutAppChangePassword;
 
   /// Label for a button that logs the user out of the app.
   ///
   /// In en, this message translates to:
   /// **'Logout'**
   String get aboutAppLogout;
+
+  /// Label for a button that leads to more information about the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more'**
+  String get aboutAppLearnMore;
 }
 
 class _AppLocalizationsDelegate

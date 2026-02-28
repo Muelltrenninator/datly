@@ -91,6 +91,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The email address is already linked to another account. Please use a different one.';
 
   @override
+  String get registerErrorCaptcha =>
+      'Captcha verification failed. Please try again.';
+
+  @override
   String get registerLogin => 'Log in';
 
   @override
@@ -186,6 +190,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get consentButton => 'Give consent and submit';
 
   @override
+  String get passwordChangeFirstTimeLogin =>
+      'Your current password is temporary and we highly recommend changing it to something only you know. Please choose a new password to secure your account.';
+
+  @override
+  String get passwordChangeTitle => 'Change password';
+
+  @override
+  String get passwordChangeCurrent => 'Current password';
+
+  @override
+  String get passwordChangeNew => 'New password';
+
+  @override
+  String get passwordChangeConfirm => 'Confirm new password';
+
+  @override
+  String get passwordChangeSubmit => 'Change password';
+
+  @override
+  String get passwordChangeErrorWrongPassword =>
+      'Current password is incorrect.';
+
+  @override
+  String get passwordChangeErrorMismatch =>
+      'New password and confirmation do not match.';
+
+  @override
+  String get passwordChangeErrorWeak =>
+      'The password must be at least 12 characters long and include uppercase letters, lowercase letters, numbers, and special characters.';
+
+  @override
+  String passwordChangeErrorInsecure(String message) {
+    return 'This password does not meet the security requirements. $message.';
+  }
+
+  @override
+  String get passwordChangeErrorInsecureCodeShort =>
+      'Passwords must be at least 12 characters long';
+
+  @override
+  String get passwordChangeErrorInsecureCodeLong =>
+      'Passwords must be at most 128 characters long';
+
+  @override
+  String get passwordChangeErrorInsecureCodeUppercase =>
+      'Passwords must contain at least one uppercase letter';
+
+  @override
+  String get passwordChangeErrorInsecureCodeLowercase =>
+      'Passwords must contain at least one lowercase letter';
+
+  @override
+  String get passwordChangeErrorInsecureCodeDigit =>
+      'Passwords must contain at least one digit';
+
+  @override
+  String get passwordChangeErrorInsecureCodeSpecial =>
+      'Passwords must contain at least one special character';
+
+  @override
+  String get passwordChangeErrorInsecureCodeCompromised =>
+      'It has appeared in a data breach is not to be considered secure';
+
+  @override
   String get noSubmissions => 'No submissions yet.';
 
   @override
@@ -222,8 +290,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get aboutAppLearnMore => 'Learn more';
+  String get aboutAppChangePassword => 'Change password';
 
   @override
   String get aboutAppLogout => 'Logout';
+
+  @override
+  String get aboutAppLearnMore => 'Learn more';
 }

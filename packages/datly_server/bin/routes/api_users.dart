@@ -29,7 +29,10 @@ void define(Router router) {
           jsonEncode(
             auth.user.toJson()
               ..remove("password")
-              ..addAll({"submissionCount": submissionCount}),
+              ..addAll({
+                "submissionCount": submissionCount,
+                if (auth.firstTimeLogin) "firstTimeLogin": auth.firstTimeLogin,
+              }),
           ),
           headers: {"Content-Type": "application/json"},
         );
@@ -222,7 +225,20 @@ void define(Router router) {
           "projects": List<dynamic>? projects,
           "role": String? role,
           "locale": String? locale,
+          "captcha": String? captcha,
         }) {
+          if (captcha == null && !isAdmin) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Captcha response required"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          } else if (!(await verifyCaptcha(captcha!, req))) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Invalid captcha response"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+
           final password = await generatePlaintextPassword();
 
           final emailCheck = emailRegex.hasMatch(email);
@@ -325,7 +341,9 @@ void define(Router router) {
     )
     ..put(
       "/user/<username>", // MARK: [PUT] /user/<username>
-      apiAuthWall((req, _) async {
+      apiAuthWall((req, auth) async {
+        final isAdmin = auth!.user.role.index >= UserRole.admin.index;
+
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
@@ -357,7 +375,8 @@ void define(Router router) {
             }
           }
 
-          if (email != null) {
+          final String? effectiveEmail;
+          if (email != null && isAdmin) {
             final emailCheck = emailRegex.hasMatch(email);
             if (!emailCheck) {
               return Response.badRequest(
@@ -375,10 +394,13 @@ void define(Router router) {
                 headers: {"Content-Type": "application/json"},
               );
             }
+            effectiveEmail = email;
+          } else {
+            effectiveEmail = null;
           }
 
           List<int>? parsedProjects;
-          if (projects != null) {
+          if (projects != null && isAdmin) {
             try {
               parsedProjects = projects.map((e) => e as int).toList();
               for (var projectId in parsedProjects) {
@@ -400,25 +422,30 @@ void define(Router router) {
             }
           }
 
-          if (role != null &&
-              !UserRole.values.asNameMap().keys.contains(role)) {
-            return Response.badRequest(
-              body: jsonEncode({"error": "Invalid user role"}),
-              headers: {"Content-Type": "application/json"},
-            );
+          final UserRole? effectiveRole;
+          if (role != null && isAdmin) {
+            if (!UserRole.values.asNameMap().keys.contains(role)) {
+              return Response.badRequest(
+                body: jsonEncode({"error": "Invalid user role"}),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+            effectiveRole = UserRole.values.byName(role);
+          } else {
+            effectiveRole = null;
           }
 
           final updatedUser = UsersCompanion(
-            email: email != null ? Value(email) : Value.absent(),
+            email: effectiveEmail != null
+                ? Value(effectiveEmail)
+                : Value.absent(),
             password: password != null
                 ? Value(await hashPassword(password: password))
                 : Value.absent(),
             projects: parsedProjects != null
                 ? Value(parsedProjects)
                 : Value.absent(),
-            role: role != null
-                ? Value(UserRole.values.byName(role))
-                : Value.absent(),
+            role: effectiveRole != null ? Value(effectiveRole) : Value.absent(),
           );
 
           await (db.update(
@@ -431,7 +458,7 @@ void define(Router router) {
             headers: {"Content-Type": "application/json"},
           );
         }
-      }, minimumRole: UserRole.admin),
+      }),
     )
     ..delete(
       "/user/<username>", // MARK: [DELETE] /user/<username>

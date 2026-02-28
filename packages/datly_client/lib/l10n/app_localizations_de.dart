@@ -91,6 +91,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die E-Mail-Adresse ist bereits mit einem anderen Account verknüpft. Bitte verwende eine andere.';
 
   @override
+  String get registerErrorCaptcha =>
+      'Die Captcha-Überprüfung ist fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
   String get registerLogin => 'Login';
 
   @override
@@ -188,6 +192,70 @@ class AppLocalizationsDe extends AppLocalizations {
   String get consentButton => 'Zustimmen und absenden';
 
   @override
+  String get passwordChangeFirstTimeLogin =>
+      'Dein aktuelles Passwort ist temporär und wir empfehlen dringend, es durch ein nur dir bekanntes zu ersetzen. Bitte wähle ein neues Passwort, um deinen Account zu sichern.';
+
+  @override
+  String get passwordChangeTitle => 'Passwort ändern';
+
+  @override
+  String get passwordChangeCurrent => 'Aktuelles Passwort';
+
+  @override
+  String get passwordChangeNew => 'Neues Passwort';
+
+  @override
+  String get passwordChangeConfirm => 'Neues Passwort bestätigen';
+
+  @override
+  String get passwordChangeSubmit => 'Passwort ändern';
+
+  @override
+  String get passwordChangeErrorWrongPassword =>
+      'Aktuelles Passwort ist falsch.';
+
+  @override
+  String get passwordChangeErrorMismatch =>
+      'Neues Passwort und Bestätigung stimmen nicht überein.';
+
+  @override
+  String get passwordChangeErrorWeak =>
+      'Das Passwort muss mindestens 12 Zeichen lang sein und Großbuchstaben, Kleinbuchstaben, Zahlen und Sonderzeichen enthalten.';
+
+  @override
+  String passwordChangeErrorInsecure(String message) {
+    return 'Dieses Passwort erfüllt nicht die Sicherheitsanforderungen. $message.';
+  }
+
+  @override
+  String get passwordChangeErrorInsecureCodeShort =>
+      'Passwörter müssen mindestens 12 Zeichen lang sein';
+
+  @override
+  String get passwordChangeErrorInsecureCodeLong =>
+      'Passwörter dürfen höchstens 128 Zeichen lang sein';
+
+  @override
+  String get passwordChangeErrorInsecureCodeUppercase =>
+      'Passwörter müssen mindestens einen Großbuchstaben enthalten';
+
+  @override
+  String get passwordChangeErrorInsecureCodeLowercase =>
+      'Passwörter müssen mindestens einen Kleinbuchstaben enthalten';
+
+  @override
+  String get passwordChangeErrorInsecureCodeDigit =>
+      'Passwörter müssen mindestens eine Ziffer enthalten';
+
+  @override
+  String get passwordChangeErrorInsecureCodeSpecial =>
+      'Passwörter müssen mindestens ein Sonderzeichen enthalten';
+
+  @override
+  String get passwordChangeErrorInsecureCodeCompromised =>
+      'Es ist in einem Datenleck aufgetaucht und gilt nicht als sicher';
+
+  @override
   String get noSubmissions => 'Noch keine Einsendungen.';
 
   @override
@@ -224,8 +292,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get aboutAppLearnMore => 'Mehr erfahren';
+  String get aboutAppChangePassword => 'Passwort ändern';
 
   @override
   String get aboutAppLogout => 'Abmelden';
+
+  @override
+  String get aboutAppLearnMore => 'Mehr erfahren';
 }

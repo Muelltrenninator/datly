@@ -16,12 +16,20 @@ late final SmtpServer _emailSmtpServer;
 late final String _emailFromAddress;
 late final String _emailTemplateBase;
 void initializeSmtpServer() {
+  if (!env.isDefined("DATLY_SMTP_HOST") ||
+      !env.isDefined("DATLY_SMTP_PORT") ||
+      !env.isDefined("DATLY_SMTP_USERNAME") ||
+      !env.isDefined("DATLY_SMTP_PASSWORD")) {
+        t.fatal("SMTP server configuration is incomplete. Please set DATLY_SMTP_HOST, DATLY_SMTP_PORT, DATLY_SMTP_USERNAME, and DATLY_SMTP_PASSWORD environment variables.");
+        exit(1);
+      }
+
   _emailSmtpServer = SmtpServer(
     env["DATLY_SMTP_HOST"]!,
     port: int.parse(env["DATLY_SMTP_PORT"]!),
     ssl: bool.tryParse(env["DATLY_SMTP_SSL"] ?? "") ?? false,
-    username: env["DATLY_SMTP_USERNAME"],
-    password: env["DATLY_SMTP_PASSWORD"],
+    username: env["DATLY_SMTP_USERNAME"]!,
+    password: env["DATLY_SMTP_PASSWORD"]!,
   );
   _emailFromAddress =
       env["DATLY_SMTP_FROM"] ??

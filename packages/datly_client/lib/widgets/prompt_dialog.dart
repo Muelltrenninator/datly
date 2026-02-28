@@ -554,7 +554,9 @@ class PromptDialogActionEvent {
   });
 }
 
-abstract class PromptDialogActions {
+class PromptDialogActions {
+  PromptDialogActions._();
+
   static PromptDialogAction clear(BuildContext context) => PromptDialogAction(
     icon: Icons.clear,
     label: "Clear",

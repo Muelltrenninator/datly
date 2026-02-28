@@ -120,10 +120,13 @@ Future<Object?> _apiAuthInternal(
       jsonEncode({"error": "User account is disabled"}),
       headers: {"Content-Type": "application/json"},
     );
-  } else if (!user.activated) {
-    (db.users.update()..where((u) => u.username.equals(user.username))).write(
-      UsersCompanion(activated: Value(true)),
-    );
+  }
+
+  bool firstTimeLogin = false;
+  if (!user.activated) {
+    firstTimeLogin = true;
+    await (db.users.update()..where((u) => u.username.equals(user.username)))
+        .write(UsersCompanion(activated: Value(true)));
   }
 
   final locale = localeFromRequest(req);
@@ -139,7 +142,7 @@ Future<Object?> _apiAuthInternal(
     );
   }
 
-  return (user: user);
+  return (user: user, firstTimeLogin: firstTimeLogin);
 }
 
 Future<Response?> apiAuth(
@@ -152,10 +155,10 @@ Future<Response?> apiAuth(
 }
 
 Future<Response> Function(Request req) apiAuthWall(
-  Function(Request req, ({User user})? auth) handler, {
+  Function(Request req, ({User user, bool firstTimeLogin})? auth) handler, {
   UserRole minimumRole = UserRole.user,
 }) => (Request req) async {
   final result = await _apiAuthInternal(req, minimumRole: minimumRole);
   if (result is Response) return result;
-  return handler.call(req, result as ({User user})?);
+  return handler.call(req, result as ({User user, bool firstTimeLogin})?);
 };

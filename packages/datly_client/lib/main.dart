@@ -12,6 +12,7 @@ import 'package:web/web.dart' as web;
 import 'api.dart';
 import 'l10n/app_localizations.dart';
 import 'main.gr.dart';
+import 'widgets/password_change_dialog.dart';
 import 'widgets/title_bar.dart';
 
 @AutoRouterConfig()
@@ -23,14 +24,15 @@ class AppRouter extends RootStackRouter {
       path: "/",
       guards: [AuthenticationGuard()],
       children: [
-        AutoRoute(
-          page: UploadValidateParentRoute.page,
-          path: "",
-          children: [
-            AutoRoute(page: UploadRoute.page, path: ""),
-            AutoRoute(page: ValidateRoute.page, path: "validate"),
-          ],
-        ),
+        AutoRoute(page: UploadRoute.page, path: ""),
+        // AutoRoute(
+        //   page: UploadValidateParentRoute.page,
+        //   path: "",
+        //   children: [
+        //     AutoRoute(page: UploadRoute.page, path: ""),
+        //     AutoRoute(page: ValidateRoute.page, path: "validate"),
+        //   ],
+        // ),
         AutoRoute(page: SubmissionsRoute.page, path: "submissions"),
         AutoRoute(page: ListUsersRoute.page, path: "users"),
         AutoRoute(page: ListProjectsRoute.page, path: "projects"),
@@ -98,7 +100,7 @@ Future<void> camerasInitialize() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
-  // await BrowserContextMenu.disableContextMenu();
+  await BrowserContextMenu.disableContextMenu();
 
   prefs = await SharedPreferencesWithCache.create(
     cacheOptions: const SharedPreferencesWithCacheOptions(),
@@ -128,7 +130,6 @@ class _MainAppState extends State<MainApp> {
         "Poppins",
       ], await DefaultAssetBundle.of(context).loadString("assets/OFL.txt"));
     });
-
     if (kIsWeb) web.document.getElementById("loaderContainer")?.remove();
   }
 
@@ -162,6 +163,17 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     ImmersiveModeAction.enabledNotifier.addListener(onUpdate);
+
+    if (AuthManager.instance.wasLastFetchFirstTimeLogin) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => showPasswordChangeDialog(
+          context: context,
+          description: AppLocalizations.of(
+            context,
+          ).passwordChangeFirstTimeLogin,
+        ),
+      );
+    }
   }
 
   @override

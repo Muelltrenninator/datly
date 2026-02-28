@@ -14,6 +14,7 @@ final _rng = Random.secure();
 final emailRegex = RegExp(
   r"""^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$""",
 );
+late final String? captchaSecretKey;
 
 Future<({bool secure, String? code, String? message})> isSecurePassword(
   String password, {
@@ -22,13 +23,13 @@ Future<({bool secure, String? code, String? message})> isSecurePassword(
   if (password.length < 12) {
     return (
       secure: false,
-      code: "length",
+      code: "short",
       message: "Password must be at least 12 characters long",
     );
   } else if (password.length > 128) {
     return (
       secure: false,
-      code: "length",
+      code: "long",
       message: "Password must be at most 128 characters long",
     );
   } else if (!password.contains(RegExp(r'[A-Z]'))) {
@@ -81,7 +82,7 @@ Future<({bool secure, String? code, String? message})> isSecurePassword(
 Future<String> generatePlaintextPassword() async {
   String result = "";
   const chars =
-      r"0123456789ABCDEFGHJKLMNPQRSTUVWXYabcdefghjklmnpqrstuvwxy!@#$%^&*()-_=+[]{}|;:,.<>?";
+      r"0123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnopqrstuvwxyz!@#$%^&*-_=+;:?";
   while (!result.startsWith(RegExp("[A-Za-z]")) ||
       !(await isSecurePassword(result, checkPwned: false)).secure) {
     result = List.generate(
@@ -166,6 +167,30 @@ Future<bool> verifyPassword(String password, String stored) async {
   }
 
   return constantTimeBytesEquality(derived, hash);
+}
+
+Future<bool> verifyCaptcha(String token, [Request? req]) async {
+  if (captchaSecretKey == null) {
+    t.warn("Captcha secret key not configured, skipping captcha verification");
+    return true;
+  }
+
+  try {
+    final response = await http.post(
+      Uri.parse("https://challenges.cloudflare.com/turnstile/v0/siteverify"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "secret": captchaSecretKey!,
+        "response": token,
+        "remoteip": req != null ? identifierFromRequest(req) : null,
+      }),
+    );
+
+    final data = json.decode(response.body);
+    return data["success"] == true;
+  } catch (_) {
+    return false;
+  }
 }
 
 File assetFile(String assetId, String assetMimeType) {

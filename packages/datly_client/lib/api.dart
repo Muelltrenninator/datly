@@ -25,7 +25,9 @@ class ApiManager {
         : (kDebugMode ? "http://localhost:33552/api" : "/api"),
   );
 
-  static final turnstileKey = "0x4AAAAAAChDHJ4ogHeFbGfK";
+  static final turnstileKey = kDebugMode
+      ? "1x00000000000000000000BB"
+      : "0x4AAAAAAChDHJ4ogHeFbGfK";
 }
 
 class AuthManager extends ChangeNotifier {
@@ -77,14 +79,20 @@ class AuthManager extends ChangeNotifier {
       token: newToken,
     );
 
-    final body = response?.body;
-    if (response != null && response.statusCode == 200 && body != null) {
+    if (response != null && response.statusCode == 200) {
       final valueBefore = _authenticatedUser;
-      _authenticatedUser = UserData.fromJson(jsonDecode(body));
+
+      final body = jsonDecode(response.body);
+      if (body is Map<String, dynamic> && body.containsKey("firstTimeLogin")) {
+        _wasLastFetchFirstTimeLogin = true;
+      }
+
+      _authenticatedUser = UserData.fromJson(body);
       UserRegistry.instance.add(
         _authenticatedUser!.username,
         _authenticatedUser!,
       );
+
       if (authToken == null) prefs.setString("token", newToken!);
       if (valueBefore != _authenticatedUser) notifyListeners();
     }
@@ -108,6 +116,9 @@ class AuthManager extends ChangeNotifier {
   bool _wasLastFetchAccountDisabledError = false;
   bool get wasLastFetchAccountDisabledError =>
       _wasLastFetchAccountDisabledError;
+
+  bool _wasLastFetchFirstTimeLogin = false;
+  bool get wasLastFetchFirstTimeLogin => _wasLastFetchFirstTimeLogin;
 
   Future<http.Response?> fetch(
     http.BaseRequest request, {
@@ -156,6 +167,9 @@ class UserData {
   DateTime joinedAt;
   List<int> projects;
   String role;
+  String? disabled;
+  bool activated;
+  String locale;
   int submissionCount;
 
   UserData({
@@ -164,6 +178,9 @@ class UserData {
     required this.joinedAt,
     required this.projects,
     required this.role,
+    required this.disabled,
+    required this.activated,
+    required this.locale,
     required this.submissionCount,
   });
 
@@ -201,6 +218,9 @@ class UserData {
     ),
     projects: List<int>.from(json["projects"]),
     role: json["role"]!,
+    disabled: json["disabled"],
+    activated: json["activated"]!,
+    locale: json["locale"]!,
     submissionCount: json["submissionCount"]!,
   );
   Map<String, dynamic> toJson() => {
@@ -209,6 +229,9 @@ class UserData {
     "joinedAt": joinedAt.millisecondsSinceEpoch,
     "projects": projects,
     "role": role,
+    "disabled": disabled,
+    "activated": activated,
+    "locale": locale,
     "submissionCount": submissionCount,
   };
 }

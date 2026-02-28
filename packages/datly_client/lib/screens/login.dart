@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -42,17 +43,16 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPersistentFrameCallback(
-      (_) => LoginScreen.childHeight.value =
-          _childHeightKey.currentContext?.size?.height ??
-          LoginScreen.childHeight.value,
-    );
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => kDebugMode
-          // ignore: avoid_print
-          ? print("LoginScreen.childHeight: ${LoginScreen.childHeight.value}")
-          : null,
-    );
+    WidgetsBinding.instance.addPersistentFrameCallback((_) {
+      final before = LoginScreen.childHeight.value;
+      LoginScreen.childHeight.value =
+          _childHeightKey.currentContext?.size?.height ?? before;
+      if (LoginScreen.childHeight.value != before && kDebugMode) {
+        if (kDebugMode) {
+          print("LoginScreen.childHeight: ${LoginScreen.childHeight.value}");
+        }
+      }
+    });
 
     if (widget.initialEmail != null &&
         emailRegex.hasMatch(Uri.decodeQueryComponent(widget.initialEmail!))) {
@@ -266,6 +266,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen>
     with TickerProviderStateMixin {
   final _childHeightKey = GlobalKey();
+
   final usernameController = TextEditingController();
   String usernameControllerTextOld = "";
   final usernameFocusNode = FocusNode();
@@ -281,19 +282,18 @@ class _RegisterScreenState extends State<RegisterScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPersistentFrameCallback(
-      (_) => RegisterScreen.childHeight.value =
-          _childHeightKey.currentContext?.size?.height ??
-          RegisterScreen.childHeight.value,
-    );
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => kDebugMode
-          // ignore: avoid_print
-          ? print(
-              "RegisterScreen.childHeight: ${RegisterScreen.childHeight.value}",
-            )
-          : null,
-    );
+    WidgetsBinding.instance.addPersistentFrameCallback((_) {
+      final before = RegisterScreen.childHeight.value;
+      RegisterScreen.childHeight.value =
+          _childHeightKey.currentContext?.size?.height ?? before;
+      if (RegisterScreen.childHeight.value != before && kDebugMode) {
+        if (kDebugMode) {
+          print(
+            "RegisterScreen.childHeight: ${RegisterScreen.childHeight.value}",
+          );
+        }
+      }
+    });
 
     usernameController.addListener(() {
       final text = usernameController.text;
@@ -379,9 +379,24 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (mounted) setState(() {});
 
     // animation smoothing
-    await Future.delayed(Durations.medium3);
-
+    // await Future.delayed(Durations.medium3);
     if (!mounted) return;
+
+    final String captchaToken;
+    final turnstile = CloudflareTurnstile.invisible(
+      siteKey: ApiManager.turnstileKey,
+      baseUrl: Uri.base.toString(),
+    );
+    try {
+      captchaToken = (await turnstile.getToken())!;
+    } catch (_) {
+      submitLoading = false;
+      submitErrorText = appLocalizations.registerErrorCaptcha;
+      if (mounted) setState(() {});
+      return;
+    } finally {
+      turnstile.dispose();
+    }
 
     try {
       final response = await http.post(
@@ -392,6 +407,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           "projects": null,
           "role": null,
           "locale": appLocalizations.localeName,
+          "captcha": captchaToken,
         }),
       );
       if (response.statusCode == 201) {
@@ -551,20 +567,6 @@ class _RegisterScreenState extends State<RegisterScreen>
             label: Text(appLocalizations.registerSubmit),
           ),
         ),
-        // TODO: maybe implement, but right now: error 600010
-        // CloudflareTurnstile(
-        //   siteKey: ApiManager.turnstileKey,
-        //   baseUrl: Uri.base.toString(),
-        //   onTokenReceived: (token) {
-        //     if (kDebugMode) print(token);
-        //   },
-        //   options: TurnstileOptions(
-        //     theme: Theme.brightnessOf(context) == Brightness.dark
-        //         ? TurnstileTheme.dark
-        //         : TurnstileTheme.light,
-        //     language: appLocalizations.localeName,
-        //   ),
-        // ),
       ],
     );
     final success = Padding(
@@ -688,7 +690,7 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
                     duration: Durations.medium1,
                     curve: Curves.easeInOutCubicEmphasized,
                     constraints: BoxConstraints(
-                      maxHeight: childHeight + 2 * 12,
+                      maxHeight: childHeight + 12 + 16,
                     ),
                     child: Card.filled(
                       margin: EdgeInsets.zero,
@@ -708,7 +710,7 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
                               left: 16,
                               right: 16,
                               top: 12,
-                              bottom: 12,
+                              bottom: 16,
                             ),
                             child: OverflowBox(
                               alignment: Alignment.topCenter,

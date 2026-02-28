@@ -127,6 +127,11 @@
         "description": "Error message shown when the provided email address is already linked to another account during registration.",
         "context": "login"
     },
+    "registerErrorCaptcha": "Captcha verification failed. Please try again.",
+    "@registerErrorCaptcha": {
+        "description": "Error message shown when the captcha verification fails during registration.",
+        "context": "login"
+    },
     "registerLogin": "Log in",
     "@registerLogin": {
         "description": "Button text to switch to the login form from the registration form.",
@@ -295,6 +300,97 @@
         "description": "Button text to give consent and submit the image.",
         "context": "upload:consent"
     },
+    "passwordChangeFirstTimeLogin": "Your current password is temporary and we highly recommend changing it to something only you know. Please choose a new password to secure your account.",
+    "@passwordChangeFirstTimeLogin": {
+        "description": "Message shown to users who log in for the first time with a temporary password, prompting them to change their password.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeTitle": "Change password",
+    "@passwordChangeTitle": {
+        "description": "Title for the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeCurrent": "Current password",
+    "@passwordChangeCurrent": {
+        "description": "Label for the current password input field in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeNew": "New password",
+    "@passwordChangeNew": {
+        "description": "Label for the new password input field in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeConfirm": "Confirm new password",
+    "@passwordChangeConfirm": {
+        "description": "Label for the confirm new password input field in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeSubmit": "Change password",
+    "@passwordChangeSubmit": {
+        "description": "Button text to submit the change password form.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorWrongPassword": "Current password is incorrect.",
+    "@passwordChangeErrorWrongPassword": {
+        "description": "Error message shown when the user enters an incorrect current password in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorMismatch": "New password and confirmation do not match.",
+    "@passwordChangeErrorMismatch": {
+        "description": "Error message shown when the new password and confirmation do not match in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorWeak": "The password must be at least 12 characters long and include uppercase letters, lowercase letters, numbers, and special characters.",
+    "@passwordChangeErrorWeak": {
+        "description": "Error message shown when the new password does not meet the strength requirements in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorInsecure": "This password does not meet the security requirements. {message}.",
+    "@passwordChangeErrorInsecure": {
+        "description": "Generic error message shown when the new password does not meet the security requirements in the change password dialog. The specific reason is provided in the {message} placeholder.",
+        "context": "about:changePassword",
+        "placeholders": {
+            "message": {
+                "type": "String",
+                "example": "Passwords must be at least 12 characters long"
+            }
+        }
+    },
+    "passwordChangeErrorInsecureCodeShort": "Passwords must be at least 12 characters long",
+    "@passwordChangeErrorInsecureCodeShort": {
+        "description": "Error message shown when the new password is too short in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorInsecureCodeLong": "Passwords must be at most 128 characters long",
+    "@passwordChangeErrorInsecureCodeLong": {
+        "description": "Error message shown when the new password is too long in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorInsecureCodeUppercase": "Passwords must contain at least one uppercase letter",
+    "@passwordChangeErrorInsecureCodeUppercase": {
+        "description": "Error message shown when the new password does not contain an uppercase letter in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorInsecureCodeLowercase": "Passwords must contain at least one lowercase letter",
+    "@passwordChangeErrorInsecureCodeLowercase": {
+        "description": "Error message shown when the new password does not contain a lowercase letter in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorInsecureCodeDigit": "Passwords must contain at least one digit",
+    "@passwordChangeErrorInsecureCodeDigit": {
+        "description": "Error message shown when the new password does not contain a digit in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorInsecureCodeSpecial": "Passwords must contain at least one special character",
+    "@passwordChangeErrorInsecureCodeSpecial": {
+        "description": "Error message shown when the new password does not contain a special character in the change password dialog.",
+        "context": "about:changePassword"
+    },
+    "passwordChangeErrorInsecureCodeCompromised": "It has appeared in a data breach is not to be considered secure",
+    "@passwordChangeErrorInsecureCodeCompromised": {
+        "description": "Error message shown when the new password has appeared in a data breach in the change password dialog.",
+        "context": "about:changePassword"
+    },
     "noSubmissions": "No submissions yet.",
     "@noSubmissions": {
         "description": "Shown when there are no submissions available for the selected project.",
@@ -356,14 +452,19 @@
             }
         }
     },
-    "aboutAppLearnMore": "Learn more",
-    "@aboutAppLearnMore": {
-        "description": "Label for a button that leads to more information about the app.",
+    "aboutAppChangePassword": "Change password",
+    "@aboutAppChangePassword": {
+        "description": "Label for a button that allows the user to change their password.",
         "context": "about"
     },
     "aboutAppLogout": "Logout",
     "@aboutAppLogout": {
         "description": "Label for a button that logs the user out of the app.",
+        "context": "about"
+    },
+    "aboutAppLearnMore": "Learn more",
+    "@aboutAppLearnMore": {
+        "description": "Label for a button that leads to more information about the app.",
         "context": "about"
     }
 }

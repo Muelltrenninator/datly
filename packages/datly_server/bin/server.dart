@@ -10,9 +10,9 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:tracer/tracer.dart';
 
 import 'database/database.dart';
+import 'email/email.dart';
 import 'helpers.dart';
 import 'routes/api.dart';
-import 'email/email.dart';
 
 late final Directory dataDirectory;
 late final Directory assetsDirectory;
@@ -147,6 +147,7 @@ void main(List<String> args) async {
   env = DotEnv(includePlatformEnvironment: true, quiet: true)
     ..load(["${dataDirectory.path}/.env"]);
   initializeSmtpServer();
+  captchaSecretKey = env["DATLY_CAPTCHA_SECRET"] ;
 
   await generateJwtKeys();
   jwtPrivateKey = RSAPrivateKey(await jwtPrivateKeyFile.readAsString());

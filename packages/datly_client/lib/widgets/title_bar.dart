@@ -7,6 +7,7 @@ import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../main.gr.dart';
 import '../screens/terms.dart';
+import 'password_change_dialog.dart';
 
 class TitleBarTitle extends StatelessWidget {
   final GestureTapCallback? onTap;
@@ -101,10 +102,14 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               SizedBox(height: 24),
               ListTile(
-                onTap: () =>
-                    launchUrl(Uri.parse("https://github.com/Muelltrenninator")),
-                leading: Icon(Icons.open_in_new),
-                title: Text(AppLocalizations.of(context).aboutAppLearnMore),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showPasswordChangeDialog(context: context);
+                },
+                leading: Icon(Icons.key),
+                title: Text(
+                  AppLocalizations.of(context).aboutAppChangePassword,
+                ),
               ),
               ListTile(
                 onTap: () async {
@@ -115,6 +120,12 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
                 title: Text(AppLocalizations.of(context).aboutAppLogout),
               ),
               SizedBox(height: 12),
+              ListTile(
+                onTap: () =>
+                    launchUrl(Uri.parse("https://github.com/Muelltrenninator")),
+                leading: Icon(Icons.open_in_new),
+                title: Text(AppLocalizations.of(context).aboutAppLearnMore),
+              ),
               ListTile(
                 onTap: () => showMarkdownDialog(
                   context: context,
