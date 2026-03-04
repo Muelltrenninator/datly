@@ -15,12 +15,12 @@ export 'package:drift/drift.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Projects, Users, Submissions, Signatures])
+@DriftDatabase(tables: [Projects, Users, Submissions, Signatures, Categories])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -112,6 +112,38 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      if (from < 4) {
+        for (final user in await select(users).get()) {
+          queueEmail(
+            EmailMessagesTemplates.legalChangedAll(
+              user: user,
+              effectiveDate: DateTime(2026, 3, 1),
+            ).stylized(),
+          );
+        }
+      }
+      if (from < 5) {
+        await m.createTable(categories);
+        await m.alterTable(
+          TableMigration(
+            submissions,
+            newColumns: [
+              submissions.category,
+              submissions.validationWeightPositive,
+              submissions.validationWeightNegative,
+            ],
+          ),
+        );
+        await m.alterTable(
+          TableMigration(
+            users,
+            newColumns: [
+              users.validationWeightPositive,
+              users.validationWeightNegative,
+            ],
+          ),
+        );
+      }
 
       t.info("Database migration completed");
     },
@@ -121,5 +153,7 @@ class AppDatabase extends _$AppDatabase {
 enum UserRole { external, user, admin }
 
 enum SubmissionStatus { pending, accepted, rejected, censored }
+
+enum ScoreType { unknown, knownPositive, knownNegative }
 
 enum SignatureMethod { typed }

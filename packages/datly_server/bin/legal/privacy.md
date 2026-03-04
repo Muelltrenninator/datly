@@ -1,99 +1,231 @@
 # Datly — Privacy Policy
 
-**Effective date:** 2025-12-14
-**Maintainer / Controller:** JHubi1  
-**Contact:** <me@jhubi1.com>  
+**Effective date:** 2026-03-01
+**Maintainer / Controller:** JHubi1
+**Contact:** <me@jhubi1.com>
 **Location:** Germany
 
 ## Quick summary
 
-- Datly lets approved users take photos and upload them to our servers. Uploaded photos are used **only** to train, evaluate, and improve AI/ML models.  
-- Accounts are created and approved manually by administrators. Usernames are assigned by admins and are **not changeable** by users.  
-- We currently collect **no other personal data by default**. An email address may be collected in the future for optional notifications, but email addresses and usernames will **not** be included in any training datasets.  
-- All uploaded images have embedded metadata (EXIF) removed before they are stored (data minimisation).  
-- When you submit an image, we permanently store the submitting client's IP address and browser user‑agent for security, abuse prevention, and to comply with requirements of the overarching project this data is collected for.  
+- Datly lets registered users capture and upload photos. Uploaded photos are used **only** to train, evaluate, and improve AI/ML models.
+- Accounts may be created by administrators or through self-registration (with CAPTCHA verification). Usernames are assigned by admins or chosen during registration and are **not changeable** by users.
+- We collect your **username, email address** (required for account creation), and **hashed password**. Email addresses and usernames are **not** included in any training datasets.
+- All uploaded images have embedded metadata (EXIF) **fully removed**, are **centre-cropped and resized to 224 × 224 pixels**, and re-encoded before storage (data minimisation).
+- When you submit an image, you sign a consent form. We permanently store the submitting client's **IP address**, **browser user-agent**, and a **snapshot of the consent form and your account data** at the time of signing as legal evidence.
+- Your **preferred language** is automatically detected from the `Accept-Language` HTTP header and stored in your account.
 - Access to the service is **free**.
+
+---
 
 ## 1. Controller & contact
 
-The data controller for processing carried out via Datly is the maintainer listed above (JHubi1). For questions, privacy requests, or to exercise your rights contact: **<me@jhubi1.com>**.
+The data controller for all processing carried out via Datly is:
 
-## 2. What we collect
+**JHubi1**
+Email: **<me@jhubi1.com>**
+Location: Germany
 
-- **Images you upload.** This includes the image file content; however, embedded metadata (EXIF, GPS, camera model, etc.) is removed before the file is stored.  
-- **Account identifiers.** A username (admin-assigned). Optionally an email address only if you voluntarily provide it for notifications; emails are not used in training datasets.  
-- **Minimal administrative data.** Status/approval timestamps and basic logs required to manage accounts and moderate uploads.
+No Data Protection Officer (DPO) has been formally appointed. For all questions, privacy requests, or to exercise your rights, contact the address above.
 
-- **Network and device metadata at upload.** The IP address and browser user‑agent of the submitting client are captured at the time of each image submission. These are retained indefinitely to protect the service (security, fraud/abuse prevention, audit, and compliance with requirements of the overarching project this data is collected for).
+## 2. Categories of personal data we collect
 
-We do **not** collect unrelated personal data (contact lists, device address books, payment data, health or sensitive category data as a matter of design). Do not upload photos that contain sensitive personal data about others unless you have lawful consent.
+### 2.1 Account data
 
-## 3. Purpose & legal bases for processing
+| Data                             | Details                                                                                                                                                          |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Username**                     | 3–16 alphanumeric characters; assigned by an admin or chosen at self-registration; serves as your primary identifier                                             |
+| **Email address**                | Required at account creation; used for transactional notifications (welcome, password reset, account status changes)                                             |
+| **Password**                     | Stored only as an **Argon2id hash** (never in plaintext); validated against minimum-complexity rules and the Have I Been Pwned breach database before acceptance |
+| **Locale / language preference** | Automatically detected from your browser's `Accept-Language` header and updated on each authenticated request                                                    |
+| **Role**                         | One of `external`, `user`, or `admin`; determines access permissions                                                                                             |
+| **Account status**               | Whether your account is activated, disabled (with reason), and the date you joined                                                                               |
+| **Project assignments**          | List of project IDs you are authorised to contribute to                                                                                                          |
 
-**Primary purpose:** to store and process images for the development, training, evaluation and improvement of AI/ML models and related research/benchmarks.
+### 2.2 Images you upload
 
-**Legal bases (Article 6 GDPR):**
+- The original image file content is processed as follows before storage:
+  1. All embedded metadata (EXIF, GPS, camera model, timestamps, etc.) is **fully removed**.
+  2. Minimal new EXIF data is written: `Software: Datly`, `Copyright: (c) <year> <username>`.
+  3. The image is **centre-cropped and resized to 224 × 224 pixels** (cubic interpolation).
+  4. A **BlurHash** perceptual placeholder is computed for display purposes.
+  5. The processed image is re-encoded as PNG or JPEG and stored under a random UUID filename.
+- The original, unprocessed image is **not retained**.
 
-- **Consent (Art. 6(1)(a))** — for processing images you actively upload for training purposes we rely on your explicit informed consent at the time of upload. Consent is freely given, specific and can be withdrawn.  
-- **Legitimate interests / contract (Art. 6(1)(f)/(b))** — for account management, fraud prevention, security and maintaining the service we rely on legitimate interests and contract where applicable (e.g., if you opt into optional notifications). This includes retaining IP addresses and browser user‑agent strings associated with uploads indefinitely for security, abuse prevention, and compliance with requirements of the overarching project this data is collected for. We will document any legitimate-interests assessment where required.
+### 2.3 Submission metadata
 
-If the legal basis for a particular processing step differs, we will make that clear at the point of collection.
+| Data                     | Details                                          |
+| ------------------------ | ------------------------------------------------ |
+| **Submission ID**        | Auto-generated integer                           |
+| **Project ID**           | The project the image was submitted to           |
+| **Submitting user**      | Your username                                    |
+| **Status**               | `pending`, `accepted`, `rejected`, or `censored` |
+| **Submission timestamp** | Date and time of upload                          |
+| **Asset ID**             | Random UUID referencing the stored image file    |
+| **Asset MIME type**      | `image/png` or `image/jpeg`                      |
+| **Asset BlurHash**       | Perceptual hash for UI placeholders              |
 
-## 4. What you grant us (license & model use)
+### 2.4 Consent signatures
 
-By uploading an image you grant Datly a **non-exclusive, worldwide, royalty-free, transferable and sublicensable** license to store, reproduce, analyse, transform (including anonymisation/feature extraction), and use the image and any derived data for training, validating, evaluating and improving AI/ML models and for associated research and development. This includes use in internal or external publications or benchmarks in de-identified or aggregated form.
+Each image submission requires a consent signature. The following data is stored as **legal evidence**:
 
-**Important:** We will remove EXIF/embedded metadata before storage. If you request deletion we will delete original files and take steps to exclude them from future training; however, information that has already been irreversibly incorporated into a trained model may not be fully removable. We will make reasonable efforts to prevent further use of deleted images in subsequent training. The legal limits to erasing information already learned by models are described in the GDPR (right to erasure and practical limitations).
+| Data                      | Details                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| **Signature text**        | The text you type to confirm consent (max 128 characters)                             |
+| **Parental signature**    | If applicable, a parental/guardian consent signature (max 128 characters)             |
+| **Signature method**      | Currently: `typed`                                                                    |
+| **Consent form snapshot** | The exact text of the consent form you agreed to at signing time                      |
+| **Consent version**       | Version number of the consent form                                                    |
+| **IP address**            | The IP address of the submitting client at the time of signing                        |
+| **Browser user-agent**    | The `User-Agent` HTTP header of the submitting client                                 |
+| **User snapshot**         | A point-in-time JSON snapshot of your full account record (including hashed password) |
+| **Submission snapshot**   | A point-in-time JSON snapshot of the submission record                                |
+| **Signed-at timestamp**   | Date and time of signing                                                              |
+| **Revocation data**       | If revoked: revocation timestamp and reason                                           |
 
-## 5. Retention
+### 2.5 Network and device metadata
 
-- Default retention for original uploaded images: **up to 24 months** from upload, unless you request earlier deletion.  
-- IP addresses and browser user‑agent strings captured at submission are retained **indefinitely** for security, fraud/abuse prevention, audit purposes, and compliance with requirements of the overarching project this data is collected for.  
-- If you request account deletion we will remove original image files and account data (except logs necessary for security, legal compliance, or backup retention) within **30 days** where technically feasible. We will exclude your images from future training and datasets after deletion.  
-- Backup copies or limited logs may be retained longer only for legal, security or backup-restoration purposes; such data will be minimised and access restricted.
+| Data                       | Where used                                                                   | Retained                                                           |
+| -------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **IP address**             | Consent signatures; rate limiting; CAPTCHA verification (sent to Cloudflare) | Permanently in signatures; transiently in memory for rate limiting |
+| **Browser user-agent**     | Consent signatures                                                           | Permanently in signatures                                          |
+| **Accept-Language header** | Locale detection                                                             | Stored as `locale` in your account                                 |
 
-These retention periods are chosen to balance model development needs and data minimisation/storage limitation obligations under the GDPR.
+### 2.6 Data we do **not** collect
 
-## 6. Data subject rights & exercising them
+We do not collect: contact lists, device identifiers, address books, payment data, location data (beyond IP), health data, biometric data, cookies for tracking, or any data from analytics or advertising SDKs. No cookies or similar tracking technologies are used.
 
-Under the GDPR you have rights including (where applicable):  
+> **Important:** Do not upload photos that contain sensitive personal data about others (e.g. biometric data, health information) unless you have an appropriate lawful basis.
 
-- Right to be informed (this notice), access, rectification, erasure (right to be forgotten), restriction of processing, objection, data portability, and rights related to automated decision-making. We will assist you to exercise these rights and respond within GDPR timeframes.
+## 3. Purposes and legal bases for processing
 
-To exercise any right, contact **<me@jhubi1.com>**. We may require reasonable proof of identity before fulfilling requests.
+| Purpose                                                                                                                                    | Data involved                                                                                         | Legal basis (Art. 6 GDPR)                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **AI/ML model training** — storing and processing images for training, evaluation, improvement, and benchmarking of AI/ML models           | Uploaded images, submission metadata                                                                  | **Consent (Art. 6(1)(a))** — explicit informed consent given at each upload via the consent signature                                                                          |
+| **Account management** — creating, authenticating, and managing your account; sending transactional emails                                 | Username, email, hashed password, role, locale, account status                                        | **Contract performance (Art. 6(1)(b))** — necessary to provide the service you registered for                                                                                  |
+| **Security & abuse prevention** — rate limiting, CAPTCHA verification, password breach checking, access control                            | IP address, user-agent, hashed password prefix (5 chars of SHA-1)                                     | **Legitimate interests (Art. 6(1)(f))** — our interest in protecting the service, its users, and data integrity                                                                |
+| **Legal evidence of consent** — retaining proof that valid consent was given for image use, including after account or submission deletion | Consent signatures (IP, user-agent, user snapshot, submission snapshot, signature text, consent form) | **Legal obligation (Art. 6(1)(c))** and **Legitimate interests (Art. 6(1)(f))** — to demonstrate compliance with consent requirements (Art. 7(1) GDPR) and project obligations |
+| **Transactional communications** — welcome emails, password resets, account status notifications                                           | Email address, username, locale                                                                       | **Contract performance (Art. 6(1)(b))**                                                                                                                                        |
 
-You may also withdraw any consent you gave for image use at any time; withdrawal will not affect processing already lawfully completed prior to withdrawal.
+Where we rely on **legitimate interests**, we have conducted a balancing test and determined that the processing is proportionate and does not override your rights. You may request details of this assessment.
 
-## 7. Data Protection Impact Assessment (DPIA)
+Where we rely on **consent**, you may withdraw it at any time (see Section 7). Withdrawal does not affect the lawfulness of processing carried out before withdrawal.
 
-Processing personal images to train AI can be a high-risk activity. Where required by the GDPR, Datly will carry out a Data Protection Impact Assessment (DPIA) before or when launching processing operations that are likely to result in a high risk to data subjects (for example large-scale profiling or certain AI uses). You may request summary information about any DPIA we have carried out.
+## 4. What you grant us (licence & model use)
 
-## 8. Security
+By uploading an image and signing the consent form, you grant Datly a **non-exclusive, worldwide, royalty-free, transferable, and sublicensable** licence to store, reproduce, analyse, transform (including anonymisation and feature extraction), and use the image and any derived data for training, validating, evaluating, and improving AI/ML models and for associated research and development. This includes use in internal or external publications or benchmarks in de-identified or aggregated form.
 
-We use appropriate technical and organisational measures (access controls, encryption in transit, minimal admin access, secure hosting practices) to protect stored images and account data. While we aim to protect your data, no system is absolutely secure. In the unlikely event of a personal data breach requiring notification, we will follow GDPR notification obligations.
+**Important:**
 
-## 9. International transfers
+- We remove all original EXIF metadata and resize images before storage; the original file is not retained.
+- If you request deletion, we will delete original files and take steps to exclude them from future training. However, information that has already been irreversibly incorporated into a trained model may not be fully removable. We will make reasonable efforts to prevent further use of deleted images in subsequent training runs.
+- Usernames and email addresses are **never** included in training datasets or shared model artefacts.
 
-Data may be processed or stored outside the EU/EEA (e.g., by hosting or ML service providers). Where we transfer personal data outside the EEA we will apply appropriate safeguards (e.g., EU Standard Contractual Clauses or other lawful transfer mechanisms) as required by GDPR.
+## 5. Data retention
 
-## 10. Sharing & subprocessors
+| Data category                                  | Retention period                                                                                                                                                                               |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Uploaded images**                            | Until you request deletion, the submission is deleted, or the submission is censored — whichever comes first. No automated expiry.                                                             |
+| **Submission records**                         | Deleted when the submission is deleted or the user account is deleted (cascade). Censored submissions retain the record but the image file is deleted.                                         |
+| **Account data**                               | Retained until the account is deleted by an administrator at your request.                                                                                                                     |
+| **Consent signatures**                         | Retained **indefinitely**, even after account or submission deletion. Signatures are marked as revoked (with timestamp and reason) but not erased, as they serve as legal evidence of consent. |
+| **IP addresses & user-agents** (in signatures) | Retained **indefinitely** as part of the consent signature record (see above).                                                                                                                 |
+| **JWT authentication tokens**                  | Expire after **180 days**. Tokens are stateless and not stored server-side.                                                                                                                    |
+| **Server logs**                                | HTTP request method, status code, and URL path are logged to stderr. Logs are not persisted beyond the server process lifetime unless captured by the hosting environment.                     |
 
-We use trusted subprocessors to store and process data. Specifically, our primary hosting provider is **Hetzner Online GmbH**, located in **Nuremberg, Germany (eu-central)**, where we utilize a private shared server environment. Subprocessors are contractually required to process data only on our instructions and to implement appropriate safeguards. We may share de-identified or aggregated research outputs or models; usernames and email addresses will **not** be included in training datasets or shared model artifacts.
+We acknowledge that indefinite retention must be justified under the GDPR's storage limitation principle (Art. 5(1)(e)). We retain consent signatures indefinitely because they constitute evidence of lawful consent (Art. 7(1) GDPR) and are required for compliance with the overarching research project's obligations. We periodically review retention necessity.
 
-## 11. Minors
+There is currently no automated data purging mechanism. If you wish to have your data deleted, contact us (see Section 7).
 
-Datly is **not intended** for children. By using the service you represent that you meet the minimum age in your jurisdiction to give consent for image uploads. Do not upload images of minors unless you have lawful permission.
+## 6. Recipients and subprocessors
 
-## 12. Complaints & supervisory authority
+We share personal data with the following categories of recipients:
 
-If you have an unresolved complaint about our processing you may contact your national data protection authority. In Germany you may contact the relevant state supervisory authority or the Federal Commissioner for Data Protection and Freedom of Information (BfDI) for federal matters. Filing a complaint with a supervisory authority is free of charge.
+| Recipient                    | Data shared                                                  | Purpose                                                                             | Location                                |
+| ---------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------- | --------------------------------------- |
+| **Hetzner Online GmbH**      | All stored data (database, image files)                      | Hosting infrastructure (private shared server)                                      | Nuremberg, Germany (EU)                 |
+| **Configured SMTP provider** | Email address, username, temporary passwords, account status | Transactional email delivery                                                        | Depends on configuration; see Section 8 |
+| **Cloudflare, Inc.**         | CAPTCHA response token, client IP address                    | CAPTCHA verification (Turnstile) during self-registration                           | USA (see Section 8)                     |
+| **Have I Been Pwned (HIBP)** | First 5 characters of the SHA-1 hash of your password        | Password breach checking (k-Anonymity model; the full hash never leaves the server) | International                           |
 
-## 13. Changes to this Privacy Policy
+Subprocessors are contractually required to process data only on our instructions and to implement appropriate safeguards. We do **not** sell personal data. De-identified or aggregated research outputs may be published; usernames and email addresses are never included.
 
-We may update this policy; material changes will be communicated via the app or by email if you have provided one. The latest effective date will be displayed at the top.
+## 7. Your rights under the GDPR
 
-## 14. Misc / legal
+Under the GDPR you have the following rights, which you can exercise at any time by contacting **<me@jhubi1.com>**:
 
-This notice is intended to describe core practices and is not a substitute for legal advice. For legal questions about obligations under GDPR or other national laws please consult a qualified attorney.
+| Right                                 | Description                                                                                                                      |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Access** (Art. 15)                  | Obtain confirmation of whether we process your data and receive a copy of it                                                     |
+| **Rectification** (Art. 16)           | Have inaccurate data corrected (note: usernames cannot be changed)                                                               |
+| **Erasure** (Art. 17)                 | Request deletion of your data ("right to be forgotten"), subject to the limitations below                                        |
+| **Restriction** (Art. 18)             | Request that we restrict processing of your data in certain circumstances                                                        |
+| **Data portability** (Art. 20)        | Receive your data in a structured, commonly used, machine-readable format                                                        |
+| **Objection** (Art. 21)               | Object to processing based on legitimate interests; we will cease processing unless we demonstrate compelling legitimate grounds |
+| **Withdrawal of consent** (Art. 7(3)) | Withdraw your consent for image processing at any time; this does not affect the lawfulness of processing before withdrawal      |
 
-**Contact:** <me@jhubi1.com> (maintainer: JHubi1)
+**Limitations on erasure:**
+
+- **Consent signatures** (including IP address, user-agent, and account snapshot) are retained even after account deletion as legal evidence of consent. They are marked as revoked but not erased.
+- Information already irreversibly incorporated into a trained AI/ML model may not be fully removable. We will exclude deleted images from all future training.
+
+We will respond to your request within **one month** (extendable by two further months for complex requests, with notification). We may require reasonable proof of identity before fulfilling requests. Exercising your rights is free of charge.
+
+## 8. International data transfers
+
+Our primary data storage is within the EU (Hetzner, Germany). However, certain processing involves transfers outside the EEA:
+
+| Transfer                                        | Destination              | Safeguard                                                                                                   |
+| ----------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Cloudflare Turnstile** (CAPTCHA verification) | USA                      | EU Standard Contractual Clauses (SCCs) and Cloudflare's DPA                                                 |
+| **Have I Been Pwned** (password breach check)   | International            | Only a 5-character hash prefix is transmitted (no personal data in practical terms); k-Anonymity model used |
+| **SMTP provider** (email delivery)              | Depends on configuration | Appropriate safeguards (SCCs or adequacy decision) applied as required                                      |
+
+Where we transfer personal data outside the EEA, we ensure appropriate safeguards are in place as required by Chapter V GDPR (Arts. 44–49), including EU Standard Contractual Clauses or reliance on an adequacy decision.
+
+## 9. Security measures
+
+We implement appropriate technical and organisational measures (Art. 32 GDPR) to protect your data:
+
+- **Password security:** Argon2id hashing with OWASP-recommended parameters; constant-time hash comparison to prevent timing attacks; minimum-complexity enforcement; breach-database checking
+- **Authentication:** RS256 (RSA 2048-bit) JWT tokens with 180-day expiry; asymmetric key signing
+- **Access control:** Role-based permissions (external/user/admin); disabled-account enforcement on every request
+- **Rate limiting:** Maximum 5 requests per 10 seconds per IP on failed authentication attempts
+- **CAPTCHA:** Cloudflare Turnstile for self-registration to prevent automated abuse
+- **Data minimisation:** EXIF metadata fully stripped from images; images resized to 224 × 224 px; original files not retained
+- **Input validation:** Strict length limits and format validation on all user inputs; path traversal prevention; asset filename validation via regex
+- **Encryption in transit:** HTTPS (TLS) for all connections
+- **Database security:** SQLite with WAL journal mode, foreign key enforcement, auto-vacuum; stored in a private server environment
+- **Log hygiene:** Consent-related query parameters redacted from request logs; passwords never returned in API responses; `Powered-By` header reveals no version information
+- **Cryptographic randomness:** `Random.secure()` used for all security-sensitive operations (tokens, salts, UUIDs)
+- **CORS policy:** `Cross-Origin-Embedder-Policy: require-corp`, `Cross-Origin-Opener-Policy: same-origin`
+
+No system is absolutely secure. In the event of a personal data breach, we will comply with the notification obligations under Arts. 33–34 GDPR (notification to the supervisory authority within 72 hours, and to affected individuals where the breach poses a high risk).
+
+## 10. Automated decision-making
+
+We do **not** use automated decision-making or profiling that produces legal effects or similarly significantly affects you (Art. 22 GDPR). Image moderation (accept/reject/censor) is performed manually by administrators.
+
+## 11. Data Protection Impact Assessment (DPIA)
+
+Processing personal images to train AI/ML models can be a high-risk activity. Where required by Art. 35 GDPR, we carry out a Data Protection Impact Assessment before launching processing operations likely to result in a high risk to data subjects. You may request summary information about any DPIA we have carried out by contacting **<me@jhubi1.com>**.
+
+## 12. Children and minors
+
+Datly is **not intended** for children under the age of 16 (or the applicable minimum age for digital consent in your jurisdiction). If you are under the applicable minimum age you may only use the service with verifiable parental/guardian consent. Where parental consent is applicable, a separate parental signature is collected alongside your own. Do not upload images of minors unless you have lawful permission.
+
+## 13. Complaints and supervisory authority
+
+If you believe our processing of your personal data infringes the GDPR, you have the right to lodge a complaint with a supervisory authority (Art. 77 GDPR), in particular in the EU Member State of your habitual residence, place of work, or place of the alleged infringement.
+
+In Germany, you may contact the relevant state data protection authority (Landesdatenschutzbeauftragte) or the Federal Commissioner for Data Protection and Freedom of Information (**BfDI**) for federal matters. Filing a complaint is free of charge.
+
+## 14. Changes to this Privacy Policy
+
+We may update this policy from time to time. Material changes will be communicated via the app or by email. The effective date at the top of this document will always reflect the latest version. Continued use of the service after changes constitutes acknowledgement of the updated policy; for changes requiring renewed consent, we will obtain it.
+
+## 15. Contact
+
+For questions, privacy requests, data subject rights, or any other matters:
+
+**JHubi1**
+Email: **<me@jhubi1.com>**

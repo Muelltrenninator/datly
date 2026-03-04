@@ -236,17 +236,23 @@ abstract class AppLocalizations {
   /// **'Log in'**
   String get registerLogin;
 
+  /// Link text for the app's terms of service. This string is formatted in MLA title case.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
   /// Link text for the app's privacy policy. This string is formatted in MLA title case.
   ///
   /// In en, this message translates to:
   /// **'Privacy Policy'**
   String get privacyPolicy;
 
-  /// Link text for the app's terms of service. This string is formatted in MLA title case.
+  /// Link text for the app's imprint. This string is formatted in MLA title case.
   ///
   /// In en, this message translates to:
-  /// **'Terms of Service'**
-  String get termsOfService;
+  /// **'Imprint'**
+  String get imprint;
 
   /// Label for the upload section in the main navigation.
   ///

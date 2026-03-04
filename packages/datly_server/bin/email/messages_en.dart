@@ -25,9 +25,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m1(username) => "Hello ${username},";
 
-  static m2(email) => "we\'ve recently switched to a new login system. The old login codes will no longer work. Instead, you can now log in using your email address (${email}) and the temporary password below.";
+  static m2(date) => "we are writing to let you know that our Terms of Service and Privacy Policy have been updated. The changes will take effect on ${date}.";
 
-  static m3(email) => "An account has been created for you on Datly. Please use the temporary password below along with your email address (${email}) to log in, then change it to something of your choice.";
+  static m3(date) => "we are writing to let you know that our Privacy Policy has been updated. The changes will take effect on ${date}.";
+
+  static m4(date) => "we are writing to let you know that our Terms of Service have been updated. The changes will take effect on ${date}.";
+
+  static m5(email) => "we\'ve recently switched to a new login system. The old login codes will no longer work. Instead, you can now log in using your email address (${email}) and the temporary password below.";
+
+  static m6(email) => "An account has been created for you on Datly. Please use the temporary password below along with your email address (${email}) to log in, then change it to something of your choice.";
 
   @override
   final Map<String, dynamic> messages = _notInlinedMessages(_notInlinedMessages);
@@ -54,8 +60,36 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailAccountReenabledSummary': MessageLookupByLibrary.simpleMessage('Your Datly account has been reactivated.'),
     'emailFooter': MessageLookupByLibrary.simpleMessage('You are receiving this email because you registered at our service.<br>To unsubscribe, please <a href=\"mailto:me@jhubi1.com\" style=\"color: #999999;text-decoration: underline;\">contact the admin</a> for removal from the app.<br><br>&copy; 2025–2026 JHubi1. All rights reserved.'),
     'emailHello': m1,
+    'emailLegalChangedAllContentExtra1': MessageLookupByLibrary.simpleMessage('View Terms of Service'),
+    'emailLegalChangedAllContentExtra2': MessageLookupByLibrary.simpleMessage('View Privacy Policy'),
+    'emailLegalChangedAllPart1': m2,
+    'emailLegalChangedAllPart2': MessageLookupByLibrary.simpleMessage('We encourage you to review the updated documents at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.'),
+    'emailLegalChangedAllPart3': MessageLookupByLibrary.simpleMessage('If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.'),
+    'emailLegalChangedAllPart4': MessageLookupByLibrary.simpleMessage('If you have any questions, please don\'t hesitate to '),
+    'emailLegalChangedAllPart5': MessageLookupByLibrary.simpleMessage('contact our support team'),
+    'emailLegalChangedAllPart6': MessageLookupByLibrary.simpleMessage('.'),
+    'emailLegalChangedAllSubject': MessageLookupByLibrary.simpleMessage('Updates to the Datly Terms of Service and Privacy Policy'),
+    'emailLegalChangedAllSummary': MessageLookupByLibrary.simpleMessage('Our Terms of Service and Privacy Policy have been updated.'),
+    'emailLegalChangedPrivacyContentExtra1': MessageLookupByLibrary.simpleMessage('View Privacy Policy'),
+    'emailLegalChangedPrivacyPart1': m3,
+    'emailLegalChangedPrivacyPart2': MessageLookupByLibrary.simpleMessage('We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.'),
+    'emailLegalChangedPrivacyPart3': MessageLookupByLibrary.simpleMessage('If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.'),
+    'emailLegalChangedPrivacyPart4': MessageLookupByLibrary.simpleMessage('If you have any questions, please don\'t hesitate to '),
+    'emailLegalChangedPrivacyPart5': MessageLookupByLibrary.simpleMessage('contact our support team'),
+    'emailLegalChangedPrivacyPart6': MessageLookupByLibrary.simpleMessage('.'),
+    'emailLegalChangedPrivacySubject': MessageLookupByLibrary.simpleMessage('Updates to the Datly Privacy Policy'),
+    'emailLegalChangedPrivacySummary': MessageLookupByLibrary.simpleMessage('Our Privacy Policy has been updated.'),
+    'emailLegalChangedTermsContentExtra1': MessageLookupByLibrary.simpleMessage('View Terms of Service'),
+    'emailLegalChangedTermsPart1': m4,
+    'emailLegalChangedTermsPart2': MessageLookupByLibrary.simpleMessage('We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.'),
+    'emailLegalChangedTermsPart3': MessageLookupByLibrary.simpleMessage('If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.'),
+    'emailLegalChangedTermsPart4': MessageLookupByLibrary.simpleMessage('If you have any questions, please don\'t hesitate to '),
+    'emailLegalChangedTermsPart5': MessageLookupByLibrary.simpleMessage('contact our support team'),
+    'emailLegalChangedTermsPart6': MessageLookupByLibrary.simpleMessage('.'),
+    'emailLegalChangedTermsSubject': MessageLookupByLibrary.simpleMessage('Updates to the Datly Terms of Service'),
+    'emailLegalChangedTermsSummary': MessageLookupByLibrary.simpleMessage('Our Terms of Service have been updated.'),
     'emailPasswordResetMigrationContentExtra1': MessageLookupByLibrary.simpleMessage('Log in now'),
-    'emailPasswordResetMigrationPart1': m2,
+    'emailPasswordResetMigrationPart1': m5,
     'emailPasswordResetMigrationPart2': MessageLookupByLibrary.simpleMessage('This change was necessary to open the platform to a wider audience, making the old invite code system no longer feasible. We apologize for any inconvenience and thank you for your understanding.'),
     'emailPasswordResetMigrationSubject': MessageLookupByLibrary.simpleMessage('Important changes to your Datly login'),
     'emailPasswordResetMigrationSummary': MessageLookupByLibrary.simpleMessage('You can now log in using your email address and a password.'),
@@ -65,7 +99,7 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailPasswordResetTemporarySummary': MessageLookupByLibrary.simpleMessage('Your Datly password has been reset.'),
     'emailPasswordResetWelcomeContentExtra1': MessageLookupByLibrary.simpleMessage('Log in now'),
     'emailPasswordResetWelcomePart1': MessageLookupByLibrary.simpleMessage('you\'ve been invited to join the Datly Collectors! We collect photos of trash to better classify and understand it — and we\'re glad to have you on board.'),
-    'emailPasswordResetWelcomePart2': m3,
+    'emailPasswordResetWelcomePart2': m6,
     'emailPasswordResetWelcomeSubject': MessageLookupByLibrary.simpleMessage('Welcome to Datly'),
     'emailPasswordResetWelcomeSummary': MessageLookupByLibrary.simpleMessage('Please log in with the temporary password we\'ve created for you.'),
     'emailWelcomeContentExtra1': MessageLookupByLibrary.simpleMessage('Log in now'),

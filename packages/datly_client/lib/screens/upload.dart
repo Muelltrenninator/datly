@@ -320,7 +320,8 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
         child:
             controller != null &&
                 projectIndex != null &&
-                projectIndexCache != null
+                projectIndexCache != null &&
+                projects.length > 1
             ? Container(
                 key: ValueKey("container"),
                 padding: EdgeInsets.all(16),
@@ -410,16 +411,16 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                           ),
                         ),
                         if (projects.isNotEmpty) ...[
-                          SizedBox(height: 4),
-                          FloatingActionButton(
-                            onPressed: projects.isNotEmpty
-                                ? switchProject
-                                : null,
-                            child: Icon(Icons.assignment),
-                          ),
+                          if (projects.length > 1) ...[
+                            SizedBox(height: 4),
+                            FloatingActionButton(
+                              onPressed: switchProject,
+                              child: Icon(Icons.assignment),
+                            ),
+                          ],
                           SizedBox(height: 8),
                           FloatingActionButton.large(
-                            onPressed: projects.isNotEmpty ? submit : null,
+                            onPressed: submit,
                             child: Icon(Icons.camera),
                           ),
                         ],
@@ -664,6 +665,7 @@ ${!checkAge ? """
                           : appLocalizations.termsOfService,
                       style: TextStyle(
                         color: ColorScheme.of(context).primary,
+                        decorationColor: ColorScheme.of(context).primary,
                         decoration: TextDecoration.underline,
                       ),
                       recognizer: TapGestureRecognizer()

@@ -220,8 +220,8 @@ String? identifierFromRequest(Request request) {
   return ip;
 }
 
-String? localeFromRequest(Request request) {
-  final languages = request.headers["accept-language"]?.split(",");
+String? localeFromRequest(Request req) {
+  final languages = req.headers["accept-language"]?.split(",");
   if (languages == null || languages.isEmpty) return null;
 
   languages.sort(

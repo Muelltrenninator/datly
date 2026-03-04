@@ -17,7 +17,7 @@
       <mj-section padding="0px" padding-top="0px">
         <mj-column vertical-align="middle">
 
-          <mj-image src="https://datly.con.bz/assets/assets/emailLogo.png" href="{{canonical}}" alt="Datly Logo" width="110px" height="30px" align="left" />
+          <mj-image src="{{canonical}}/assets/assets/emailLogo.png" href="{{canonical}}" alt="Datly Logo" width="110px" height="30px" align="left" />
 
         </mj-column>
       </mj-section>

@@ -147,11 +147,8 @@ class _ValidatePageState extends State<ValidatePage> {
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () => showMarkdownDialog(
                                         context: context,
-                                        source: MarkdownDialogHttpSource(
-                                          Uri.parse(
-                                            "${ApiManager.baseUri.replace(path: "")}/legal/privacy",
-                                          ),
-                                        ),
+                                        source:
+                                            MarkdownDialogSource.privacyPolicy(),
                                       ),
                                   ),
                                   TextSpan(text: " • "),
@@ -162,11 +159,8 @@ class _ValidatePageState extends State<ValidatePage> {
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () => showMarkdownDialog(
                                         context: context,
-                                        source: MarkdownDialogHttpSource(
-                                          Uri.parse(
-                                            "${ApiManager.baseUri.replace(path: "")}/legal/terms",
-                                          ),
-                                        ),
+                                        source:
+                                            MarkdownDialogSource.termsOfService(),
                                       ),
                                   ),
                                 ],

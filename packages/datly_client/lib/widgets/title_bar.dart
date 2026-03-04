@@ -102,10 +102,7 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               SizedBox(height: 24),
               ListTile(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  showPasswordChangeDialog(context: context);
-                },
+                onTap: () => showPasswordChangeDialog(context: context),
                 leading: Icon(Icons.key),
                 title: Text(
                   AppLocalizations.of(context).aboutAppChangePassword,
@@ -126,14 +123,19 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
                 leading: Icon(Icons.open_in_new),
                 title: Text(AppLocalizations.of(context).aboutAppLearnMore),
               ),
+              SizedBox(height: 12),
               ListTile(
                 onTap: () => showMarkdownDialog(
                   context: context,
-                  source: MarkdownDialogHttpSource(
-                    Uri.parse(
-                      "${ApiManager.baseUri.replace(path: "")}/legal/privacy",
-                    ),
-                  ),
+                  source: MarkdownDialogSource.termsOfService(),
+                ),
+                leading: Icon(Icons.description_outlined),
+                title: Text(AppLocalizations.of(context).termsOfService),
+              ),
+              ListTile(
+                onTap: () => showMarkdownDialog(
+                  context: context,
+                  source: MarkdownDialogSource.privacyPolicy(),
                 ),
                 leading: Icon(Icons.privacy_tip_outlined),
                 title: Text(AppLocalizations.of(context).privacyPolicy),
@@ -141,14 +143,10 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
               ListTile(
                 onTap: () => showMarkdownDialog(
                   context: context,
-                  source: MarkdownDialogHttpSource(
-                    Uri.parse(
-                      "${ApiManager.baseUri.replace(path: "")}/legal/terms",
-                    ),
-                  ),
+                  source: MarkdownDialogSource.imprint(),
                 ),
-                leading: Icon(Icons.description_outlined),
-                title: Text(AppLocalizations.of(context).termsOfService),
+                leading: Icon(Icons.gavel_outlined),
+                title: Text(AppLocalizations.of(context).imprint),
               ),
             ],
           ),

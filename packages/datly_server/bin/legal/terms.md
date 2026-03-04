@@ -1,63 +1,99 @@
 # Datly — Terms of Service (ToS)
 
-**Effective date:** 2025-12-14
+**Effective date:** 2026-03-01
 **Maintainer / Provider:** JHubi1
 **Contact:** <me@jhubi1.com>
 **Location:** Germany
 
 ## 1. Acceptance
 
-By using Datly you agree to these Terms of Service and the Datly Privacy Policy. If you do not agree, do not use the service.
+By creating an account on Datly or otherwise using the service, you agree to these Terms of Service and the Datly Privacy Policy. If you do not agree, do not use the service.
 
 ## 2. Service description
 
-Datly is a free service that allows approved users to capture and upload photos. Uploaded photos are used to train, evaluate, and improve AI/ML models. There is no other feature beyond image collection and related model development.
+Datly is a free service that allows registered users to capture and upload photos. Uploaded photos are used to train, evaluate, and improve AI/ML models. The service includes image collection, consent management, and related model-development activities. There are no other features beyond this scope.
 
 ## 3. Registration & accounts
 
-- There is **no public self-registration**: accounts are created and approved manually by administrators.
-- Usernames are assigned by admins and are **not changeable** by users.
-- You are responsible for keeping any account credentials secure and for all activity performed under your account.
+- Accounts may be created by **administrators** or through **self-registration** (with CAPTCHA verification). Self-registered users receive a temporary password via email and can begin using the service immediately.
+- Usernames are assigned by admins or chosen during registration and are **not changeable** by users. Usernames must be 3–16 alphanumeric characters (including underscores).
+- An **email address** is required for account creation and is used for transactional notifications (welcome messages, password resets, account status changes).
+- You are responsible for keeping your account credentials secure and for all activity performed under your account. Passwords must meet minimum security requirements (at least 12 characters, including uppercase, lowercase, digit, and special character).
+- Accounts may be **disabled** by administrators with a stated reason. Disabled accounts cannot authenticate or submit images.
 
 ## 4. Eligibility & lawful use
 
-- You must be legally able to agree to these Terms and to give consent to image processing under applicable law. The service is not intended for children.
-- You must only upload images you have the right to upload (you own the copyright or have permission from the copyright owner) and you must have the necessary consents from any identifiable person depicted in images where required by law.
+- You must be legally able to agree to these Terms and to give consent to image processing under applicable law.
+- The service is **not intended for children** under the age of 16 (or the applicable minimum age of digital consent in your jurisdiction). If you are under the applicable minimum age, you may only use the service with verifiable parental/guardian consent.
+- You must only upload images you have the right to upload (you own the copyright or have permission from the copyright owner), and you must have the necessary consents from any identifiable person depicted in the images where required by law.
 
-## 5. User content & license
+## 5. User content & licence
 
-- You retain ownership of images you upload. By uploading you grant Datly the license described in our Privacy Policy to use the images for training and related research/development.
-- You promise that uploaded content does not infringe third-party rights, is not illegal, and does not contain prohibited content (child sexual abuse material, hate speech, non-consensual intimate imagery, etc.). We reserve the right to remove content that violates these Terms.
+- You retain ownership of images you upload.
+- By uploading and signing the consent form, you grant Datly the licence described in our [Privacy Policy](privacy) (Section 4) to use the images for training and related research/development.
+- Each image submission requires signing a **consent form**. The consent signature, together with metadata (IP address, user-agent, account snapshot, submission snapshot), is stored as legal evidence and retained even after account or submission deletion.
+- You represent that uploaded content does not infringe third-party rights, is not illegal, and does not contain prohibited content (child sexual abuse material, hate speech, non-consensual intimate imagery, etc.). We reserve the right to remove content that violates these Terms and to censor or delete offending submissions.
 
-## 6. Prohibited conduct
+## 6. Image processing
 
-Do not use Datly to upload illegal content or to upload images in a way that violates privacy or other rights. We may suspend or terminate accounts that violate these Terms.
+All uploaded images are processed before storage:
 
-## 7. Deletion & account closure
+1. All embedded metadata (EXIF, GPS, camera model, etc.) is **fully removed**.
+2. Images are **centre-cropped and resized to 224 × 224 pixels**.
+3. Images are re-encoded as PNG or JPEG.
+4. The original, unprocessed image is **not retained**.
 
-You may request deletion of your account and original uploaded images by contacting **<me@jhubi1.com>**. We will remove originals and exclude them from future training where technically feasible; however, we cannot guarantee removal of information already irreversibly incorporated into a deployed model.
+You acknowledge that submitted images, once processed, are used for AI/ML model training and that information irreversibly incorporated into a trained model may not be fully removable upon deletion.
 
-## 8. Fees
+## 7. Prohibited conduct
 
-Datly is provided free of charge unless we state otherwise in a future update. If fees are introduced, they will be communicated and explicitly agreed to.
+You must not:
 
-## 9. Disclaimers & liability
+- Upload illegal content or content that violates the rights of others.
+- Upload images containing sensitive personal data of others without an appropriate lawful basis.
+- Attempt to circumvent security measures, rate limits, or access controls.
+- Use automated tools to submit content without authorisation.
+- Impersonate another user or provide false registration information.
 
-- The service is provided “as is”. We disclaim all warranties to the fullest extent permitted by law.
-- To the maximum extent permitted by applicable law, JHubi1’s liability for direct damages is limited to any amounts paid to us in the 12 months prior to the claim (if any); JHubi1 is not liable for indirect, incidental, special or consequential damages.
+We may **suspend or terminate** accounts that violate these Terms without prior notice.
 
-## 10. Indemnification
+## 8. Deletion & account closure
 
-You agree to indemnify and hold JHubi1 harmless from claims arising from your violation of these Terms or your uploads.
+- You may request deletion of your account and uploaded images by contacting **<me@jhubi1.com>**.
+- Upon account deletion: your account data and submission records are removed; associated image files are deleted from disk.
+- **Consent signatures and their metadata** (IP address, user-agent, account snapshot, submission snapshot) are **retained** as legal evidence even after account deletion. They are marked as revoked but not erased.
+- Information already irreversibly incorporated into a deployed AI/ML model may not be fully removable. We will exclude deleted images from all future training.
 
-## 11. Changes to the Terms
+## 9. Fees
 
-We may modify these Terms. Significant changes will be communicated via the app or email (if you provided one). Continued use after such changes constitutes acceptance.
+Datly is provided free of charge. If fees are introduced in the future, they will be communicated in advance and require your explicit agreement before taking effect.
 
-## 12. Governing law & jurisdiction
+## 10. Disclaimers & liability
 
-These Terms are governed by the laws of **Germany**. Where you are a consumer, mandatory consumer-protection rules in your jurisdiction remain applicable.
+- The service is provided **"as is"** and **"as available"**. We disclaim all warranties, express or implied, to the fullest extent permitted by law, including warranties of merchantability, fitness for a particular purpose, and non-infringement.
+- To the maximum extent permitted by applicable law, JHubi1's aggregate liability for direct damages is limited to any amounts you paid to us in the 12 months prior to the claim (if any).
+- JHubi1 is **not liable** for indirect, incidental, special, consequential, or punitive damages, including loss of data, profits, or business opportunities.
+- Nothing in these Terms excludes or limits liability for death, personal injury caused by negligence, fraud, or any other liability that cannot be excluded by law.
 
-## 13. Contact
+## 11. Indemnification
 
-For questions, account requests, deletion requests or other matters contact: **<me@jhubi1.com>** (maintainer: JHubi1).
+To the extent permitted by applicable law, you agree to indemnify and hold JHubi1 harmless from any claims, damages, losses, or expenses (including reasonable legal fees) arising from your violation of these Terms or your uploads.
+
+## 12. Changes to the Terms
+
+We may modify these Terms from time to time. Significant changes will be communicated via the app or by email. The effective date at the top will reflect the latest version. Continued use of the service after changes constitutes acceptance of the modified Terms. If you do not agree with the changes, you must stop using the service and may request account deletion.
+
+## 13. Governing law & jurisdiction
+
+These Terms are governed by the laws of **Germany**. Where you are a consumer habitually resident in the EU, the mandatory consumer-protection rules of your jurisdiction remain applicable. Any disputes shall be subject to the jurisdiction of the competent courts in Germany, without prejudice to your right to bring proceedings in the courts of your Member State of domicile.
+
+## 14. Severability
+
+If any provision of these Terms is found to be invalid or unenforceable, the remaining provisions shall continue in full force and effect. The invalid provision shall be replaced by a valid provision that most closely achieves the intended purpose.
+
+## 15. Contact
+
+For questions, account requests, deletion requests, or other matters:
+
+**JHubi1**
+Email: **<me@jhubi1.com>**

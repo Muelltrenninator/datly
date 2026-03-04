@@ -137,14 +137,19 @@
         "description": "Button text to switch to the login form from the registration form.",
         "context": "login"
     },
+    "termsOfService": "Terms of Service",
+    "@termsOfService": {
+        "description": "Link text for the app's terms of service. This string is formatted in MLA title case.",
+        "context": "login"
+    },
     "privacyPolicy": "Privacy Policy",
     "@privacyPolicy": {
         "description": "Link text for the app's privacy policy. This string is formatted in MLA title case.",
         "context": "login"
     },
-    "termsOfService": "Terms of Service",
-    "@termsOfService": {
-        "description": "Link text for the app's terms of service. This string is formatted in MLA title case.",
+    "imprint": "Imprint",
+    "@imprint": {
+        "description": "Link text for the app's imprint. This string is formatted in MLA title case.",
         "context": "login"
     },
     "navigationUpload": "Upload",

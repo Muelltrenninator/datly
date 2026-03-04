@@ -249,7 +249,7 @@ class _MultipleChoiceDialogState<T extends Object>
   }
 }
 
-Future<List<T>> showMultipleChoiceDialog<T extends Object>({
+Future<List<T>?> showMultipleChoiceDialog<T extends Object>({
   required BuildContext context,
   Widget? icon,
   Color? iconColor,
@@ -267,22 +267,21 @@ Future<List<T>> showMultipleChoiceDialog<T extends Object>({
   ValueChanged<List<T>>? onSubmit,
 }) async {
   return await showDialog<List<T>>(
-        context: context,
-        builder: (_) => MultipleChoiceDialog<T>(
-          icon: icon,
-          iconColor: iconColor,
-          title: title,
-          description: description,
-          initialValue: initialValue,
-          items: items,
-          titleGenerator: titleGenerator,
-          subtitleGenerator: subtitleGenerator,
-          iconGenerator: iconGenerator,
-          semanticLabel: semanticLabel,
-          alignment: alignment,
-          allowEmptySelection: allowEmptySelection,
-          onSubmit: onSubmit,
-        ),
-      ) ??
-      [];
+    context: context,
+    builder: (_) => MultipleChoiceDialog<T>(
+      icon: icon,
+      iconColor: iconColor,
+      title: title,
+      description: description,
+      initialValue: initialValue,
+      items: items,
+      titleGenerator: titleGenerator,
+      subtitleGenerator: subtitleGenerator,
+      iconGenerator: iconGenerator,
+      semanticLabel: semanticLabel,
+      alignment: alignment,
+      allowEmptySelection: allowEmptySelection,
+      onSubmit: onSubmit,
+    ),
+  );
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
@@ -20,9 +21,11 @@ void initializeSmtpServer() {
       !env.isDefined("DATLY_SMTP_PORT") ||
       !env.isDefined("DATLY_SMTP_USERNAME") ||
       !env.isDefined("DATLY_SMTP_PASSWORD")) {
-        t.fatal("SMTP server configuration is incomplete. Please set DATLY_SMTP_HOST, DATLY_SMTP_PORT, DATLY_SMTP_USERNAME, and DATLY_SMTP_PASSWORD environment variables.");
-        exit(1);
-      }
+    t.fatal(
+      "SMTP server configuration is incomplete. Please set DATLY_SMTP_HOST, DATLY_SMTP_PORT, DATLY_SMTP_USERNAME, and DATLY_SMTP_PASSWORD environment variables.",
+    );
+    exit(1);
+  }
 
   _emailSmtpServer = SmtpServer(
     env["DATLY_SMTP_HOST"]!,
@@ -38,6 +41,7 @@ void initializeSmtpServer() {
 
   initializeMessages("en");
   initializeMessages("de");
+  initializeDateFormatting();
 }
 
 Message stylizedEmailMessage({
@@ -540,6 +544,208 @@ class EmailMessagesTemplates {
         MessageContentButton([
           emailAccountReenabledContentExtra1(),
         ], href: "{{canonical}}"),
+      ],
+    );
+  });
+
+  factory EmailMessagesTemplates.legalChangedTerms({
+    required User user,
+    required DateTime effectiveDate,
+  }) => Intl.withLocale(user.locale, () {
+    String emailLegalChangedTermsSubject() => Intl.message(
+      "Updates to the Datly Terms of Service",
+      name: "emailLegalChangedTermsSubject",
+    );
+    String emailLegalChangedTermsSummary() => Intl.message(
+      "Our Terms of Service have been updated.",
+      name: "emailLegalChangedTermsSummary",
+    );
+    String emailLegalChangedTermsPart1(String date) => Intl.message(
+      "we are writing to let you know that our Terms of Service have been updated. The changes will take effect on $date.",
+      name: "emailLegalChangedTermsPart1",
+      args: [date],
+    );
+    String emailLegalChangedTermsPart2() => Intl.message(
+      "We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.",
+      name: "emailLegalChangedTermsPart2",
+    );
+    String emailLegalChangedTermsPart3() => Intl.message(
+      "If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.",
+      name: "emailLegalChangedTermsPart3",
+    );
+    String emailLegalChangedTermsPart4() => Intl.message(
+      "If you have any questions, please don't hesitate to ",
+      name: "emailLegalChangedTermsPart4",
+    );
+    String emailLegalChangedTermsPart5() => Intl.message(
+      "contact our support team",
+      name: "emailLegalChangedTermsPart5",
+    );
+    String emailLegalChangedTermsPart6() =>
+        Intl.message(".", name: "emailLegalChangedTermsPart6");
+    String emailLegalChangedTermsContentExtra1() => Intl.message(
+      "View Terms of Service",
+      name: "emailLegalChangedTermsContentExtra1",
+    );
+
+    final date = DateFormat.yMMMMd().format(effectiveDate);
+    return EmailMessagesTemplates._(
+      user: user,
+      subject: emailLegalChangedTermsSubject(),
+      summary: emailLegalChangedTermsSummary(),
+      text:
+          "${emailLegalChangedTermsPart1(date)}\n\n${emailLegalChangedTermsPart2()}\n\n${emailLegalChangedTermsPart3()}\n\n{{canonical}}/legal/terms\n\n${emailLegalChangedTermsPart4()}${emailLegalChangedTermsPart5()} (support@con.bz)${emailLegalChangedTermsPart6()}",
+      content: [
+        MessageContentParagraph([emailLegalChangedTermsPart1(date)]),
+        MessageContentParagraph([emailLegalChangedTermsPart2()]),
+        MessageContentParagraph([emailLegalChangedTermsPart3()]),
+        MessageContentButton([
+          emailLegalChangedTermsContentExtra1(),
+        ], href: "{{canonical}}/legal/terms"),
+        MessageContentParagraph([
+          emailLegalChangedTermsPart4(),
+          MessageContentLink([
+            emailLegalChangedTermsPart5(),
+          ], href: "mailto:support@con.bz"),
+          emailLegalChangedTermsPart6(),
+        ]),
+      ],
+    );
+  });
+
+  factory EmailMessagesTemplates.legalChangedPrivacy({
+    required User user,
+    required DateTime effectiveDate,
+  }) => Intl.withLocale(user.locale, () {
+    String emailLegalChangedPrivacySubject() => Intl.message(
+      "Updates to the Datly Privacy Policy",
+      name: "emailLegalChangedPrivacySubject",
+    );
+    String emailLegalChangedPrivacySummary() => Intl.message(
+      "Our Privacy Policy has been updated.",
+      name: "emailLegalChangedPrivacySummary",
+    );
+    String emailLegalChangedPrivacyPart1(String date) => Intl.message(
+      "we are writing to let you know that our Privacy Policy has been updated. The changes will take effect on $date.",
+      name: "emailLegalChangedPrivacyPart1",
+      args: [date],
+    );
+    String emailLegalChangedPrivacyPart2() => Intl.message(
+      "We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.",
+      name: "emailLegalChangedPrivacyPart2",
+    );
+    String emailLegalChangedPrivacyPart3() => Intl.message(
+      "If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.",
+      name: "emailLegalChangedPrivacyPart3",
+    );
+    String emailLegalChangedPrivacyPart4() => Intl.message(
+      "If you have any questions, please don't hesitate to ",
+      name: "emailLegalChangedPrivacyPart4",
+    );
+    String emailLegalChangedPrivacyPart5() => Intl.message(
+      "contact our support team",
+      name: "emailLegalChangedPrivacyPart5",
+    );
+    String emailLegalChangedPrivacyPart6() =>
+        Intl.message(".", name: "emailLegalChangedPrivacyPart6");
+    String emailLegalChangedPrivacyContentExtra1() => Intl.message(
+      "View Privacy Policy",
+      name: "emailLegalChangedPrivacyContentExtra1",
+    );
+
+    final date = DateFormat.yMMMMd().format(effectiveDate);
+    return EmailMessagesTemplates._(
+      user: user,
+      subject: emailLegalChangedPrivacySubject(),
+      summary: emailLegalChangedPrivacySummary(),
+      text:
+          "${emailLegalChangedPrivacyPart1(date)}\n\n${emailLegalChangedPrivacyPart2()}\n\n${emailLegalChangedPrivacyPart3()}\n\n{{canonical}}/legal/privacy\n\n${emailLegalChangedPrivacyPart4()}${emailLegalChangedPrivacyPart5()} (support@con.bz)${emailLegalChangedPrivacyPart6()}",
+      content: [
+        MessageContentParagraph([emailLegalChangedPrivacyPart1(date)]),
+        MessageContentParagraph([emailLegalChangedPrivacyPart2()]),
+        MessageContentParagraph([emailLegalChangedPrivacyPart3()]),
+        MessageContentButton([
+          emailLegalChangedPrivacyContentExtra1(),
+        ], href: "{{canonical}}/legal/privacy"),
+        MessageContentParagraph([
+          emailLegalChangedPrivacyPart4(),
+          MessageContentLink([
+            emailLegalChangedPrivacyPart5(),
+          ], href: "mailto:support@con.bz"),
+          emailLegalChangedPrivacyPart6(),
+        ]),
+      ],
+    );
+  });
+
+  factory EmailMessagesTemplates.legalChangedAll({
+    required User user,
+    required DateTime effectiveDate,
+  }) => Intl.withLocale(user.locale, () {
+    String emailLegalChangedAllSubject() => Intl.message(
+      "Updates to the Datly Terms of Service and Privacy Policy",
+      name: "emailLegalChangedAllSubject",
+    );
+    String emailLegalChangedAllSummary() => Intl.message(
+      "Our Terms of Service and Privacy Policy have been updated.",
+      name: "emailLegalChangedAllSummary",
+    );
+    String emailLegalChangedAllPart1(String date) => Intl.message(
+      "we are writing to let you know that our Terms of Service and Privacy Policy have been updated. The changes will take effect on $date.",
+      name: "emailLegalChangedAllPart1",
+      args: [date],
+    );
+    String emailLegalChangedAllPart2() => Intl.message(
+      "We encourage you to review the updated documents at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.",
+      name: "emailLegalChangedAllPart2",
+    );
+    String emailLegalChangedAllPart3() => Intl.message(
+      "If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.",
+      name: "emailLegalChangedAllPart3",
+    );
+    String emailLegalChangedAllPart4() => Intl.message(
+      "If you have any questions, please don't hesitate to ",
+      name: "emailLegalChangedAllPart4",
+    );
+    String emailLegalChangedAllPart5() => Intl.message(
+      "contact our support team",
+      name: "emailLegalChangedAllPart5",
+    );
+    String emailLegalChangedAllPart6() =>
+        Intl.message(".", name: "emailLegalChangedAllPart6");
+    String emailLegalChangedAllContentExtra1() => Intl.message(
+      "View Terms of Service",
+      name: "emailLegalChangedAllContentExtra1",
+    );
+    String emailLegalChangedAllContentExtra2() => Intl.message(
+      "View Privacy Policy",
+      name: "emailLegalChangedAllContentExtra2",
+    );
+
+    final date = DateFormat.yMMMMd().format(effectiveDate);
+    return EmailMessagesTemplates._(
+      user: user,
+      subject: emailLegalChangedAllSubject(),
+      summary: emailLegalChangedAllSummary(),
+      text:
+          "${emailLegalChangedAllPart1(date)}\n\n${emailLegalChangedAllPart2()}\n\n${emailLegalChangedAllPart3()}\n\n{{canonical}}/legal/terms\n{{canonical}}/legal/privacy\n\n${emailLegalChangedAllPart4()}${emailLegalChangedAllPart5()} (support@con.bz)${emailLegalChangedAllPart6()}",
+      content: [
+        MessageContentParagraph([emailLegalChangedAllPart1(date)]),
+        MessageContentParagraph([emailLegalChangedAllPart2()]),
+        MessageContentParagraph([emailLegalChangedAllPart3()]),
+        MessageContentButton([
+          emailLegalChangedAllContentExtra1(),
+        ], href: "{{canonical}}/legal/terms"),
+        MessageContentButton([
+          emailLegalChangedAllContentExtra2(),
+        ], href: "{{canonical}}/legal/privacy"),
+        MessageContentParagraph([
+          emailLegalChangedAllPart4(),
+          MessageContentLink([
+            emailLegalChangedAllPart5(),
+          ], href: "mailto:support@con.bz"),
+          emailLegalChangedAllPart6(),
+        ]),
       ],
     );
   });

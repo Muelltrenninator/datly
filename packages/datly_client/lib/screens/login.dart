@@ -415,6 +415,14 @@ class _RegisterScreenState extends State<RegisterScreen>
         submitSuccess = true;
         setState(() {});
         return;
+      } else if (response.statusCode == 400) {
+        if (response.body.toLowerCase().contains("username")) {
+          usernameErrorText = appLocalizations.registerInvalidUsername;
+        } else if (response.body.toLowerCase().contains("email")) {
+          emailErrorText = appLocalizations.loginInvalidEmail;
+        } else if (response.body.toLowerCase().contains("captcha")) {
+          submitErrorText = appLocalizations.registerErrorCaptcha;
+        }
       } else if (response.statusCode == 409) {
         if (response.body.toLowerCase().contains("username")) {
           usernameErrorText = appLocalizations.registerErrorConflictUsername;
@@ -497,16 +505,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                         : appLocalizations.termsOfService,
                     style: TextStyle(
                       color: ColorScheme.of(context).primary,
+                      decorationColor: ColorScheme.of(context).primary,
                       decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () => showMarkdownDialog(
                         context: context,
-                        source: MarkdownDialogHttpSource(
-                          Uri.parse(
-                            "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
-                          ),
-                        ),
+                        source: isPrivacy
+                            ? MarkdownDialogSource.privacyPolicy()
+                            : MarkdownDialogSource.termsOfService(),
                       ),
                   ),
                 );
@@ -767,37 +774,39 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: appLocalizations.privacyPolicy,
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => showMarkdownDialog(
-                              context: context,
-                              source: MarkdownDialogHttpSource(
-                                Uri.parse(
-                                  "${ApiManager.baseUri.replace(path: "")}/legal/privacy",
-                                ),
-                              ),
-                            ),
-                        ),
-                        TextSpan(text: " • "),
-                        TextSpan(
                           text: appLocalizations.termsOfService,
                           style: TextStyle(fontWeight: FontWeight.w600),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () => showMarkdownDialog(
                               context: context,
-                              source: MarkdownDialogHttpSource(
-                                Uri.parse(
-                                  "${ApiManager.baseUri.replace(path: "")}/legal/terms",
-                                ),
-                              ),
+                              source: MarkdownDialogSource.termsOfService(),
+                            ),
+                        ),
+                        TextSpan(text: " • "),
+                        TextSpan(
+                          text: appLocalizations.privacyPolicy,
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => showMarkdownDialog(
+                              context: context,
+                              source: MarkdownDialogSource.privacyPolicy(),
+                            ),
+                        ),
+                        TextSpan(text: " • "),
+                        TextSpan(
+                          text: appLocalizations.imprint,
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => showMarkdownDialog(
+                              context: context,
+                              source: MarkdownDialogSource.imprint(),
                             ),
                         ),
                       ],
                     ),
                     textAlign: TextAlign.center,
                     style: DefaultTextStyle.of(context).style.copyWith(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: Theme.of(context).disabledColor,
                       fontWeight: FontWeight.w500,
                     ),

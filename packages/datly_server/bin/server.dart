@@ -32,6 +32,7 @@ late final HttpServer server;
 late final AppDatabase db;
 final _router = Router()
   ..mount("/api", apiPipeline)
+  ..get("/legal/imprint", legalHandler)
   ..get("/legal/privacy", legalHandler)
   ..get("/legal/terms", legalHandler)
   ..mount("/", fileHandler);
@@ -74,9 +75,26 @@ Future<Response> fileHandler(Request req) async {
 }
 
 Future<Response> legalHandler(Request req) async {
+  final locale = localeFromRequest(req);
   final path = req.url.path.replaceAll("..", "").split("/").last;
-  final file = File("legal/$path.md");
-  if (!(await file.exists())) return Response.notFound("Document not found");
+  var file = locale != "en" && await (File("legal/$path.$locale.md").exists())
+      ? File("legal/$path.$locale.md")
+      : File("legal/$path.md");
+  if (!(await file.exists())) {
+    final old = file.path;
+
+    final localLegal = Directory("${dataDirectory.path}/legal");
+    file =
+        locale != "en" &&
+            await (File("${localLegal.path}/$path.$locale.md").exists())
+        ? File("${localLegal.path}/$path.$locale.md")
+        : File("${localLegal.path}/$path.md");
+
+    if (!(await file.exists())) {
+      t.error("Legal document not found: $old");
+      return Response.notFound("Document not found");
+    }
+  }
 
   final contents = await file.readAsString();
   final headers = {
@@ -119,6 +137,10 @@ void shutdown([String signal = "Signal"]) async {
 }
 
 void main(List<String> args) async {
+  for (var i in [ProcessSignal.sigint, ProcessSignal.sigterm]) {
+    i.watch().listen((e) => shutdown(e.name), onError: (_) {});
+  }
+
   t.info(
     "Datly Server [${GitBaker.currentBranch.name}@${GitBaker.currentBranch.commits.last.hashAbbreviated} (${gitBakerWorkspaceFormat(GitBaker.workspace)})]",
   );
@@ -135,10 +157,6 @@ void main(List<String> args) async {
     pandocAvailable = true;
   });
 
-  for (var i in [ProcessSignal.sigint, ProcessSignal.sigterm]) {
-    i.watch().listen((e) => shutdown(e.name), onError: (_) {});
-  }
-
   Directory.current = Platform.script.resolve(".").toFilePath();
   dataDirectory = Directory("${Directory.current.parent.path}/data");
   assetsDirectory = Directory("${dataDirectory.path}/assets");
@@ -147,7 +165,7 @@ void main(List<String> args) async {
   env = DotEnv(includePlatformEnvironment: true, quiet: true)
     ..load(["${dataDirectory.path}/.env"]);
   initializeSmtpServer();
-  captchaSecretKey = env["DATLY_CAPTCHA_SECRET"] ;
+  captchaSecretKey = env["DATLY_CAPTCHA_SECRET"];
 
   await generateJwtKeys();
   jwtPrivateKey = RSAPrivateKey(await jwtPrivateKeyFile.readAsString());
@@ -224,7 +242,7 @@ void main(List<String> args) async {
         .insert(
           UsersCompanion.insert(
             username: adminUser,
-            password: adminPassword,
+            password: await hashPassword(password: adminPassword),
             email: email,
             role: Value(UserRole.admin),
           ),

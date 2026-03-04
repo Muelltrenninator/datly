@@ -98,10 +98,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerLogin => 'Log in';
 
   @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
   String get privacyPolicy => 'Privacy Policy';
 
   @override
-  String get termsOfService => 'Terms of Service';
+  String get imprint => 'Imprint';
 
   @override
   String get navigationUpload => 'Upload';

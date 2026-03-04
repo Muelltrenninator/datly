@@ -598,9 +598,9 @@ void define(Router router) {
         }
 
         final password = await generatePlaintextPassword();
-        db.update(db.users)
+      await  (db.update(db.users)
           ..where((u) => u.username.equals(user.username))
-          ..write(
+          ).write(
             UsersCompanion(
               password: Value(await hashPassword(password: password)),
             ),

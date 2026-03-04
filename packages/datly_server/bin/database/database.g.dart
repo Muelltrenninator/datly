@@ -414,6 +414,30 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     requiredDuringInsert: false,
     defaultValue: const Constant("en"),
   );
+  static const VerificationMeta _validationWeightPositiveMeta =
+      const VerificationMeta('validationWeightPositive');
+  @override
+  late final GeneratedColumn<double> validationWeightPositive =
+      GeneratedColumn<double>(
+        'validation_weight_positive',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
+  static const VerificationMeta _validationWeightNegativeMeta =
+      const VerificationMeta('validationWeightNegative');
+  @override
+  late final GeneratedColumn<double> validationWeightNegative =
+      GeneratedColumn<double>(
+        'validation_weight_negative',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     username,
@@ -425,6 +449,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     disabled,
     activated,
     locale,
+    validationWeightPositive,
+    validationWeightNegative,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -486,6 +512,24 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         locale.isAcceptableOrUnknown(data['locale']!, _localeMeta),
       );
     }
+    if (data.containsKey('validation_weight_positive')) {
+      context.handle(
+        _validationWeightPositiveMeta,
+        validationWeightPositive.isAcceptableOrUnknown(
+          data['validation_weight_positive']!,
+          _validationWeightPositiveMeta,
+        ),
+      );
+    }
+    if (data.containsKey('validation_weight_negative')) {
+      context.handle(
+        _validationWeightNegativeMeta,
+        validationWeightNegative.isAcceptableOrUnknown(
+          data['validation_weight_negative']!,
+          _validationWeightNegativeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -535,6 +579,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.string,
         data['${effectivePrefix}locale'],
       )!,
+      validationWeightPositive: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}validation_weight_positive'],
+      )!,
+      validationWeightNegative: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}validation_weight_negative'],
+      )!,
     );
   }
 
@@ -559,6 +611,8 @@ class User extends DataClass implements Insertable<User> {
   final String? disabled;
   final bool activated;
   final String locale;
+  final double validationWeightPositive;
+  final double validationWeightNegative;
   const User({
     required this.username,
     required this.password,
@@ -569,6 +623,8 @@ class User extends DataClass implements Insertable<User> {
     this.disabled,
     required this.activated,
     required this.locale,
+    required this.validationWeightPositive,
+    required this.validationWeightNegative,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -590,6 +646,12 @@ class User extends DataClass implements Insertable<User> {
     }
     map['activated'] = Variable<bool>(activated);
     map['locale'] = Variable<String>(locale);
+    map['validation_weight_positive'] = Variable<double>(
+      validationWeightPositive,
+    );
+    map['validation_weight_negative'] = Variable<double>(
+      validationWeightNegative,
+    );
     return map;
   }
 
@@ -606,6 +668,8 @@ class User extends DataClass implements Insertable<User> {
           : Value(disabled),
       activated: Value(activated),
       locale: Value(locale),
+      validationWeightPositive: Value(validationWeightPositive),
+      validationWeightNegative: Value(validationWeightNegative),
     );
   }
 
@@ -626,6 +690,12 @@ class User extends DataClass implements Insertable<User> {
       disabled: serializer.fromJson<String?>(json['disabled']),
       activated: serializer.fromJson<bool>(json['activated']),
       locale: serializer.fromJson<String>(json['locale']),
+      validationWeightPositive: serializer.fromJson<double>(
+        json['validationWeightPositive'],
+      ),
+      validationWeightNegative: serializer.fromJson<double>(
+        json['validationWeightNegative'],
+      ),
     );
   }
   @override
@@ -643,6 +713,12 @@ class User extends DataClass implements Insertable<User> {
       'disabled': serializer.toJson<String?>(disabled),
       'activated': serializer.toJson<bool>(activated),
       'locale': serializer.toJson<String>(locale),
+      'validationWeightPositive': serializer.toJson<double>(
+        validationWeightPositive,
+      ),
+      'validationWeightNegative': serializer.toJson<double>(
+        validationWeightNegative,
+      ),
     };
   }
 
@@ -656,6 +732,8 @@ class User extends DataClass implements Insertable<User> {
     Value<String?> disabled = const Value.absent(),
     bool? activated,
     String? locale,
+    double? validationWeightPositive,
+    double? validationWeightNegative,
   }) => User(
     username: username ?? this.username,
     password: password ?? this.password,
@@ -666,6 +744,10 @@ class User extends DataClass implements Insertable<User> {
     disabled: disabled.present ? disabled.value : this.disabled,
     activated: activated ?? this.activated,
     locale: locale ?? this.locale,
+    validationWeightPositive:
+        validationWeightPositive ?? this.validationWeightPositive,
+    validationWeightNegative:
+        validationWeightNegative ?? this.validationWeightNegative,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -678,6 +760,12 @@ class User extends DataClass implements Insertable<User> {
       disabled: data.disabled.present ? data.disabled.value : this.disabled,
       activated: data.activated.present ? data.activated.value : this.activated,
       locale: data.locale.present ? data.locale.value : this.locale,
+      validationWeightPositive: data.validationWeightPositive.present
+          ? data.validationWeightPositive.value
+          : this.validationWeightPositive,
+      validationWeightNegative: data.validationWeightNegative.present
+          ? data.validationWeightNegative.value
+          : this.validationWeightNegative,
     );
   }
 
@@ -692,7 +780,9 @@ class User extends DataClass implements Insertable<User> {
           ..write('role: $role, ')
           ..write('disabled: $disabled, ')
           ..write('activated: $activated, ')
-          ..write('locale: $locale')
+          ..write('locale: $locale, ')
+          ..write('validationWeightPositive: $validationWeightPositive, ')
+          ..write('validationWeightNegative: $validationWeightNegative')
           ..write(')'))
         .toString();
   }
@@ -708,6 +798,8 @@ class User extends DataClass implements Insertable<User> {
     disabled,
     activated,
     locale,
+    validationWeightPositive,
+    validationWeightNegative,
   );
   @override
   bool operator ==(Object other) =>
@@ -721,7 +813,9 @@ class User extends DataClass implements Insertable<User> {
           other.role == this.role &&
           other.disabled == this.disabled &&
           other.activated == this.activated &&
-          other.locale == this.locale);
+          other.locale == this.locale &&
+          other.validationWeightPositive == this.validationWeightPositive &&
+          other.validationWeightNegative == this.validationWeightNegative);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -734,6 +828,8 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String?> disabled;
   final Value<bool> activated;
   final Value<String> locale;
+  final Value<double> validationWeightPositive;
+  final Value<double> validationWeightNegative;
   final Value<int> rowid;
   const UsersCompanion({
     this.username = const Value.absent(),
@@ -745,6 +841,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.disabled = const Value.absent(),
     this.activated = const Value.absent(),
     this.locale = const Value.absent(),
+    this.validationWeightPositive = const Value.absent(),
+    this.validationWeightNegative = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -757,6 +855,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.disabled = const Value.absent(),
     this.activated = const Value.absent(),
     this.locale = const Value.absent(),
+    this.validationWeightPositive = const Value.absent(),
+    this.validationWeightNegative = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : username = Value(username),
        password = Value(password),
@@ -771,6 +871,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? disabled,
     Expression<bool>? activated,
     Expression<String>? locale,
+    Expression<double>? validationWeightPositive,
+    Expression<double>? validationWeightNegative,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -783,6 +885,10 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (disabled != null) 'disabled': disabled,
       if (activated != null) 'activated': activated,
       if (locale != null) 'locale': locale,
+      if (validationWeightPositive != null)
+        'validation_weight_positive': validationWeightPositive,
+      if (validationWeightNegative != null)
+        'validation_weight_negative': validationWeightNegative,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -797,6 +903,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String?>? disabled,
     Value<bool>? activated,
     Value<String>? locale,
+    Value<double>? validationWeightPositive,
+    Value<double>? validationWeightNegative,
     Value<int>? rowid,
   }) {
     return UsersCompanion(
@@ -809,6 +917,10 @@ class UsersCompanion extends UpdateCompanion<User> {
       disabled: disabled ?? this.disabled,
       activated: activated ?? this.activated,
       locale: locale ?? this.locale,
+      validationWeightPositive:
+          validationWeightPositive ?? this.validationWeightPositive,
+      validationWeightNegative:
+          validationWeightNegative ?? this.validationWeightNegative,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -847,6 +959,16 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (locale.present) {
       map['locale'] = Variable<String>(locale.value);
     }
+    if (validationWeightPositive.present) {
+      map['validation_weight_positive'] = Variable<double>(
+        validationWeightPositive.value,
+      );
+    }
+    if (validationWeightNegative.present) {
+      map['validation_weight_negative'] = Variable<double>(
+        validationWeightNegative.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -865,6 +987,232 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('disabled: $disabled, ')
           ..write('activated: $activated, ')
           ..write('locale: $locale, ')
+          ..write('validationWeightPositive: $validationWeightPositive, ')
+          ..write('validationWeightNegative: $validationWeightNegative, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CategoriesTable extends Categories
+    with TableInfo<$CategoriesTable, Category> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CategoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [name, displayName];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'categories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Category> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {name};
+  @override
+  Category map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Category(
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      ),
+    );
+  }
+
+  @override
+  $CategoriesTable createAlias(String alias) {
+    return $CategoriesTable(attachedDatabase, alias);
+  }
+}
+
+class Category extends DataClass implements Insertable<Category> {
+  final String name;
+  final String? displayName;
+  const Category({required this.name, this.displayName});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || displayName != null) {
+      map['display_name'] = Variable<String>(displayName);
+    }
+    return map;
+  }
+
+  CategoriesCompanion toCompanion(bool nullToAbsent) {
+    return CategoriesCompanion(
+      name: Value(name),
+      displayName: displayName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayName),
+    );
+  }
+
+  factory Category.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Category(
+      name: serializer.fromJson<String>(json['name']),
+      displayName: serializer.fromJson<String?>(json['displayName']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'name': serializer.toJson<String>(name),
+      'displayName': serializer.toJson<String?>(displayName),
+    };
+  }
+
+  Category copyWith({
+    String? name,
+    Value<String?> displayName = const Value.absent(),
+  }) => Category(
+    name: name ?? this.name,
+    displayName: displayName.present ? displayName.value : this.displayName,
+  );
+  Category copyWithCompanion(CategoriesCompanion data) {
+    return Category(
+      name: data.name.present ? data.name.value : this.name,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Category(')
+          ..write('name: $name, ')
+          ..write('displayName: $displayName')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(name, displayName);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Category &&
+          other.name == this.name &&
+          other.displayName == this.displayName);
+}
+
+class CategoriesCompanion extends UpdateCompanion<Category> {
+  final Value<String> name;
+  final Value<String?> displayName;
+  final Value<int> rowid;
+  const CategoriesCompanion({
+    this.name = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CategoriesCompanion.insert({
+    required String name,
+    this.displayName = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<Category> custom({
+    Expression<String>? name,
+    Expression<String>? displayName,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (name != null) 'name': name,
+      if (displayName != null) 'display_name': displayName,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CategoriesCompanion copyWith({
+    Value<String>? name,
+    Value<String?>? displayName,
+    Value<int>? rowid,
+  }) {
+    return CategoriesCompanion(
+      name: name ?? this.name,
+      displayName: displayName ?? this.displayName,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoriesCompanion(')
+          ..write('name: $name, ')
+          ..write('displayName: $displayName, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -975,6 +1323,44 @@ class $SubmissionsTable extends Submissions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (name) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _validationWeightPositiveMeta =
+      const VerificationMeta('validationWeightPositive');
+  @override
+  late final GeneratedColumn<double> validationWeightPositive =
+      GeneratedColumn<double>(
+        'validation_weight_positive',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
+  static const VerificationMeta _validationWeightNegativeMeta =
+      const VerificationMeta('validationWeightNegative');
+  @override
+  late final GeneratedColumn<double> validationWeightNegative =
+      GeneratedColumn<double>(
+        'validation_weight_negative',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -985,6 +1371,9 @@ class $SubmissionsTable extends Submissions
     assetId,
     assetMimeType,
     assetBlurHash,
+    category,
+    validationWeightPositive,
+    validationWeightNegative,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1052,6 +1441,30 @@ class $SubmissionsTable extends Submissions
     } else if (isInserting) {
       context.missing(_assetBlurHashMeta);
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('validation_weight_positive')) {
+      context.handle(
+        _validationWeightPositiveMeta,
+        validationWeightPositive.isAcceptableOrUnknown(
+          data['validation_weight_positive']!,
+          _validationWeightPositiveMeta,
+        ),
+      );
+    }
+    if (data.containsKey('validation_weight_negative')) {
+      context.handle(
+        _validationWeightNegativeMeta,
+        validationWeightNegative.isAcceptableOrUnknown(
+          data['validation_weight_negative']!,
+          _validationWeightNegativeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1095,6 +1508,18 @@ class $SubmissionsTable extends Submissions
         DriftSqlType.string,
         data['${effectivePrefix}asset_blur_hash'],
       )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      ),
+      validationWeightPositive: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}validation_weight_positive'],
+      )!,
+      validationWeightNegative: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}validation_weight_negative'],
+      )!,
     );
   }
 
@@ -1116,6 +1541,9 @@ class Submission extends DataClass implements Insertable<Submission> {
   final String? assetId;
   final String? assetMimeType;
   final String assetBlurHash;
+  final String? category;
+  final double validationWeightPositive;
+  final double validationWeightNegative;
   const Submission({
     required this.id,
     required this.projectId,
@@ -1125,6 +1553,9 @@ class Submission extends DataClass implements Insertable<Submission> {
     this.assetId,
     this.assetMimeType,
     required this.assetBlurHash,
+    this.category,
+    required this.validationWeightPositive,
+    required this.validationWeightNegative,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1145,6 +1576,15 @@ class Submission extends DataClass implements Insertable<Submission> {
       map['asset_mime_type'] = Variable<String>(assetMimeType);
     }
     map['asset_blur_hash'] = Variable<String>(assetBlurHash);
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
+    map['validation_weight_positive'] = Variable<double>(
+      validationWeightPositive,
+    );
+    map['validation_weight_negative'] = Variable<double>(
+      validationWeightNegative,
+    );
     return map;
   }
 
@@ -1162,6 +1602,11 @@ class Submission extends DataClass implements Insertable<Submission> {
           ? const Value.absent()
           : Value(assetMimeType),
       assetBlurHash: Value(assetBlurHash),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+      validationWeightPositive: Value(validationWeightPositive),
+      validationWeightNegative: Value(validationWeightNegative),
     );
   }
 
@@ -1181,6 +1626,13 @@ class Submission extends DataClass implements Insertable<Submission> {
       assetId: serializer.fromJson<String?>(json['assetId']),
       assetMimeType: serializer.fromJson<String?>(json['assetMimeType']),
       assetBlurHash: serializer.fromJson<String>(json['assetBlurHash']),
+      category: serializer.fromJson<String?>(json['category']),
+      validationWeightPositive: serializer.fromJson<double>(
+        json['validationWeightPositive'],
+      ),
+      validationWeightNegative: serializer.fromJson<double>(
+        json['validationWeightNegative'],
+      ),
     );
   }
   @override
@@ -1197,6 +1649,13 @@ class Submission extends DataClass implements Insertable<Submission> {
       'assetId': serializer.toJson<String?>(assetId),
       'assetMimeType': serializer.toJson<String?>(assetMimeType),
       'assetBlurHash': serializer.toJson<String>(assetBlurHash),
+      'category': serializer.toJson<String?>(category),
+      'validationWeightPositive': serializer.toJson<double>(
+        validationWeightPositive,
+      ),
+      'validationWeightNegative': serializer.toJson<double>(
+        validationWeightNegative,
+      ),
     };
   }
 
@@ -1209,6 +1668,9 @@ class Submission extends DataClass implements Insertable<Submission> {
     Value<String?> assetId = const Value.absent(),
     Value<String?> assetMimeType = const Value.absent(),
     String? assetBlurHash,
+    Value<String?> category = const Value.absent(),
+    double? validationWeightPositive,
+    double? validationWeightNegative,
   }) => Submission(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -1220,6 +1682,11 @@ class Submission extends DataClass implements Insertable<Submission> {
         ? assetMimeType.value
         : this.assetMimeType,
     assetBlurHash: assetBlurHash ?? this.assetBlurHash,
+    category: category.present ? category.value : this.category,
+    validationWeightPositive:
+        validationWeightPositive ?? this.validationWeightPositive,
+    validationWeightNegative:
+        validationWeightNegative ?? this.validationWeightNegative,
   );
   Submission copyWithCompanion(SubmissionsCompanion data) {
     return Submission(
@@ -1237,6 +1704,13 @@ class Submission extends DataClass implements Insertable<Submission> {
       assetBlurHash: data.assetBlurHash.present
           ? data.assetBlurHash.value
           : this.assetBlurHash,
+      category: data.category.present ? data.category.value : this.category,
+      validationWeightPositive: data.validationWeightPositive.present
+          ? data.validationWeightPositive.value
+          : this.validationWeightPositive,
+      validationWeightNegative: data.validationWeightNegative.present
+          ? data.validationWeightNegative.value
+          : this.validationWeightNegative,
     );
   }
 
@@ -1250,7 +1724,10 @@ class Submission extends DataClass implements Insertable<Submission> {
           ..write('submittedAt: $submittedAt, ')
           ..write('assetId: $assetId, ')
           ..write('assetMimeType: $assetMimeType, ')
-          ..write('assetBlurHash: $assetBlurHash')
+          ..write('assetBlurHash: $assetBlurHash, ')
+          ..write('category: $category, ')
+          ..write('validationWeightPositive: $validationWeightPositive, ')
+          ..write('validationWeightNegative: $validationWeightNegative')
           ..write(')'))
         .toString();
   }
@@ -1265,6 +1742,9 @@ class Submission extends DataClass implements Insertable<Submission> {
     assetId,
     assetMimeType,
     assetBlurHash,
+    category,
+    validationWeightPositive,
+    validationWeightNegative,
   );
   @override
   bool operator ==(Object other) =>
@@ -1277,7 +1757,10 @@ class Submission extends DataClass implements Insertable<Submission> {
           other.submittedAt == this.submittedAt &&
           other.assetId == this.assetId &&
           other.assetMimeType == this.assetMimeType &&
-          other.assetBlurHash == this.assetBlurHash);
+          other.assetBlurHash == this.assetBlurHash &&
+          other.category == this.category &&
+          other.validationWeightPositive == this.validationWeightPositive &&
+          other.validationWeightNegative == this.validationWeightNegative);
 }
 
 class SubmissionsCompanion extends UpdateCompanion<Submission> {
@@ -1289,6 +1772,9 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   final Value<String?> assetId;
   final Value<String?> assetMimeType;
   final Value<String> assetBlurHash;
+  final Value<String?> category;
+  final Value<double> validationWeightPositive;
+  final Value<double> validationWeightNegative;
   const SubmissionsCompanion({
     this.id = const Value.absent(),
     this.projectId = const Value.absent(),
@@ -1298,6 +1784,9 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.assetId = const Value.absent(),
     this.assetMimeType = const Value.absent(),
     this.assetBlurHash = const Value.absent(),
+    this.category = const Value.absent(),
+    this.validationWeightPositive = const Value.absent(),
+    this.validationWeightNegative = const Value.absent(),
   });
   SubmissionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1308,6 +1797,9 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.assetId = const Value.absent(),
     this.assetMimeType = const Value.absent(),
     required String assetBlurHash,
+    this.category = const Value.absent(),
+    this.validationWeightPositive = const Value.absent(),
+    this.validationWeightNegative = const Value.absent(),
   }) : projectId = Value(projectId),
        user = Value(user),
        assetBlurHash = Value(assetBlurHash);
@@ -1320,6 +1812,9 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Expression<String>? assetId,
     Expression<String>? assetMimeType,
     Expression<String>? assetBlurHash,
+    Expression<String>? category,
+    Expression<double>? validationWeightPositive,
+    Expression<double>? validationWeightNegative,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1330,6 +1825,11 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       if (assetId != null) 'asset_id': assetId,
       if (assetMimeType != null) 'asset_mime_type': assetMimeType,
       if (assetBlurHash != null) 'asset_blur_hash': assetBlurHash,
+      if (category != null) 'category': category,
+      if (validationWeightPositive != null)
+        'validation_weight_positive': validationWeightPositive,
+      if (validationWeightNegative != null)
+        'validation_weight_negative': validationWeightNegative,
     });
   }
 
@@ -1342,6 +1842,9 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Value<String?>? assetId,
     Value<String?>? assetMimeType,
     Value<String>? assetBlurHash,
+    Value<String?>? category,
+    Value<double>? validationWeightPositive,
+    Value<double>? validationWeightNegative,
   }) {
     return SubmissionsCompanion(
       id: id ?? this.id,
@@ -1352,6 +1855,11 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       assetId: assetId ?? this.assetId,
       assetMimeType: assetMimeType ?? this.assetMimeType,
       assetBlurHash: assetBlurHash ?? this.assetBlurHash,
+      category: category ?? this.category,
+      validationWeightPositive:
+          validationWeightPositive ?? this.validationWeightPositive,
+      validationWeightNegative:
+          validationWeightNegative ?? this.validationWeightNegative,
     );
   }
 
@@ -1384,6 +1892,19 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     if (assetBlurHash.present) {
       map['asset_blur_hash'] = Variable<String>(assetBlurHash.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (validationWeightPositive.present) {
+      map['validation_weight_positive'] = Variable<double>(
+        validationWeightPositive.value,
+      );
+    }
+    if (validationWeightNegative.present) {
+      map['validation_weight_negative'] = Variable<double>(
+        validationWeightNegative.value,
+      );
+    }
     return map;
   }
 
@@ -1397,7 +1918,10 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
           ..write('submittedAt: $submittedAt, ')
           ..write('assetId: $assetId, ')
           ..write('assetMimeType: $assetMimeType, ')
-          ..write('assetBlurHash: $assetBlurHash')
+          ..write('assetBlurHash: $assetBlurHash, ')
+          ..write('category: $category, ')
+          ..write('validationWeightPositive: $validationWeightPositive, ')
+          ..write('validationWeightNegative: $validationWeightNegative')
           ..write(')'))
         .toString();
   }
@@ -2253,6 +2777,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ProjectsTable projects = $ProjectsTable(this);
   late final $UsersTable users = $UsersTable(this);
+  late final $CategoriesTable categories = $CategoriesTable(this);
   late final $SubmissionsTable submissions = $SubmissionsTable(this);
   late final $SignaturesTable signatures = $SignaturesTable(this);
   @override
@@ -2262,6 +2787,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     projects,
     users,
+    categories,
     submissions,
     signatures,
   ];
@@ -2572,6 +3098,8 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<String?> disabled,
       Value<bool> activated,
       Value<String> locale,
+      Value<double> validationWeightPositive,
+      Value<double> validationWeightNegative,
       Value<int> rowid,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
@@ -2585,6 +3113,8 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String?> disabled,
       Value<bool> activated,
       Value<String> locale,
+      Value<double> validationWeightPositive,
+      Value<double> validationWeightNegative,
       Value<int> rowid,
     });
 
@@ -2663,6 +3193,16 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get locale => $composableBuilder(
     column: $table.locale,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get validationWeightPositive => $composableBuilder(
+    column: $table.validationWeightPositive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get validationWeightNegative => $composableBuilder(
+    column: $table.validationWeightNegative,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2745,6 +3285,16 @@ class $$UsersTableOrderingComposer
     column: $table.locale,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get validationWeightPositive => $composableBuilder(
+    column: $table.validationWeightPositive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get validationWeightNegative => $composableBuilder(
+    column: $table.validationWeightNegative,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -2782,6 +3332,16 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get locale =>
       $composableBuilder(column: $table.locale, builder: (column) => column);
+
+  GeneratedColumn<double> get validationWeightPositive => $composableBuilder(
+    column: $table.validationWeightPositive,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get validationWeightNegative => $composableBuilder(
+    column: $table.validationWeightNegative,
+    builder: (column) => column,
+  );
 
   Expression<T> submissionsRefs<T extends Object>(
     Expression<T> Function($$SubmissionsTableAnnotationComposer a) f,
@@ -2846,6 +3406,8 @@ class $$UsersTableTableManager
                 Value<String?> disabled = const Value.absent(),
                 Value<bool> activated = const Value.absent(),
                 Value<String> locale = const Value.absent(),
+                Value<double> validationWeightPositive = const Value.absent(),
+                Value<double> validationWeightNegative = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion(
                 username: username,
@@ -2857,6 +3419,8 @@ class $$UsersTableTableManager
                 disabled: disabled,
                 activated: activated,
                 locale: locale,
+                validationWeightPositive: validationWeightPositive,
+                validationWeightNegative: validationWeightNegative,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2870,6 +3434,8 @@ class $$UsersTableTableManager
                 Value<String?> disabled = const Value.absent(),
                 Value<bool> activated = const Value.absent(),
                 Value<String> locale = const Value.absent(),
+                Value<double> validationWeightPositive = const Value.absent(),
+                Value<double> validationWeightNegative = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion.insert(
                 username: username,
@@ -2881,6 +3447,8 @@ class $$UsersTableTableManager
                 disabled: disabled,
                 activated: activated,
                 locale: locale,
+                validationWeightPositive: validationWeightPositive,
+                validationWeightNegative: validationWeightNegative,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2929,6 +3497,255 @@ typedef $$UsersTableProcessedTableManager =
       User,
       PrefetchHooks Function({bool submissionsRefs})
     >;
+typedef $$CategoriesTableCreateCompanionBuilder =
+    CategoriesCompanion Function({
+      required String name,
+      Value<String?> displayName,
+      Value<int> rowid,
+    });
+typedef $$CategoriesTableUpdateCompanionBuilder =
+    CategoriesCompanion Function({
+      Value<String> name,
+      Value<String?> displayName,
+      Value<int> rowid,
+    });
+
+final class $$CategoriesTableReferences
+    extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
+  $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$SubmissionsTable, List<Submission>>
+  _submissionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.submissions,
+    aliasName: $_aliasNameGenerator(
+      db.categories.name,
+      db.submissions.category,
+    ),
+  );
+
+  $$SubmissionsTableProcessedTableManager get submissionsRefs {
+    final manager = $$SubmissionsTableTableManager(
+      $_db,
+      $_db.submissions,
+    ).filter((f) => f.category.name.sqlEquals($_itemColumn<String>('name')!));
+
+    final cache = $_typedResult.readTableOrNull(_submissionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CategoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $CategoriesTable> {
+  $$CategoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> submissionsRefs(
+    Expression<bool> Function($$SubmissionsTableFilterComposer f) f,
+  ) {
+    final $$SubmissionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.name,
+      referencedTable: $db.submissions,
+      getReferencedColumn: (t) => t.category,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubmissionsTableFilterComposer(
+            $db: $db,
+            $table: $db.submissions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CategoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CategoriesTable> {
+  $$CategoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CategoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CategoriesTable> {
+  $$CategoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  Expression<T> submissionsRefs<T extends Object>(
+    Expression<T> Function($$SubmissionsTableAnnotationComposer a) f,
+  ) {
+    final $$SubmissionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.name,
+      referencedTable: $db.submissions,
+      getReferencedColumn: (t) => t.category,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubmissionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.submissions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CategoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CategoriesTable,
+          Category,
+          $$CategoriesTableFilterComposer,
+          $$CategoriesTableOrderingComposer,
+          $$CategoriesTableAnnotationComposer,
+          $$CategoriesTableCreateCompanionBuilder,
+          $$CategoriesTableUpdateCompanionBuilder,
+          (Category, $$CategoriesTableReferences),
+          Category,
+          PrefetchHooks Function({bool submissionsRefs})
+        > {
+  $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CategoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CategoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> name = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CategoriesCompanion(
+                name: name,
+                displayName: displayName,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String name,
+                Value<String?> displayName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CategoriesCompanion.insert(
+                name: name,
+                displayName: displayName,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CategoriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({submissionsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (submissionsRefs) db.submissions],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (submissionsRefs)
+                    await $_getPrefetchedData<
+                      Category,
+                      $CategoriesTable,
+                      Submission
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CategoriesTableReferences
+                          ._submissionsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CategoriesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).submissionsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.category == item.name),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CategoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CategoriesTable,
+      Category,
+      $$CategoriesTableFilterComposer,
+      $$CategoriesTableOrderingComposer,
+      $$CategoriesTableAnnotationComposer,
+      $$CategoriesTableCreateCompanionBuilder,
+      $$CategoriesTableUpdateCompanionBuilder,
+      (Category, $$CategoriesTableReferences),
+      Category,
+      PrefetchHooks Function({bool submissionsRefs})
+    >;
 typedef $$SubmissionsTableCreateCompanionBuilder =
     SubmissionsCompanion Function({
       Value<int> id,
@@ -2939,6 +3756,9 @@ typedef $$SubmissionsTableCreateCompanionBuilder =
       Value<String?> assetId,
       Value<String?> assetMimeType,
       required String assetBlurHash,
+      Value<String?> category,
+      Value<double> validationWeightPositive,
+      Value<double> validationWeightNegative,
     });
 typedef $$SubmissionsTableUpdateCompanionBuilder =
     SubmissionsCompanion Function({
@@ -2950,6 +3770,9 @@ typedef $$SubmissionsTableUpdateCompanionBuilder =
       Value<String?> assetId,
       Value<String?> assetMimeType,
       Value<String> assetBlurHash,
+      Value<String?> category,
+      Value<double> validationWeightPositive,
+      Value<double> validationWeightNegative,
     });
 
 final class $$SubmissionsTableReferences
@@ -2987,6 +3810,25 @@ final class $$SubmissionsTableReferences
       $_db.users,
     ).filter((f) => f.username.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_userTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CategoriesTable _categoryTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(db.submissions.category, db.categories.name),
+      );
+
+  $$CategoriesTableProcessedTableManager? get category {
+    final $_column = $_itemColumn<String>('category');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.name.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -3034,6 +3876,16 @@ class $$SubmissionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get validationWeightPositive => $composableBuilder(
+    column: $table.validationWeightPositive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get validationWeightNegative => $composableBuilder(
+    column: $table.validationWeightNegative,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$ProjectsTableFilterComposer get projectId {
     final $$ProjectsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -3071,6 +3923,29 @@ class $$SubmissionsTableFilterComposer
           }) => $$UsersTableFilterComposer(
             $db: $db,
             $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableFilterComposer get category {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.name,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3120,6 +3995,16 @@ class $$SubmissionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get validationWeightPositive => $composableBuilder(
+    column: $table.validationWeightPositive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get validationWeightNegative => $composableBuilder(
+    column: $table.validationWeightNegative,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ProjectsTableOrderingComposer get projectId {
     final $$ProjectsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3165,6 +4050,29 @@ class $$SubmissionsTableOrderingComposer
     );
     return composer;
   }
+
+  $$CategoriesTableOrderingComposer get category {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.name,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$SubmissionsTableAnnotationComposer
@@ -3197,6 +4105,16 @@ class $$SubmissionsTableAnnotationComposer
 
   GeneratedColumn<String> get assetBlurHash => $composableBuilder(
     column: $table.assetBlurHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get validationWeightPositive => $composableBuilder(
+    column: $table.validationWeightPositive,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get validationWeightNegative => $composableBuilder(
+    column: $table.validationWeightNegative,
     builder: (column) => column,
   );
 
@@ -3245,6 +4163,29 @@ class $$SubmissionsTableAnnotationComposer
     );
     return composer;
   }
+
+  $$CategoriesTableAnnotationComposer get category {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.category,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.name,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$SubmissionsTableTableManager
@@ -3260,7 +4201,7 @@ class $$SubmissionsTableTableManager
           $$SubmissionsTableUpdateCompanionBuilder,
           (Submission, $$SubmissionsTableReferences),
           Submission,
-          PrefetchHooks Function({bool projectId, bool user})
+          PrefetchHooks Function({bool projectId, bool user, bool category})
         > {
   $$SubmissionsTableTableManager(_$AppDatabase db, $SubmissionsTable table)
     : super(
@@ -3283,6 +4224,9 @@ class $$SubmissionsTableTableManager
                 Value<String?> assetId = const Value.absent(),
                 Value<String?> assetMimeType = const Value.absent(),
                 Value<String> assetBlurHash = const Value.absent(),
+                Value<String?> category = const Value.absent(),
+                Value<double> validationWeightPositive = const Value.absent(),
+                Value<double> validationWeightNegative = const Value.absent(),
               }) => SubmissionsCompanion(
                 id: id,
                 projectId: projectId,
@@ -3292,6 +4236,9 @@ class $$SubmissionsTableTableManager
                 assetId: assetId,
                 assetMimeType: assetMimeType,
                 assetBlurHash: assetBlurHash,
+                category: category,
+                validationWeightPositive: validationWeightPositive,
+                validationWeightNegative: validationWeightNegative,
               ),
           createCompanionCallback:
               ({
@@ -3303,6 +4250,9 @@ class $$SubmissionsTableTableManager
                 Value<String?> assetId = const Value.absent(),
                 Value<String?> assetMimeType = const Value.absent(),
                 required String assetBlurHash,
+                Value<String?> category = const Value.absent(),
+                Value<double> validationWeightPositive = const Value.absent(),
+                Value<double> validationWeightNegative = const Value.absent(),
               }) => SubmissionsCompanion.insert(
                 id: id,
                 projectId: projectId,
@@ -3312,6 +4262,9 @@ class $$SubmissionsTableTableManager
                 assetId: assetId,
                 assetMimeType: assetMimeType,
                 assetBlurHash: assetBlurHash,
+                category: category,
+                validationWeightPositive: validationWeightPositive,
+                validationWeightNegative: validationWeightNegative,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3321,60 +4274,81 @@ class $$SubmissionsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({projectId = false, user = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (projectId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.projectId,
-                                referencedTable: $$SubmissionsTableReferences
-                                    ._projectIdTable(db),
-                                referencedColumn: $$SubmissionsTableReferences
-                                    ._projectIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-                    if (user) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.user,
-                                referencedTable: $$SubmissionsTableReferences
-                                    ._userTable(db),
-                                referencedColumn: $$SubmissionsTableReferences
-                                    ._userTable(db)
-                                    .username,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({projectId = false, user = false, category = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (projectId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.projectId,
+                                    referencedTable:
+                                        $$SubmissionsTableReferences
+                                            ._projectIdTable(db),
+                                    referencedColumn:
+                                        $$SubmissionsTableReferences
+                                            ._projectIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (user) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.user,
+                                    referencedTable:
+                                        $$SubmissionsTableReferences._userTable(
+                                          db,
+                                        ),
+                                    referencedColumn:
+                                        $$SubmissionsTableReferences
+                                            ._userTable(db)
+                                            .username,
+                                  )
+                                  as T;
+                        }
+                        if (category) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.category,
+                                    referencedTable:
+                                        $$SubmissionsTableReferences
+                                            ._categoryTable(db),
+                                    referencedColumn:
+                                        $$SubmissionsTableReferences
+                                            ._categoryTable(db)
+                                            .name,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -3391,7 +4365,7 @@ typedef $$SubmissionsTableProcessedTableManager =
       $$SubmissionsTableUpdateCompanionBuilder,
       (Submission, $$SubmissionsTableReferences),
       Submission,
-      PrefetchHooks Function({bool projectId, bool user})
+      PrefetchHooks Function({bool projectId, bool user, bool category})
     >;
 typedef $$SignaturesTableCreateCompanionBuilder =
     SignaturesCompanion Function({
@@ -3781,6 +4755,8 @@ class $AppDatabaseManager {
       $$ProjectsTableTableManager(_db, _db.projects);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db, _db.users);
+  $$CategoriesTableTableManager get categories =>
+      $$CategoriesTableTableManager(_db, _db.categories);
   $$SubmissionsTableTableManager get submissions =>
       $$SubmissionsTableTableManager(_db, _db.submissions);
   $$SignaturesTableTableManager get signatures =>

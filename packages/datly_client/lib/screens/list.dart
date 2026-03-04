@@ -168,7 +168,7 @@ class _ListScreenState extends State<ListScreen> {
                     "email": MultiPromptPrompt(
                       label: "Email Address",
                       placeholder: "user@example.com",
-                      validator: (v) => v.isNotEmpty && !validateEmail(v)
+                      validator: (v) => !validateEmail(v)
                           ? "Not a valid email address."
                           : null,
                       keyboardType: TextInputType.emailAddress,
@@ -179,18 +179,27 @@ class _ListScreenState extends State<ListScreen> {
                       placeholder: "user, admin",
                       content: "user",
                       validator: (value) => !["user", "admin"].contains(value)
-                          ? "Role must be either 'user' or 'admin'."
+                          ? "Role must be one of: user, admin"
+                          : null,
+                      capitalization: TextCapitalization.none,
+                    ),
+                    "locale": MultiPromptPrompt(
+                      label: "Account Locale",
+                      placeholder: "en, de, …",
+                      content: "en",
+                      validator: (value) =>
+                          !AppLocalizations.supportedLocales
+                              .map((e) => e.languageCode)
+                              .contains(value)
+                          ? "Locale must be one of: ${AppLocalizations.supportedLocales.map((e) => e.languageCode).join(", ")}"
                           : null,
                       capitalization: TextCapitalization.none,
                     ),
                   },
                 );
                 if (inputRaw == null) return;
-                final input = Map<String, dynamic>.from(inputRaw);
-
-                if (input["email"]!.isEmpty) {
-                  input["email"] = "${input["username"]}@localhost";
-                }
+                final input = Map<String, dynamic>.from(inputRaw)
+                  ..["captcha"] = null;
 
                 final allProjectsResponse = await allProjectsFuture;
                 if (allProjectsResponse == null ||
@@ -213,31 +222,25 @@ class _ListScreenState extends State<ListScreen> {
                 } else {
                   if (!context.mounted) return;
                   final selectedProjects =
-                      await showMultipleChoiceDialog(
-                          context: context,
-                          title: "Assign Projects",
-                          description:
-                              "Select the projects to assign to this user.",
-                          initialValue: allProjects.length == 1
-                              ? allProjects
-                              : null,
-                          items: allProjects,
-                          titleGenerator: (item) => item.title,
-                          subtitleGenerator: (item) => item.description,
-                          allowEmptySelection: true,
-                        )
+                      (await showMultipleChoiceDialog(
+                              context: context,
+                              title: "Assign Projects",
+                              description:
+                                  "Select the projects to assign to this user.",
+                              initialValue: allProjects.length == 1
+                                  ? allProjects
+                                  : null,
+                              items: allProjects,
+                              titleGenerator: (item) => item.title,
+                              subtitleGenerator: (item) => item.description,
+                              allowEmptySelection: true,
+                            ) ??
+                            [])
                         ..sort((a, b) => a.id.compareTo(b.id));
                   input["projects"] = selectedProjects
                       .map((p) => p.id)
                       .toList();
                 }
-
-                final user = UserData.fromJson(
-                  Map<String, dynamic>.from(input)
-                    ..["joinedAt"] = DateTime.now()
-                        .toUtc()
-                        .millisecondsSinceEpoch, // otherwise: TypeError
-                );
 
                 final username = input.remove("username");
                 final response = await AuthManager.instance.fetch(
@@ -248,26 +251,7 @@ class _ListScreenState extends State<ListScreen> {
                     ..headers["Content-Type"] = "application/json"
                     ..body = jsonEncode(input),
                 );
-                if (response?.statusCode == 201) {
-                  fetch();
-                  final response = await AuthManager.instance.fetch(
-                    http.Request(
-                      "POST",
-                      Uri.parse(
-                        "${ApiManager.baseUri}/user/$username/loginCode",
-                      ),
-                    ),
-                  );
-                  if (response == null || response.statusCode != 200) {
-                    return;
-                  }
-
-                  final code = jsonDecode(response.body)["code"] as String?;
-                  if (code == null) return;
-
-                  if (!context.mounted) return;
-                  showLoginCodeDialog(context, code, user);
-                }
+                if (response?.statusCode == 201) fetch();
               },
               leadingIcon: Icon(Icons.add),
               child: Text("Create User"),
@@ -326,6 +310,11 @@ class _ListScreenState extends State<ListScreen> {
                                 children: List.generate(
                                   data.length,
                                   (i) => ListWidget(
+                                    key: ValueKey(
+                                      widget.isProjects
+                                          ? "project_${data[i]["id"]}"
+                                          : "user_${data[i]["username"]}",
+                                    ),
                                     data: data[i],
                                     isProject: widget.isProjects,
                                     onDelete: fetch,
@@ -420,30 +409,35 @@ class _ListWidgetState extends State<ListWidget> {
     } else {
       user = UserData.fromJson(widget.data);
       _preloadUserProjects();
-      () async {
-        final allProjectsResponse = await AuthManager.instance.fetch(
-          http.Request("GET", Uri.parse("${ApiManager.baseUri}/projects/list")),
-        );
-        if (allProjectsResponse == null ||
-            allProjectsResponse.statusCode != 200 ||
-            !(allProjectsResponse.headers["content-type"]?.startsWith(
-                  "application/json",
-                ) ??
-                false)) {
-          return;
-        }
+      if (AuthManager.instance.authenticatedUserIsAdmin) {
+        () async {
+          final allProjectsResponse = await AuthManager.instance.fetch(
+            http.Request(
+              "GET",
+              Uri.parse("${ApiManager.baseUri}/projects/list"),
+            ),
+          );
+          if (allProjectsResponse == null ||
+              allProjectsResponse.statusCode != 200 ||
+              !(allProjectsResponse.headers["content-type"]?.startsWith(
+                    "application/json",
+                  ) ??
+                  false)) {
+            return;
+          }
 
-        allProjectIds.addAll(
-          (jsonDecode(allProjectsResponse.body) as List<dynamic>).map((e) {
-            final projectId = ProjectData.fromJson(
-              e as Map<String, dynamic>,
-            ).id;
-            ProjectRegistry.instance.get(projectId);
-            return projectId;
-          }),
-        );
-        if (mounted) setState(() {});
-      }.call();
+          allProjectIds.addAll(
+            (jsonDecode(allProjectsResponse.body) as List<dynamic>).map((e) {
+              final projectId = ProjectData.fromJson(
+                e as Map<String, dynamic>,
+              ).id;
+              ProjectRegistry.instance.get(projectId);
+              return projectId;
+            }),
+          );
+          if (mounted) setState(() {});
+        }.call();
+      }
     }
   }
 
@@ -474,6 +468,276 @@ class _ListWidgetState extends State<ListWidget> {
         ? true
         : AuthManager.instance.authenticatedUser?.username != user?.username;
 
+    void delete() async {
+      if (!await showConfirmationDialog(
+            context: context,
+            title: "Delete ${widget.isProject ? "Project" : "User"}",
+            description:
+                "Are you sure you want to delete this ${widget.isProject ? "project" : "user"}? This action cannot be undone.",
+          ) ||
+          !context.mounted) {
+        return;
+      }
+
+      final completer = Completer<void>();
+      http.Response? response;
+      showStatusModal(
+        context: context,
+        completer: completer,
+        failureDetailsGenerator: () =>
+            responseFailureDetailsGenerator(response),
+      );
+
+      try {
+        response = await AuthManager.instance.fetch(
+          http.Request("DELETE", uri),
+        );
+        if (response == null || response.statusCode != 200) {
+          completer.completeError("");
+          return;
+        }
+      } catch (_) {
+        completer.completeError("");
+        return;
+      }
+
+      widget.onDelete();
+      completer.complete();
+    }
+
+    void projectSetDescription() async {
+      final newDescription = await showPromptDialog(
+        context: context,
+        title: "Set Description",
+        content: project?.description,
+        placeholder: "Training data for a model to detect…",
+        maxLength: 256,
+        maxLines: 4,
+      );
+      if (newDescription != null && newDescription != project?.description) {
+        await AuthManager.instance.fetch(
+          http.Request("PUT", uri)
+            ..headers["Content-Type"] = "application/json"
+            ..body = jsonEncode({"title": null, "description": newDescription}),
+        );
+        project?.description = newDescription;
+        if (mounted) setState(() {});
+      }
+    }
+
+    void userSetEmail() async {
+      final newEmail = await showPromptDialog(
+        context: context,
+        title: "Set Email Address",
+        content: user?.email,
+        quickValidator: (e) => validateEmail(e),
+        keyboardType: TextInputType.emailAddress,
+        autofillHints: [],
+      );
+      if (newEmail != null && newEmail != user?.email && context.mounted) {
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        try {
+          response = await AuthManager.instance.fetch(
+            http.Request("PUT", uri)
+              ..headers["Content-Type"] = "application/json"
+              ..body = jsonEncode({
+                "password": null,
+                "email": newEmail,
+                "projects": null,
+                "role": null,
+              }),
+          );
+          if (response == null || response.statusCode != 200) {
+            completer.completeError("");
+            return;
+          }
+        } catch (_) {
+          completer.completeError("");
+          return;
+        }
+
+        user?.email = newEmail;
+        if (mounted) setState(() {});
+        completer.complete();
+      }
+    }
+
+    void userSetProjects() async {
+      final items = (await Future.wait(
+        allProjectIds.map((id) => ProjectRegistry.instance.get(id)),
+      )).whereType<ProjectData>();
+      if (!context.mounted) return;
+      final newProjects = (await showMultipleChoiceDialog(
+        context: context,
+        title: "Change Assigned Projects",
+        initialValue: userAssignedProjects,
+        items: items,
+        titleGenerator: (item) => item.title,
+        subtitleGenerator: (item) => item.description,
+        allowEmptySelection: true,
+      ));
+      if (newProjects != null &&
+          (newProjects..sort((a, b) => a.id.compareTo(b.id))).map(
+                (p) => p.id,
+              ) !=
+              user?.projects &&
+          context.mounted) {
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        try {
+          response = await AuthManager.instance.fetch(
+            http.Request("PUT", uri)
+              ..headers["Content-Type"] = "application/json"
+              ..body = jsonEncode({
+                "password": null,
+                "email": null,
+                "projects": newProjects.map((p) => p.id).toList(),
+                "role": null,
+              }),
+          );
+          if (response == null || response.statusCode != 200) {
+            completer.completeError("");
+            return;
+          }
+        } catch (_) {
+          completer.completeError("");
+          return;
+        }
+
+        user?.projects = newProjects.map((p) => p.id).toList();
+        await _preloadUserProjects();
+        if (mounted) setState(() {});
+        completer.complete();
+      }
+    }
+
+    void userDisableReenable() async {
+      if (user!.disabled == null) {
+        final reason = await showPromptDialog(
+          context: context,
+          title: "Ban user",
+          description:
+              "Provide a reason for disabling this user. This will be shown to the user.\nThe user will be notified via email. This should only be used for banning users that have violated the terms of service.",
+          placeholder: "Violated Par. 4 of the ToS",
+          maxLines: 3,
+        );
+        if (reason == null || !context.mounted) return;
+
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        try {
+          response = await AuthManager.instance.fetch(
+            http.Request("POST", Uri.parse("$uri/disable"))
+              ..headers["Content-Type"] = "application/json"
+              ..body = jsonEncode({"reason": reason}),
+          );
+          if (response == null || response.statusCode != 200) {
+            return;
+          }
+        } catch (_) {
+          completer.completeError("");
+          return;
+        }
+
+        user?.disabled = reason;
+        if (mounted) setState(() {});
+        completer.complete();
+      } else {
+        if (!await showConfirmationDialog(
+              context: context,
+              title: "Reenable user",
+              description:
+                  "Are you sure you want to reenable this user? This will allow them to log in again. The user will be notified via email.",
+            ) ||
+            !context.mounted) {
+          return;
+        }
+
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        try {
+          response = await AuthManager.instance.fetch(
+            http.Request("POST", Uri.parse("$uri/reenable")),
+          );
+          if (response == null || response.statusCode != 200) {
+            completer.completeError("");
+            return;
+          }
+        } catch (_) {
+          completer.completeError("");
+          return;
+        }
+
+        user?.disabled = null;
+        if (mounted) setState(() {});
+        completer.complete();
+      }
+    }
+
+    void userSetPassword() async {
+      if (!await showConfirmationDialog(
+            context: context,
+            title: "Send new password",
+            description:
+                "Are you sure you want to reset this user's password? This will send an email to the user with a new temporary password. The current password will become invalid. This action cannot be undone.",
+          ) ||
+          !context.mounted) {
+        return;
+      }
+
+      final completer = Completer<void>();
+      http.Response? response;
+      showStatusModal(
+        context: context,
+        completer: completer,
+        failureDetailsGenerator: () =>
+            responseFailureDetailsGenerator(response),
+      );
+
+      try {
+        response = await AuthManager.instance.fetch(
+          http.Request("POST", Uri.parse("$uri/passwordReset")),
+        );
+        if (response == null || response.statusCode != 200) {
+          completer.completeError("");
+          return;
+        }
+      } catch (_) {
+        completer.completeError("");
+        return;
+      }
+      completer.complete();
+    }
+
     final card = SizedBox(
       width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
       child: Card.filled(
@@ -503,32 +767,7 @@ class _ListWidgetState extends State<ListWidget> {
                             deleteIcon: Icon(Icons.edit),
                             onDeleted:
                                 AuthManager.instance.authenticatedUserIsAdmin
-                                ? () async {
-                                    final newDescription = await showPromptDialog(
-                                      context: context,
-                                      title: "Set Description",
-                                      content: project?.description,
-                                      placeholder:
-                                          "Training data for a model to detect…",
-                                      maxLength: 256,
-                                      maxLines: 4,
-                                    );
-                                    if (newDescription != null &&
-                                        newDescription !=
-                                            project?.description) {
-                                      await AuthManager.instance.fetch(
-                                        http.Request("PUT", uri)
-                                          ..headers["Content-Type"] =
-                                              "application/json"
-                                          ..body = jsonEncode({
-                                            "title": null,
-                                            "description": newDescription,
-                                          }),
-                                      );
-                                      project?.description = newDescription;
-                                      if (mounted) setState(() {});
-                                    }
-                                  }
+                                ? projectSetDescription
                                 : null,
                           ),
                           Chip(
@@ -574,31 +813,7 @@ class _ListWidgetState extends State<ListWidget> {
                             deleteIcon: Icon(Icons.edit),
                             onDeleted:
                                 AuthManager.instance.authenticatedUserIsAdmin
-                                ? () async {
-                                    final newEmail = await showPromptDialog(
-                                      context: context,
-                                      title: "Set Email Address",
-                                      content: user?.email,
-                                      quickValidator: (e) => validateEmail(e),
-                                      keyboardType: TextInputType.emailAddress,
-                                      autofillHints: [],
-                                    );
-                                    if (newEmail != null &&
-                                        newEmail != user?.email) {
-                                      await AuthManager.instance.fetch(
-                                        http.Request("PUT", uri)
-                                          ..headers["Content-Type"] =
-                                              "application/json"
-                                          ..body = jsonEncode({
-                                            "email": newEmail,
-                                            "projects": null,
-                                            "role": null,
-                                          }),
-                                      );
-                                      user?.email = newEmail;
-                                      if (mounted) setState(() {});
-                                    }
-                                  }
+                                ? userSetEmail
                                 : null,
                           ),
                           Chip(
@@ -634,8 +849,17 @@ class _ListWidgetState extends State<ListWidget> {
                                               })
                                               .join(", ")
                                         : "–"
-                                  : "No projects assigned",
-                              style: user?.projects.isEmpty ?? true
+                                  : (AuthManager
+                                            .instance
+                                            .authenticatedUserIsAdmin
+                                        ? "None"
+                                        : "–"),
+                              style:
+                                  user?.projects.isEmpty ??
+                                      true &&
+                                          AuthManager
+                                              .instance
+                                              .authenticatedUserIsAdmin
                                   ? TextStyle(
                                       fontStyle: FontStyle.italic,
                                       color: theme.disabledColor,
@@ -645,48 +869,7 @@ class _ListWidgetState extends State<ListWidget> {
                             deleteIcon: Icon(Icons.edit),
                             onDeleted:
                                 AuthManager.instance.authenticatedUserIsAdmin
-                                ? () async {
-                                    final items = (await Future.wait(
-                                      allProjectIds.map(
-                                        (id) =>
-                                            ProjectRegistry.instance.get(id),
-                                      ),
-                                    )).whereType<ProjectData>();
-                                    if (!context.mounted) return;
-                                    final newProjects =
-                                        (await showMultipleChoiceDialog(
-                                          context: context,
-                                          title: "Change Assigned Projects",
-                                          initialValue: userAssignedProjects,
-                                          items: items,
-                                          titleGenerator: (item) => item.title,
-                                          subtitleGenerator: (item) =>
-                                              item.description,
-                                        ))..sort(
-                                          (a, b) => a.id.compareTo(b.id),
-                                        );
-                                    if (newProjects.isNotEmpty &&
-                                        newProjects.map((p) => p.id) !=
-                                            user?.projects) {
-                                      await AuthManager.instance.fetch(
-                                        http.Request("PUT", uri)
-                                          ..headers["Content-Type"] =
-                                              "application/json"
-                                          ..body = jsonEncode({
-                                            "email": null,
-                                            "projects": newProjects
-                                                .map((p) => p.id)
-                                                .toList(),
-                                            "role": null,
-                                          }),
-                                      );
-                                      user?.projects = newProjects
-                                          .map((p) => p.id)
-                                          .toList();
-                                      _preloadUserProjects();
-                                      if (mounted) setState(() {});
-                                    }
-                                  }
+                                ? userSetProjects
                                 : null,
                           ),
                           Chip(
@@ -864,22 +1047,7 @@ class _ListWidgetState extends State<ListWidget> {
                             ),
                           ),
                         ),
-                        onPressed: showDeleteButton
-                            ? () async {
-                                final selection = await showConfirmationDialog(
-                                  context: context,
-                                  title:
-                                      "Delete ${widget.isProject ? "Project" : "User"}",
-                                  description:
-                                      "Are you sure you want to delete this ${widget.isProject ? "project" : "user"}? This action cannot be undone.",
-                                );
-                                if (!selection) return;
-                                await AuthManager.instance.fetch(
-                                  http.Request("DELETE", uri),
-                                );
-                                widget.onDelete();
-                              }
-                            : null,
+                        onPressed: showDeleteButton ? delete : null,
                       ),
                     ],
                   ),
@@ -894,47 +1062,26 @@ class _ListWidgetState extends State<ListWidget> {
                       spacing: 2,
                       runSpacing: 2,
                       children: [
-                        Chip(label: Text("Login Codes:")),
                         ActionChip(
-                          avatar: Icon(Icons.add),
-                          label: Text("Add"),
-                          onPressed: () async {
-                            final response = await AuthManager.instance.fetch(
-                              http.Request("POST", Uri.parse("$uri/loginCode")),
-                            );
-                            if (response == null ||
-                                response.statusCode != 200) {
-                              return;
-                            }
-
-                            final code =
-                                jsonDecode(response.body)["code"] as String?;
-                            if (code == null) return;
-
-                            if (!context.mounted) return;
-                            showLoginCodeDialog(context, code, user);
-                          },
+                          avatar: Icon(
+                            user!.disabled == null
+                                ? Icons.block_outlined
+                                : Icons.check_circle_outline,
+                            color: user!.disabled == null && showDeleteButton
+                                ? colorScheme.error
+                                : null,
+                          ),
+                          label: Text(
+                            user!.disabled == null ? "Disable" : "Reenable",
+                          ),
+                          onPressed: showDeleteButton
+                              ? userDisableReenable
+                              : null,
                         ),
                         ActionChip(
-                          backgroundColor: colorScheme.error,
-                          avatar: Icon(
-                            Icons.folder_delete,
-                            color: colorScheme.onError,
-                          ),
-                          label: Builder(
-                            builder: (context) => Text(
-                              "Purge All",
-                              style: DefaultTextStyle.of(
-                                context,
-                              ).style.copyWith(color: colorScheme.onError),
-                            ),
-                          ),
-                          onPressed: () => AuthManager.instance.fetch(
-                            http.Request(
-                              "DELETE",
-                              Uri.parse("$uri/loginCode/purge"),
-                            ),
-                          ),
+                          avatar: Icon(Icons.upcoming_outlined),
+                          label: Text("New password"),
+                          onPressed: showDeleteButton ? userSetPassword : null,
                         ),
                       ],
                     ),
@@ -951,97 +1098,4 @@ class _ListWidgetState extends State<ListWidget> {
   Uri get uri => widget.isProject
       ? Uri.parse("${ApiManager.baseUri}/projects/${project!.id}")
       : Uri.parse("${ApiManager.baseUri}/user/${user!.username}");
-}
-
-Future<void> showLoginCodeDialog(
-  BuildContext context,
-  String code,
-  UserData? user,
-) {
-  assert(code.length == 8, "Login code must be 8 characters long.");
-  final textTheme = TextTheme.of(context);
-  return showDialog(
-    context: context,
-    builder: (context) {
-      final windowSizeClass = WindowSizeClass.of(context);
-      return AlertDialog(
-        contentPadding: EdgeInsetsGeometry.only(
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: 16,
-        ),
-        constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              code,
-              style: textTheme.displayLarge?.copyWith(
-                fontFamily: "GoogleSansCode",
-                fontWeight: FontWeight.bold,
-                letterSpacing: windowSizeClass > WindowSizeClass.compact
-                    ? 8
-                    : 0,
-              ),
-            ),
-            Text(
-              "THIS CODE WILL NOT BE SHOWN AGAIN.",
-              style: textTheme.labelMedium,
-            ),
-          ],
-        ),
-        actions: [
-          MenuAnchor(
-            menuChildren: [
-              MenuItemButton(
-                onPressed: () => Clipboard.setData(ClipboardData(text: code)),
-                leadingIcon: Icon(Icons.copy),
-                child: Text("Copy code only"),
-              ),
-              MenuItemButton(
-                onPressed: user != null
-                    ? () async {
-                        final appLocalizations = AppLocalizations.of(context);
-                        final projectNames = user.projects.isNotEmpty
-                            ? (await Future.wait(
-                                    user.projects.map(
-                                      (p) => ProjectRegistry.instance.get(p),
-                                    ),
-                                  ))
-                                  .whereType<ProjectData>()
-                                  .map((p) => appLocalizations.quote(p.title))
-                                  .join(", ")
-                            : "";
-                        if (!context.mounted) return;
-                        Clipboard.setData(
-                          ClipboardData(
-                            text: appLocalizations.invite(
-                              user.username,
-                              Uri.base.origin,
-                              user.projects.length,
-                              projectNames,
-                              code,
-                            ),
-                          ),
-                        );
-                      }
-                    : null,
-                leadingIcon: Icon(Icons.copy_all),
-                child: Text("Copy invitation message"),
-              ),
-            ],
-            builder: (context, controller, _) => TextButton(
-              onPressed: controller.isOpen ? controller.close : controller.open,
-              child: Text(MaterialLocalizations.of(context).copyButtonLabel),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(MaterialLocalizations.of(context).okButtonLabel),
-          ),
-        ],
-      );
-    },
-  );
 }

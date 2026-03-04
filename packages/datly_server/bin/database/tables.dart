@@ -1,6 +1,3 @@
-// code generation handles this
-// ignore_for_file: recursive_getters
-
 import 'converters.dart';
 import 'database.dart';
 
@@ -16,6 +13,7 @@ class Users extends Table {
   TextColumn get password => text()();
   TextColumn get email => text().unique()();
   DateTimeColumn get joinedAt => dateTime().withDefault(currentDateAndTime)();
+
   TextColumn get projects =>
       text().map(ListConverter<int>()).withDefault(const Constant("[]"))();
   TextColumn get role =>
@@ -24,6 +22,11 @@ class Users extends Table {
       text().nullable().withDefault(const Constant(null))();
   BoolColumn get activated => boolean().withDefault(const Constant(false))();
   TextColumn get locale => text().withDefault(const Constant("en"))();
+
+  RealColumn get validationWeightPositive =>
+      real().withDefault(const Constant(0.0))();
+  RealColumn get validationWeightNegative =>
+      real().withDefault(const Constant(0.0))();
 
   @override
   Set<Column<Object>>? get primaryKey => {username};
@@ -40,9 +43,18 @@ class Submissions extends Table {
   )();
   DateTimeColumn get submittedAt =>
       dateTime().withDefault(currentDateAndTime)();
+
   TextColumn get assetId => text().nullable().withLength(min: 32, max: 32)();
   TextColumn get assetMimeType => text().nullable()();
   TextColumn get assetBlurHash => text()();
+
+  TextColumn get category => text()
+      .references(Categories, #name, onDelete: KeyAction.restrict)
+      .nullable()();
+  RealColumn get validationWeightPositive =>
+      real().withDefault(const Constant(0.0))();
+  RealColumn get validationWeightNegative =>
+      real().withDefault(const Constant(0.0))();
 }
 
 class Signatures extends Table {
@@ -68,4 +80,12 @@ class Signatures extends Table {
 
   @override
   Set<Column<Object>>? get primaryKey => {submissionId};
+}
+
+class Categories extends Table {
+  TextColumn get name => text()();
+  TextColumn get displayName => text().nullable()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {name};
 }

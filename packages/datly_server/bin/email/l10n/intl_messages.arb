@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "@@last_modified": "2026-02-23T22:48:37.191049",
+  "@@last_modified": "2026-03-04T22:06:17.720579",
   "emailWelcomeSubject": "Welcome to Datly",
   "@emailWelcomeSubject": {
     "type": "text",
@@ -169,6 +169,152 @@
   },
   "emailAccountReenabledContentExtra1": "Open Datly",
   "@emailAccountReenabledContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsSubject": "Updates to the Datly Terms of Service",
+  "@emailLegalChangedTermsSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsSummary": "Our Terms of Service have been updated.",
+  "@emailLegalChangedTermsSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsPart1": "we are writing to let you know that our Terms of Service have been updated. The changes will take effect on {date}.",
+  "@emailLegalChangedTermsPart1": {
+    "type": "text",
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "emailLegalChangedTermsPart2": "We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.",
+  "@emailLegalChangedTermsPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsPart3": "If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.",
+  "@emailLegalChangedTermsPart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsPart4": "If you have any questions, please don't hesitate to ",
+  "@emailLegalChangedTermsPart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsPart5": "contact our support team",
+  "@emailLegalChangedTermsPart5": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsPart6": ".",
+  "@emailLegalChangedTermsPart6": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedTermsContentExtra1": "View Terms of Service",
+  "@emailLegalChangedTermsContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacySubject": "Updates to the Datly Privacy Policy",
+  "@emailLegalChangedPrivacySubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacySummary": "Our Privacy Policy has been updated.",
+  "@emailLegalChangedPrivacySummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacyPart1": "we are writing to let you know that our Privacy Policy has been updated. The changes will take effect on {date}.",
+  "@emailLegalChangedPrivacyPart1": {
+    "type": "text",
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "emailLegalChangedPrivacyPart2": "We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.",
+  "@emailLegalChangedPrivacyPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacyPart3": "If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.",
+  "@emailLegalChangedPrivacyPart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacyPart4": "If you have any questions, please don't hesitate to ",
+  "@emailLegalChangedPrivacyPart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacyPart5": "contact our support team",
+  "@emailLegalChangedPrivacyPart5": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacyPart6": ".",
+  "@emailLegalChangedPrivacyPart6": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedPrivacyContentExtra1": "View Privacy Policy",
+  "@emailLegalChangedPrivacyContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllSubject": "Updates to the Datly Terms of Service and Privacy Policy",
+  "@emailLegalChangedAllSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllSummary": "Our Terms of Service and Privacy Policy have been updated.",
+  "@emailLegalChangedAllSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllPart1": "we are writing to let you know that our Terms of Service and Privacy Policy have been updated. The changes will take effect on {date}.",
+  "@emailLegalChangedAllPart1": {
+    "type": "text",
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "emailLegalChangedAllPart2": "We encourage you to review the updated documents at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.",
+  "@emailLegalChangedAllPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllPart3": "If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.",
+  "@emailLegalChangedAllPart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllPart4": "If you have any questions, please don't hesitate to ",
+  "@emailLegalChangedAllPart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllPart5": "contact our support team",
+  "@emailLegalChangedAllPart5": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllPart6": ".",
+  "@emailLegalChangedAllPart6": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllContentExtra1": "View Terms of Service",
+  "@emailLegalChangedAllContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLegalChangedAllContentExtra2": "View Privacy Policy",
+  "@emailLegalChangedAllContentExtra2": {
     "type": "text",
     "placeholders": {}
   },

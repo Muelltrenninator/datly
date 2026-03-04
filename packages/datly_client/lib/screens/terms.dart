@@ -4,8 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:markdown_widget/markdown_widget.dart';
 
+import '../api.dart';
+
 abstract class MarkdownDialogSource {
+  MarkdownDialogSource();
   FutureOr<String> getMarkdown();
+  MarkdownDialogSource copyWith();
+
+  factory MarkdownDialogSource.termsOfService() => MarkdownDialogHttpSource(
+    Uri.parse("${ApiManager.baseUri.replace(path: "")}/legal/terms"),
+  );
+  factory MarkdownDialogSource.privacyPolicy() => MarkdownDialogHttpSource(
+    Uri.parse("${ApiManager.baseUri.replace(path: "")}/legal/privacy"),
+  );
+  factory MarkdownDialogSource.imprint() => MarkdownDialogHttpSource(
+    Uri.parse("${ApiManager.baseUri.replace(path: "")}/legal/imprint"),
+  );
 }
 
 class MarkdownDialogStringSource extends MarkdownDialogSource {
@@ -14,6 +28,10 @@ class MarkdownDialogStringSource extends MarkdownDialogSource {
 
   @override
   String getMarkdown() => data;
+
+  @override
+  MarkdownDialogStringSource copyWith({String? data}) =>
+      MarkdownDialogStringSource(data ?? this.data);
 }
 
 class MarkdownDialogHttpSource extends MarkdownDialogSource {
@@ -29,6 +47,10 @@ class MarkdownDialogHttpSource extends MarkdownDialogSource {
       throw Exception("Failed to load document.");
     }
   }
+
+  @override
+  MarkdownDialogHttpSource copyWith({Uri? origin}) =>
+      MarkdownDialogHttpSource(origin ?? this.origin);
 }
 
 class MarkdownDialog extends StatefulWidget {
@@ -59,6 +81,19 @@ class _MarkdownDialogState extends State<MarkdownDialog> {
 
   @override
   Widget build(BuildContext context) {
+    var markdownConfig = Theme.brightnessOf(context) == Brightness.dark
+        ? MarkdownConfig.darkConfig
+        : MarkdownConfig.defaultConfig;
+    markdownConfig = markdownConfig.copy(
+      configs: [
+        TableConfig(
+          wrapper: (child) => SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: child,
+          ),
+        ),
+      ],
+    );
     return AlertDialog(
       contentPadding: EdgeInsets.symmetric(vertical: 16),
       constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
@@ -74,10 +109,7 @@ class _MarkdownDialogState extends State<MarkdownDialog> {
                           padding: EdgeInsets.symmetric(horizontal: 24),
                           child: MarkdownBlock(
                             data: data!,
-                            config:
-                                Theme.brightnessOf(context) == Brightness.dark
-                                ? MarkdownConfig.darkConfig
-                                : MarkdownConfig.defaultConfig,
+                            config: markdownConfig,
                           ),
                         ),
                       ),
