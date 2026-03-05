@@ -514,14 +514,39 @@ class _ListWidgetState extends State<ListWidget> {
         maxLength: 256,
         maxLines: 4,
       );
-      if (newDescription != null && newDescription != project?.description) {
-        await AuthManager.instance.fetch(
-          http.Request("PUT", uri)
-            ..headers["Content-Type"] = "application/json"
-            ..body = jsonEncode({"title": null, "description": newDescription}),
+      if (newDescription != null &&
+          newDescription != project?.description &&
+          context.mounted) {
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
         );
+
+        try {
+          response = await AuthManager.instance.fetch(
+            http.Request("PUT", uri)
+              ..headers["Content-Type"] = "application/json"
+              ..body = jsonEncode({
+                "title": null,
+                "description": newDescription,
+              }),
+          );
+          if (response == null || response.statusCode != 200) {
+            completer.completeError("");
+            return;
+          }
+        } catch (_) {
+          completer.completeError("");
+          return;
+        }
+
         project?.description = newDescription;
         if (mounted) setState(() {});
+        completer.complete();
       }
     }
 
@@ -1033,9 +1058,7 @@ class _ListWidgetState extends State<ListWidget> {
                         backgroundColor: colorScheme.error,
                         avatar: Icon(
                           Icons.delete_outlined,
-                          color: showDeleteButton
-                              ? colorScheme.onError
-                              : theme.disabledColor,
+                          color: showDeleteButton ? colorScheme.onError : null,
                         ),
                         label: Builder(
                           builder: (context) => Text(
@@ -1049,19 +1072,7 @@ class _ListWidgetState extends State<ListWidget> {
                         ),
                         onPressed: showDeleteButton ? delete : null,
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              if (!widget.isProject)
-                Padding(
-                  padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Wrap(
-                      spacing: 2,
-                      runSpacing: 2,
-                      children: [
+                      if (!widget.isProject) ...[
                         ActionChip(
                           avatar: Icon(
                             user!.disabled == null
@@ -1084,9 +1095,10 @@ class _ListWidgetState extends State<ListWidget> {
                           onPressed: showDeleteButton ? userSetPassword : null,
                         ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
+              ),
             ],
           ],
         ),
