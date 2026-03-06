@@ -260,7 +260,7 @@ class SubmissionData {
   String? assetId;
   String? assetMimeType;
   String assetBlurHash;
-  String category;
+  String? category;
   double validationWeightPositive;
   double validationWeightNegative;
 
@@ -292,22 +292,22 @@ class SubmissionData {
       : null;
 
   factory SubmissionData.fromJson(Map<String, dynamic> json) => SubmissionData(
-    id: json["id"]!,
-    projectId: json["projectId"]!,
-    user: json["user"]!,
-    submittedAt: DateTime.fromMillisecondsSinceEpoch(
-      json["submittedAt"],
-      isUtc: true,
-    ),
-    status: json["status"]!,
-    moderated: json["moderated"]!,
-    assetId: json["assetId"],
-    assetMimeType: json["assetMimeType"],
-    assetBlurHash: json["assetBlurHash"]!,
-    category: json["category"]!,
-    validationWeightPositive: json["validationWeightPositive"]!,
-    validationWeightNegative: json["validationWeightNegative"]!,
-  );
+      id: json["id"]!,
+      projectId: json["projectId"]!,
+      user: json["user"]!,
+      submittedAt: DateTime.fromMillisecondsSinceEpoch(
+        json["submittedAt"],
+        isUtc: true,
+      ),
+      status: json["status"]!,
+      moderated: json["moderated"]!,
+      assetId: json["assetId"],
+      assetMimeType: json["assetMimeType"],
+      assetBlurHash: json["assetBlurHash"]!,
+      category: json["category"],
+      validationWeightPositive: json["validationWeightPositive"]!,
+      validationWeightNegative: json["validationWeightNegative"]!,
+    );
   Map<String, dynamic> toJson() => {
     "id": id,
     "projectId": projectId,

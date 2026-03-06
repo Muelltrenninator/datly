@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-03-06T18:48:00
+/// Last generated: 2026-03-06T19:26:43
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 45,
+      revision: 48,
       ahead: 0,
       behind: 0,
       commits: [
@@ -472,6 +472,9 @@ final class GitBaker {
         "f466858c0d88bef4453d594557397385d96a6a78",
         "c2cd91cae907cc88b646ffff74937e479ae8fdd4",
         "7f0748dd796bf72981b6dbdb192259572a8acc5b",
+        "1ce97bf1e642cd1f2a0b7031a88c3f1af0ed5ef9",
+        "fa95a359988f79b3d45c2c61ee8edd3dc23cf26e",
+        "9fe9443a7fb279050fe2443e3895df82c99b1cec",
       ],
     ),
   ];
@@ -896,6 +899,33 @@ final class GitBaker {
       hashAbbreviated: "7f0748d",
       message: "Moderation, other small changes",
       date: DateTime.parse("2026-03-06T17:47:23.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "1ce97bf1e642cd1f2a0b7031a88c3f1af0ed5ef9",
+      hashAbbreviated: "1ce97bf",
+      message: "Fixed imports",
+      date: DateTime.parse("2026-03-06T18:01:56.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "fa95a359988f79b3d45c2c61ee8edd3dc23cf26e",
+      hashAbbreviated: "fa95a35",
+      message: "Update server.dart",
+      date: DateTime.parse("2026-03-06T18:08:11.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "9fe9443a7fb279050fe2443e3895df82c99b1cec",
+      hashAbbreviated: "9fe9443",
+      message: "Revert breaking change",
+      date: DateTime.parse("2026-03-06T18:26:13.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",
