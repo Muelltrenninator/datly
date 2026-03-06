@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:openai_dart/openai_dart.dart';
 import 'package:retry/retry.dart';
 
 import 'database/database.dart';
 import 'email/email.dart';
+import 'email/messages_all.dart';
 import 'helpers.dart';
 import 'server.dart';
 
@@ -33,6 +35,10 @@ void initializeModeration() {
       }
     },
   );
+
+  initializeMessages("en");
+  initializeMessages("de");
+  initializeDateFormatting();
 }
 
 final _moderationQueue = <({Submission submission, int failedIterations})>[];
