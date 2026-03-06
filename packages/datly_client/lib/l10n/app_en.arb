@@ -57,7 +57,7 @@
         "description": "Error message shown when the server cannot be reached during login.",
         "context": "login"
     },
-    "loginAccountDisabled": "Your account has been disabled. Learn about the details in the email sent to your linked email address.",
+    "loginAccountDisabled": "Your account has been disabled. Learn about the details in the message sent to your linked email address.",
     "@loginAccountDisabled": {
         "description": "Error message shown when the user's account has been disabled.",
         "context": "login"

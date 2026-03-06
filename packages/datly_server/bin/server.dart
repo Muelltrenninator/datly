@@ -12,6 +12,7 @@ import 'package:tracer/tracer.dart';
 import 'database/database.dart';
 import 'email/email.dart';
 import 'helpers.dart';
+import 'moderation.dart';
 import 'routes/api.dart';
 
 late final Directory dataDirectory;
@@ -164,7 +165,6 @@ void main(List<String> args) async {
 
   env = DotEnv(includePlatformEnvironment: true, quiet: true)
     ..load(["${dataDirectory.path}/.env"]);
-  initializeSmtpServer();
   captchaSecretKey = env["DATLY_CAPTCHA_SECRET"];
 
   await generateJwtKeys();
@@ -173,7 +173,10 @@ void main(List<String> args) async {
 
   defineApiRouter();
   db = AppDatabase();
-  await db.customSelect("SELECT 1").getSingle(); // await migration
+  await db.customSelect("SELECT 1").get(); // await migration
+  
+  initializeSmtpServer();
+  initializeModeration();
 
   final handler = Pipeline()
       .addMiddleware(
@@ -226,7 +229,7 @@ void main(List<String> args) async {
     db.users,
   )..where((u) => u.username.equals(adminUser))).getSingleOrNull();
 
-  if (existing == null) {
+  if (existing == null || existing.password.isEmpty) {
     final email = env["DATLY_ADMIN_EMAIL"] ?? "admin@localhost";
     final adminPassword =
         env["DATLY_ADMIN_PASSWORD"] ?? await generatePlaintextPassword();
@@ -239,7 +242,7 @@ void main(List<String> args) async {
 
     await db
         .into(db.users)
-        .insert(
+        .insertOnConflictUpdate(
           UsersCompanion.insert(
             username: adminUser,
             password: await hashPassword(password: adminPassword),
@@ -248,7 +251,7 @@ void main(List<String> args) async {
           ),
         );
     t.warn(
-      "Created admin user '$adminUser' ($email)${secureContext ? ". Temporary password: $adminPassword" : ""}",
+      "${existing == null ? "Created" : "Updated"} admin user '$adminUser' ($email)${secureContext ? ". Temporary password: $adminPassword" : ""}",
     );
   } else if (existing.role != UserRole.admin) {
     await (db.update(db.users)..where((u) => u.username.equals(adminUser)))

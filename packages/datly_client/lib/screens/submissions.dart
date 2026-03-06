@@ -165,6 +165,12 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
             ),
           )
           .then((value) {
+            if (value.statusCode == 401 || value.statusCode == 403) {
+              AuthManager.instance.fourOhOneFourOhThree(value.statusCode);
+              error = true;
+              if (mounted) setState(() {});
+              return;
+            }
             if (value.statusCode != 200 ||
                 !(value.headers["content-type"]?.startsWith(
                       "application/jsonl",

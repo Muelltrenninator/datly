@@ -37,7 +37,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get loginInvalidEmail => 'Ungültige E-Mail-Adresse.';
+  String get loginInvalidEmail => 'Ungültige E‑Mail‑Adresse.';
 
   @override
   String get loginError =>
@@ -45,13 +45,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get loginAccountDisabled =>
-      'Dein Account wurde deaktiviert. Erfahre mehr über die Details in der E-Mail, die an deine verknüpfte E-Mail-Adresse gesendet wurde.';
+      'Dein Account wurde deaktiviert. Erfahre mehr in der Nachricht, die an deine verknüpfte E‑Mail‑Adresse gesendet wurde.';
 
   @override
-  String get loginUnknown => 'Unbekannte E-Mail-Adresse oder Passwort.';
+  String get loginUnknown => 'Unbekannte E‑Mail‑Adresse oder Passwort.';
 
   @override
-  String get loginEmailLabel => 'E-Mail-Adresse';
+  String get loginEmailLabel => 'E‑Mail‑Adresse';
 
   @override
   String get loginPasswordLabel => 'Passwort';
@@ -66,7 +66,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get registerUsernameLabel => 'Benutzername';
 
   @override
-  String get registerEmailLabel => 'E-Mail-Adresse';
+  String get registerEmailLabel => 'E‑Mail‑Adresse';
 
   @override
   String get registerSubmit => 'Registrieren';
@@ -76,7 +76,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get registerSuccessDescription =>
-      'Dein Account wurde erfolgreich erstellt. Bitte überprüfe deine E-Mail auf ein temporäres Passwort und weitere Anweisungen, um den Registrierungsprozess abzuschließen.';
+      'Dein Account wurde erfolgreich erstellt. Bitte überprüfe deine E‑Mail auf ein temporäres Passwort und weitere Anweisungen, um den Registrierungsprozess abzuschließen.';
 
   @override
   String get registerInvalidUsername =>
@@ -88,11 +88,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get registerErrorConflictEmail =>
-      'Die E-Mail-Adresse ist bereits mit einem anderen Account verknüpft. Bitte verwende eine andere.';
+      'Die E‑Mail‑Adresse ist bereits mit einem anderen Account verknüpft. Bitte verwende eine andere.';
 
   @override
   String get registerErrorCaptcha =>
-      'Die Captcha-Überprüfung ist fehlgeschlagen. Bitte versuche es erneut.';
+      'Die Captcha‑Überprüfung ist fehlgeschlagen. Bitte versuche es erneut.';
 
   @override
   String get registerLogin => 'Login';
@@ -287,7 +287,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das Löschen einer Einsendung wird dessen Bild vom nächsten Export entfernen und die Einwilligung zurückziehen. Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
-  String get accountOverview => 'Account-Übersicht';
+  String get accountOverview => 'Account‑Übersicht';
 
   @override
   String accountOverviewFor(String username) {

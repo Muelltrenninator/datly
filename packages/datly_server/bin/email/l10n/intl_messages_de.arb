@@ -27,7 +27,13 @@
   "emailAccountDisabledPart2": "Falls du glaubst, dass es sich um einen Fehler handelt, ",
   "emailAccountDisabledPart3": "wende dich bitte an unser Support-Team",
   "emailAccountDisabledPart4": ", um eine Überprüfung anzufordern.",
-  "emailAccountDisabledContentExtra1": "Grund:<br>{reason}",
+  "emailAccountDisabledContentExtra1": "{reason}",
+  "emailAccountDisabledModerationAdminSubject": "[DRINGEND] Unerlaubte Inhalte erkannt (@{username})",
+  "emailAccountDisabledModerationAdminSummary": "In einer Einsendung von {username} wurden verbotene Inhalte erkannt. Das Konto wurde automatisch gesperrt. Eine sofortige Überprüfung ist erforderlich.",
+  "emailAccountDisabledModerationAdminPart1": "eine Einsendung von {username} wurde wegen potenziell illegaler oder verbotener Inhalte markiert. Das Konto des Nutzers wurde automatisch gesperrt.",
+  "emailAccountDisabledModerationAdminPart2": "Einsendungs-ID: {submissionId}<br>Eingereicht: {timestamp}<br>Kategorien: {categories}",
+  "emailAccountDisabledModerationAdminPart3": "Dies erfordert deine sofortige Aufmerksamkeit. Bitte überprüfe den markierten Inhalt und die anderen Einsendungen des Nutzers so schnell wie möglich und ergreife die entsprechenden administrativen Maßnahmen.",
+  "emailAccountDisabledModerationAdminContentExtra1": "Nutzer jetzt überprüfen",
   "emailAccountReenabledSubject": "Dein Datly-Konto wurde reaktiviert",
   "emailAccountReenabledSummary": "Dein Datly-Konto wurde reaktiviert.",
   "emailAccountReenabledPart1": "gute Nachrichten — dein Konto wurde reaktiviert! Wir entschuldigen uns für die Unannehmlichkeiten und danken dir für deine Geduld während der Überprüfung.",
@@ -69,5 +75,6 @@
   "emailAccountDeletedPart4": "unser Support-Team zu kontaktieren",
   "emailAccountDeletedPart5": " und es uns mitzuteilen. Wir wünschen dir alles Gute!",
   "emailHello": "Hallo {username},",
-  "emailFooter": "Du erhältst diese E-Mail, weil du bei unserem Service registriert bist.<br>Für eine Abmeldung wende dich bitte <a href=\"mailto:me@jhubi1.com\" style=\"color: #999999;text-decoration: underline;\">an den Admin</a> zur Kontolöschung.<br><br>&copy; 2025–2026 JHubi1. Alle Rechte vorbehalten."
+  "emailAccountDisabledReasonModeration": "Abschnitt 5 unserer Nutzungsbedingungen:<br>„Sie erklären, dass hochgeladene Inhalte [...] nicht rechtswidrig sind und keine verbotenen Inhalte enthalten (Material über sexuellen Missbrauch von Kindern, Hassrede, nicht-einvernehmliche intime Darstellungen etc.). [...] Das Hochladen [solcher] Inhalte kann zur <b>sofortigen Deaktivierung oder dauerhaften Löschung</b> Ihres Kontos ohne Vorankündigung führen.“",
+  "emailFooter": "Du erhältst diese E-Mail, weil du bei unserem Dienst registriert bist.<br>Für eine Abmeldung wende dich bitte <a href=\"mailto:me@jhubi1.com\" style=\"color: #999999;text-decoration: underline;\">an den Admin</a> zur Kontolöschung.<br><br>&copy; 2025–2026 JHubi1. Alle Rechte vorbehalten."
 }

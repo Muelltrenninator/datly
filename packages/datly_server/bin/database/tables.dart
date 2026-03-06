@@ -38,11 +38,13 @@ class Submissions extends Table {
       integer().references(Projects, #id, onDelete: KeyAction.cascade)();
   TextColumn get user =>
       text().references(Users, #username, onDelete: KeyAction.cascade)();
+  DateTimeColumn get submittedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+
   TextColumn get status => textEnum<SubmissionStatus>().withDefault(
     Constant(SubmissionStatus.pending.name),
   )();
-  DateTimeColumn get submittedAt =>
-      dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get moderated => boolean().withDefault(const Constant(false))();
 
   TextColumn get assetId => text().nullable().withLength(min: 32, max: 32)();
   TextColumn get assetMimeType => text().nullable()();

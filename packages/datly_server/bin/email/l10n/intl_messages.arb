@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "@@last_modified": "2026-03-04T22:06:17.720579",
+  "@@last_modified": "2026-03-06T16:54:27.835109",
   "emailWelcomeSubject": "Welcome to Datly",
   "@emailWelcomeSubject": {
     "type": "text",
@@ -140,12 +140,52 @@
     "type": "text",
     "placeholders": {}
   },
-  "emailAccountDisabledContentExtra1": "Reason:<br>{reason}",
+  "emailAccountDisabledContentExtra1": "{reason}",
   "@emailAccountDisabledContentExtra1": {
     "type": "text",
     "placeholders": {
       "reason": {}
     }
+  },
+  "emailAccountDisabledModerationAdminSubject": "[URGENT] Prohibited content detected (@{username})",
+  "@emailAccountDisabledModerationAdminSubject": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "emailAccountDisabledModerationAdminSummary": "Prohibited content has been detected in a submission by {username}. The account has been automatically suspended. Immediate review is required.",
+  "@emailAccountDisabledModerationAdminSummary": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "emailAccountDisabledModerationAdminPart1": "a submission by {username} has been flagged for containing potentially illegal or prohibited content. The user's account has been suspended automatically.",
+  "@emailAccountDisabledModerationAdminPart1": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "emailAccountDisabledModerationAdminPart2": "Submission ID: {submissionId}<br>Submitted: {timestamp}<br>Categories: {categories}",
+  "@emailAccountDisabledModerationAdminPart2": {
+    "type": "text",
+    "placeholders": {
+      "submissionId": {},
+      "timestamp": {},
+      "categories": {}
+    }
+  },
+  "emailAccountDisabledModerationAdminPart3": "This requires your immediate attention. Please review the flagged content and the user's other submissions as soon as possible, and take the appropriate administrative action.",
+  "@emailAccountDisabledModerationAdminPart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailAccountDisabledModerationAdminContentExtra1": "Review user now",
+  "@emailAccountDisabledModerationAdminContentExtra1": {
+    "type": "text",
+    "placeholders": {}
   },
   "emailAccountReenabledSubject": "Your Datly account has been reactivated",
   "@emailAccountReenabledSubject": {
@@ -359,6 +399,11 @@
     "placeholders": {
       "username": {}
     }
+  },
+  "emailAccountDisabledReasonModeration": "Section 5 of our Terms of Service:<br>“You represent that uploaded content [...] is not illegal, and does not contain prohibited content [...]. [Such] content may result in the <b>immediate disabling or permanent deletion</b> of your account without prior notice.”",
+  "@emailAccountDisabledReasonModeration": {
+    "type": "text",
+    "placeholders": {}
   },
   "emailFooter": "You are receiving this email because you registered at our service.<br>To unsubscribe, please <a href=\"mailto:me@jhubi1.com\" style=\"color: #999999;text-decoration: underline;\">contact the admin</a> for removal from the app.<br><br>&copy; 2025–2026 JHubi1. All rights reserved.",
   "@emailFooter": {

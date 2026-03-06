@@ -20,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 7;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -112,16 +112,16 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
-      if (from < 4) {
-        for (final user in await select(users).get()) {
-          queueEmail(
-            EmailMessagesTemplates.legalChangedAll(
-              user: user,
-              effectiveDate: DateTime(2026, 3, 1),
-            ).stylized(),
-          );
-        }
-      }
+      // if (from < 4) { // disabled in favor of 6
+      //   for (final user in await select(users).get()) {
+      //     queueEmail(
+      //       EmailMessagesTemplates.legalChangedAll(
+      //         user: user,
+      //         effectiveDate: DateTime(2026, 3, 1),
+      //       ).stylized(),
+      //     );
+      //   }
+      // }
       if (from < 5) {
         await m.createTable(categories);
         await m.alterTable(
@@ -142,6 +142,21 @@ class AppDatabase extends _$AppDatabase {
               users.validationWeightNegative,
             ],
           ),
+        );
+      }
+      if (from < 6) {
+        for (final user in await select(users).get()) {
+          queueEmail(
+            EmailMessagesTemplates.legalChangedTerms(
+              user: user,
+              effectiveDate: DateTime(2026, 3, 6),
+            ).stylized(),
+          );
+        }
+      }
+      if (from < 7) {
+        await m.alterTable(
+          TableMigration(submissions, newColumns: [submissions.moderated]),
         );
       }
 

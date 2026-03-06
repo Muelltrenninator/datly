@@ -1,6 +1,6 @@
 # Datly — Nutzungsbedingungen (AGB)
 
-**Gültig ab:** 01.03.2026
+**Gültig ab:** 06.03.2026
 **Betreiber / Anbieter:** JHubi1
 **Kontakt:** <me@jhubi1.com>
 **Standort:** Deutschland
@@ -19,7 +19,10 @@ Datly ist ein kostenloser Dienst, der registrierten Nutzern ermöglicht, Fotos a
 - Benutzernamen werden von Admins zugewiesen oder bei der Registrierung gewählt und sind **nicht änderbar**. Benutzernamen müssen 3–16 alphanumerische Zeichen (einschließlich Unterstriche) umfassen.
 - Eine **E-Mail-Adresse** ist für die Kontoerstellung erforderlich und wird für transaktionale Benachrichtigungen verwendet (Willkommensnachrichten, Passwort-Resets, Kontostatusänderungen).
 - Sie sind für die sichere Aufbewahrung Ihrer Zugangsdaten und alle unter Ihrem Konto durchgeführten Aktivitäten verantwortlich. Passwörter müssen Mindestsicherheitsanforderungen erfüllen (mindestens 12 Zeichen, einschließlich Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen).
-- Konten können von Administratoren mit angegebener Begründung **deaktiviert** werden. Deaktivierte Konten können sich nicht authentifizieren oder Bilder einreichen.
+- Konten können von Administratoren jederzeit **deaktiviert** (gesperrt) werden. Ein Grund für die Deaktivierung wird, soweit möglich, angegeben. Sie werden über die Deaktivierung und den Grund per E-Mail an die mit Ihrem Konto verknüpfte E-Mail-Adresse benachrichtigt.
+- Deaktivierte Konten können sich **nicht authentifizieren, anmelden oder Bilder einreichen**. Ihre Kontodaten und zuvor hochgeladene Inhalte bleiben während der Sperrung gespeichert.
+- Konten können von Administratoren **reaktiviert** werden. Sie werden per E-Mail benachrichtigt, wenn Ihr Konto reaktiviert wird.
+- Wenn Sie der Meinung sind, dass Ihr Konto irrtümlich deaktiviert wurde, können Sie **<me@jhubi1.com>** kontaktieren, um eine Überprüfung zu beantragen.
 
 ## 4. Berechtigung & rechtmäßige Nutzung
 
@@ -30,9 +33,9 @@ Datly ist ein kostenloser Dienst, der registrierten Nutzern ermöglicht, Fotos a
 ## 5. Nutzerinhalte & Lizenz
 
 - Sie behalten das Eigentum an von Ihnen hochgeladenen Bildern.
-- Mit dem Upload und der Unterzeichnung des Einwilligungsformulars räumen Sie Datly die in unserer [Datenschutzerklärung](privacy) (Abschnitt 4) beschriebene Lizenz ein, die Bilder für Training und zugehörige Forschung/Entwicklung zu nutzen.
+- Mit dem Upload und der Unterzeichnung des Einwilligungsformulars räumen Sie Datly die in unserer Datenschutzerklärung (Abschnitt 4) beschriebene Lizenz ein, die Bilder für Training und zugehörige Forschung/Entwicklung zu nutzen.
 - Jede Bildeinreichung erfordert die Unterzeichnung eines **Einwilligungsformulars**. Die Einwilligungsunterschrift wird zusammen mit Metadaten (IP-Adresse, User-Agent, Konto-Snapshot, Einreichungs-Snapshot) als Rechtsnachweis gespeichert und auch nach Konto- oder Einreichungslöschung aufbewahrt.
-- Sie erklären, dass hochgeladene Inhalte keine Rechte Dritter verletzen, nicht rechtswidrig sind und keine verbotenen Inhalte enthalten (Material über sexuellen Missbrauch von Kindern, Hassrede, nicht-einvernehmliche intime Darstellungen etc.). Wir behalten uns das Recht vor, Inhalte, die gegen diese Bedingungen verstoßen, zu entfernen und betroffene Einreichungen zu zensieren oder zu löschen.
+- Sie erklären, dass hochgeladene Inhalte keine Rechte Dritter verletzen, nicht rechtswidrig sind und keine verbotenen Inhalte enthalten (Material über sexuellen Missbrauch von Kindern, Hassrede, nicht-einvernehmliche intime Darstellungen etc.). Wir behalten uns das Recht vor, Inhalte, die gegen diese Bedingungen verstoßen, zu entfernen und betroffene Einreichungen zu zensieren oder zu löschen. Das Hochladen rechtswidriger oder verbotener Inhalte kann zur **sofortigen Deaktivierung oder dauerhaften Löschung** Ihres Kontos ohne Vorankündigung führen.
 
 ## 6. Bildverarbeitung
 
@@ -55,9 +58,17 @@ Sie dürfen nicht:
 - Automatisierte Werkzeuge verwenden, um ohne Genehmigung Inhalte einzureichen.
 - Sich als ein anderer Nutzer ausgeben oder falsche Registrierungsinformationen angeben.
 
-Wir können Konten, die gegen diese Bedingungen verstoßen, ohne Vorankündigung **sperren oder kündigen**.
+Wir können Konten, die gegen diese Bedingungen verstoßen, ohne Vorankündigung **deaktivieren oder kündigen**. Die Deaktivierung kann manuell durch einen Administrator oder automatisch durch unsere Inhaltsmoderierungssysteme (einschließlich KI-basierter Moderation) erfolgen. Ein Grund wird, soweit zutreffend, angegeben.
 
-## 8. Löschung & Kontoschließung
+## 8. Deaktivierung, Löschung & Kontoschließung
+
+### 8.1 Kontodeaktivierung
+
+- Ein deaktiviertes Konto bleibt gespeichert, ist aber für den Nutzer nicht zugänglich. Sie können sich nicht anmelden, keine Bilder einreichen und keine authentifizierten Funktionen nutzen, solange Ihr Konto deaktiviert ist.
+- Die Deaktivierung ist **umkehrbar** — ein Administrator kann Ihr Konto nach eigenem Ermessen reaktivieren. Sie werden per E-Mail benachrichtigt, wenn Ihr Konto reaktiviert wird.
+- Wenn Ihr Konto deaktiviert ist, können Sie dennoch die vollständige Kontolöschung beantragen (siehe unten).
+
+### 8.2 Kontolöschung
 
 - Sie können die Löschung Ihres Kontos und Ihrer hochgeladenen Bilder beantragen, indem Sie **<me@jhubi1.com>** kontaktieren.
 - Bei Kontolöschung werden: Ihre Kontodaten und Einreichungsdatensätze entfernt; zugehörige Bilddateien von der Festplatte gelöscht.

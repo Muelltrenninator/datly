@@ -1,6 +1,6 @@
 # Datly — Terms of Service (ToS)
 
-**Effective date:** 2026-03-01
+**Effective date:** 2026-03-06
 **Maintainer / Provider:** JHubi1
 **Contact:** <me@jhubi1.com>
 **Location:** Germany
@@ -19,7 +19,10 @@ Datly is a free service that allows registered users to capture and upload photo
 - Usernames are assigned by admins or chosen during registration and are **not changeable** by users. Usernames must be 3–16 alphanumeric characters (including underscores).
 - An **email address** is required for account creation and is used for transactional notifications (welcome messages, password resets, account status changes).
 - You are responsible for keeping your account credentials secure and for all activity performed under your account. Passwords must meet minimum security requirements (at least 12 characters, including uppercase, lowercase, digit, and special character).
-- Accounts may be **disabled** by administrators with a stated reason. Disabled accounts cannot authenticate or submit images.
+- Accounts may be **disabled** (suspended) by administrators at any time. A reason for the disabling will be provided where possible. You will be notified of the disabling and the reason via the email address associated with your account.
+- Disabled accounts **cannot authenticate, log in, or submit images**. Your account data and previously uploaded content remain stored during the disabling period.
+- Accounts may be **re-enabled** by administrators. You will be notified via email when your account is re-enabled.
+- If you believe your account was disabled in error, you may contact **<support@con.bz>** to request a review.
 
 ## 4. Eligibility & lawful use
 
@@ -30,9 +33,9 @@ Datly is a free service that allows registered users to capture and upload photo
 ## 5. User content & licence
 
 - You retain ownership of images you upload.
-- By uploading and signing the consent form, you grant Datly the licence described in our [Privacy Policy](privacy) (Section 4) to use the images for training and related research/development.
+- By uploading and signing the consent form, you grant Datly the licence described in our Privacy Policy (Section 4) to use the images for training and related research/development.
 - Each image submission requires signing a **consent form**. The consent signature, together with metadata (IP address, user-agent, account snapshot, submission snapshot), is stored as legal evidence and retained even after account or submission deletion.
-- You represent that uploaded content does not infringe third-party rights, is not illegal, and does not contain prohibited content (child sexual abuse material, hate speech, non-consensual intimate imagery, etc.). We reserve the right to remove content that violates these Terms and to censor or delete offending submissions.
+- You represent that uploaded content does not infringe third-party rights, is not illegal, and does not contain prohibited content (child sexual abuse material, hate speech, non-consensual intimate imagery, etc.). We reserve the right to remove content that violates these Terms and to censor or delete offending submissions. Uploading illegal or prohibited content may result in the **immediate disabling or permanent deletion** of your account without prior notice.
 
 ## 6. Image processing
 
@@ -55,9 +58,17 @@ You must not:
 - Use automated tools to submit content without authorisation.
 - Impersonate another user or provide false registration information.
 
-We may **suspend or terminate** accounts that violate these Terms without prior notice.
+We may **disable or terminate** accounts that violate these Terms without prior notice. Disabling may occur manually by an administrator or automatically through our content-moderation systems. A reason will be provided where applicable.
 
-## 8. Deletion & account closure
+## 8. Disabling, deletion & account closure
+
+### 8.1 Account disabling
+
+- A disabled account remains stored but is inaccessible to the user. You cannot log in, submit images, or use any authenticated features while your account is disabled.
+- Disabling is **reversible** — an administrator may re-enable your account at their discretion. You will be notified by email if your account is re-enabled.
+- If your account is disabled, you may still request full account deletion (see below).
+
+### 8.2 Account deletion
 
 - You may request deletion of your account and uploaded images by contacting **<me@jhubi1.com>**.
 - Upon account deletion: your account data and submission records are removed; associated image files are deleted from disk.

@@ -2,18 +2,17 @@ import 'dart:convert';
 
 import 'package:archive/archive.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';
+
+import 'package:datly/generated/gitbaker.g.dart';
 import 'package:image/image.dart' as img;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:uuid/uuid.dart';
 
-// parent package
-// ignore: depend_on_referenced_packages, directives_ordering
-import 'package:datly/generated/gitbaker.g.dart';
-
 import '../database/database.dart';
 import '../helpers.dart';
+import '../moderation.dart';
 import '../server.dart';
 import 'api.dart';
 
@@ -564,6 +563,7 @@ void define(Router router) {
         final newSubmission = await (db.select(
           db.submissions,
         )..where((s) => s.id.equals(insertion))).getSingle();
+        queueModeration(newSubmission);
 
         await db
             .into(db.signatures)

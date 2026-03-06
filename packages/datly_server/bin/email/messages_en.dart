@@ -21,19 +21,27 @@ class MessageLookup extends MessageLookupByLibrary {
   @override
   String get localeName => 'en';
 
-  static m0(reason) => "Reason:<br>${reason}";
+  static m0(reason) => "${reason}";
 
-  static m1(username) => "Hello ${username},";
+  static m1(username) => "a submission by ${username} has been flagged for containing potentially illegal or prohibited content. The user\'s account has been suspended automatically.";
 
-  static m2(date) => "we are writing to let you know that our Terms of Service and Privacy Policy have been updated. The changes will take effect on ${date}.";
+  static m2(submissionId, timestamp, categories) => "Submission ID: ${submissionId}<br>Submitted: ${timestamp}<br>Categories: ${categories}";
 
-  static m3(date) => "we are writing to let you know that our Privacy Policy has been updated. The changes will take effect on ${date}.";
+  static m3(username) => "[URGENT] Prohibited content detected (@${username})";
 
-  static m4(date) => "we are writing to let you know that our Terms of Service have been updated. The changes will take effect on ${date}.";
+  static m4(username) => "Prohibited content has been detected in a submission by ${username}. The account has been automatically suspended. Immediate review is required.";
 
-  static m5(email) => "we\'ve recently switched to a new login system. The old login codes will no longer work. Instead, you can now log in using your email address (${email}) and the temporary password below.";
+  static m5(username) => "Hello ${username},";
 
-  static m6(email) => "An account has been created for you on Datly. Please use the temporary password below along with your email address (${email}) to log in, then change it to something of your choice.";
+  static m6(date) => "we are writing to let you know that our Terms of Service and Privacy Policy have been updated. The changes will take effect on ${date}.";
+
+  static m7(date) => "we are writing to let you know that our Privacy Policy has been updated. The changes will take effect on ${date}.";
+
+  static m8(date) => "we are writing to let you know that our Terms of Service have been updated. The changes will take effect on ${date}.";
+
+  static m9(email) => "we\'ve recently switched to a new login system. The old login codes will no longer work. Instead, you can now log in using your email address (${email}) and the temporary password below.";
+
+  static m10(email) => "An account has been created for you on Datly. Please use the temporary password below along with your email address (${email}) to log in, then change it to something of your choice.";
 
   @override
   final Map<String, dynamic> messages = _notInlinedMessages(_notInlinedMessages);
@@ -47,10 +55,17 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailAccountDeletedSubject': MessageLookupByLibrary.simpleMessage('Your Datly account has been deleted'),
     'emailAccountDeletedSummary': MessageLookupByLibrary.simpleMessage('Your Datly account has been fully deleted.'),
     'emailAccountDisabledContentExtra1': m0,
+    'emailAccountDisabledModerationAdminContentExtra1': MessageLookupByLibrary.simpleMessage('Review user now'),
+    'emailAccountDisabledModerationAdminPart1': m1,
+    'emailAccountDisabledModerationAdminPart2': m2,
+    'emailAccountDisabledModerationAdminPart3': MessageLookupByLibrary.simpleMessage('This requires your immediate attention. Please review the flagged content and the user\'s other submissions as soon as possible, and take the appropriate administrative action.'),
+    'emailAccountDisabledModerationAdminSubject': m3,
+    'emailAccountDisabledModerationAdminSummary': m4,
     'emailAccountDisabledPart1': MessageLookupByLibrary.simpleMessage('we regret to inform you that your account has been suspended due to a potential violation of our terms of service.'),
     'emailAccountDisabledPart2': MessageLookupByLibrary.simpleMessage('If you believe this was a mistake, please '),
     'emailAccountDisabledPart3': MessageLookupByLibrary.simpleMessage('contact our support team'),
     'emailAccountDisabledPart4': MessageLookupByLibrary.simpleMessage(' to request a review.'),
+    'emailAccountDisabledReasonModeration': MessageLookupByLibrary.simpleMessage('Section 5 of our Terms of Service:<br>“You represent that uploaded content [...] is not illegal, and does not contain prohibited content [...]. [Such] content may result in the <b>immediate disabling or permanent deletion</b> of your account without prior notice.”'),
     'emailAccountDisabledSubject': MessageLookupByLibrary.simpleMessage('Your Datly account has been suspended'),
     'emailAccountDisabledSummary': MessageLookupByLibrary.simpleMessage('Your Datly account has been suspended.'),
     'emailAccountReenabledContentExtra1': MessageLookupByLibrary.simpleMessage('Open Datly'),
@@ -59,10 +74,10 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailAccountReenabledSubject': MessageLookupByLibrary.simpleMessage('Your Datly account has been reactivated'),
     'emailAccountReenabledSummary': MessageLookupByLibrary.simpleMessage('Your Datly account has been reactivated.'),
     'emailFooter': MessageLookupByLibrary.simpleMessage('You are receiving this email because you registered at our service.<br>To unsubscribe, please <a href=\"mailto:me@jhubi1.com\" style=\"color: #999999;text-decoration: underline;\">contact the admin</a> for removal from the app.<br><br>&copy; 2025–2026 JHubi1. All rights reserved.'),
-    'emailHello': m1,
+    'emailHello': m5,
     'emailLegalChangedAllContentExtra1': MessageLookupByLibrary.simpleMessage('View Terms of Service'),
     'emailLegalChangedAllContentExtra2': MessageLookupByLibrary.simpleMessage('View Privacy Policy'),
-    'emailLegalChangedAllPart1': m2,
+    'emailLegalChangedAllPart1': m6,
     'emailLegalChangedAllPart2': MessageLookupByLibrary.simpleMessage('We encourage you to review the updated documents at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.'),
     'emailLegalChangedAllPart3': MessageLookupByLibrary.simpleMessage('If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.'),
     'emailLegalChangedAllPart4': MessageLookupByLibrary.simpleMessage('If you have any questions, please don\'t hesitate to '),
@@ -71,7 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailLegalChangedAllSubject': MessageLookupByLibrary.simpleMessage('Updates to the Datly Terms of Service and Privacy Policy'),
     'emailLegalChangedAllSummary': MessageLookupByLibrary.simpleMessage('Our Terms of Service and Privacy Policy have been updated.'),
     'emailLegalChangedPrivacyContentExtra1': MessageLookupByLibrary.simpleMessage('View Privacy Policy'),
-    'emailLegalChangedPrivacyPart1': m3,
+    'emailLegalChangedPrivacyPart1': m7,
     'emailLegalChangedPrivacyPart2': MessageLookupByLibrary.simpleMessage('We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.'),
     'emailLegalChangedPrivacyPart3': MessageLookupByLibrary.simpleMessage('If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.'),
     'emailLegalChangedPrivacyPart4': MessageLookupByLibrary.simpleMessage('If you have any questions, please don\'t hesitate to '),
@@ -80,7 +95,7 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailLegalChangedPrivacySubject': MessageLookupByLibrary.simpleMessage('Updates to the Datly Privacy Policy'),
     'emailLegalChangedPrivacySummary': MessageLookupByLibrary.simpleMessage('Our Privacy Policy has been updated.'),
     'emailLegalChangedTermsContentExtra1': MessageLookupByLibrary.simpleMessage('View Terms of Service'),
-    'emailLegalChangedTermsPart1': m4,
+    'emailLegalChangedTermsPart1': m8,
     'emailLegalChangedTermsPart2': MessageLookupByLibrary.simpleMessage('We encourage you to review the updated document at your convenience. By continuing to use Datly after the effective date, you accept the revised terms.'),
     'emailLegalChangedTermsPart3': MessageLookupByLibrary.simpleMessage('If you do not agree with the changes, you may stop using the service and request deletion of your account by contacting us.'),
     'emailLegalChangedTermsPart4': MessageLookupByLibrary.simpleMessage('If you have any questions, please don\'t hesitate to '),
@@ -89,7 +104,7 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailLegalChangedTermsSubject': MessageLookupByLibrary.simpleMessage('Updates to the Datly Terms of Service'),
     'emailLegalChangedTermsSummary': MessageLookupByLibrary.simpleMessage('Our Terms of Service have been updated.'),
     'emailPasswordResetMigrationContentExtra1': MessageLookupByLibrary.simpleMessage('Log in now'),
-    'emailPasswordResetMigrationPart1': m5,
+    'emailPasswordResetMigrationPart1': m9,
     'emailPasswordResetMigrationPart2': MessageLookupByLibrary.simpleMessage('This change was necessary to open the platform to a wider audience, making the old invite code system no longer feasible. We apologize for any inconvenience and thank you for your understanding.'),
     'emailPasswordResetMigrationSubject': MessageLookupByLibrary.simpleMessage('Important changes to your Datly login'),
     'emailPasswordResetMigrationSummary': MessageLookupByLibrary.simpleMessage('You can now log in using your email address and a password.'),
@@ -99,7 +114,7 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailPasswordResetTemporarySummary': MessageLookupByLibrary.simpleMessage('Your Datly password has been reset.'),
     'emailPasswordResetWelcomeContentExtra1': MessageLookupByLibrary.simpleMessage('Log in now'),
     'emailPasswordResetWelcomePart1': MessageLookupByLibrary.simpleMessage('you\'ve been invited to join the Datly Collectors! We collect photos of trash to better classify and understand it — and we\'re glad to have you on board.'),
-    'emailPasswordResetWelcomePart2': m6,
+    'emailPasswordResetWelcomePart2': m10,
     'emailPasswordResetWelcomeSubject': MessageLookupByLibrary.simpleMessage('Welcome to Datly'),
     'emailPasswordResetWelcomeSummary': MessageLookupByLibrary.simpleMessage('Please log in with the temporary password we\'ve created for you.'),
     'emailWelcomeContentExtra1': MessageLookupByLibrary.simpleMessage('Log in now'),

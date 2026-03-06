@@ -57,17 +57,19 @@ class AuthManager extends ChangeNotifier {
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({"email": user.email, "password": user.password}),
         );
-        newToken = jsonDecode(response.body)["token"];
         _wasLastFetchNetworkError = false;
 
         if (response.statusCode == 403) {
           _wasLastFetchAccountDisabledError = true;
+          return;
         }
         _wasLastFetchAccountDisabledError = false;
 
-        if (response.statusCode != 200 || newToken == null) {
+        if (response.statusCode != 200) {
           return;
         }
+
+        newToken = jsonDecode(response.body)["token"];
       } catch (_) {
         _wasLastFetchNetworkError = true;
         return;
@@ -102,6 +104,14 @@ class AuthManager extends ChangeNotifier {
     _authenticatedUser = null;
     prefs.remove("token");
     notifyListeners();
+  }
+
+  Future<void> fourOhOneFourOhThree(int statusCode) async {
+    final valueBefore = _authenticatedUser;
+    _authenticatedUser = null;
+    prefs.remove("token");
+    if (statusCode == 403) _wasLastFetchAccountDisabledError = true;
+    if (valueBefore != null) notifyListeners();
   }
 
   bool get authenticatedUserIsAdmin =>
@@ -139,11 +149,7 @@ class AuthManager extends ChangeNotifier {
     _wasLastFetchNetworkError = false;
 
     if (response.statusCode == 401 || response.statusCode == 403) {
-      final valueBefore = _authenticatedUser;
-      _authenticatedUser = null;
-      prefs.remove("token");
-      if (response.statusCode == 403) _wasLastFetchAccountDisabledError = true;
-      if (valueBefore != null) notifyListeners();
+      await fourOhOneFourOhThree(response.statusCode);
     }
 
     return response;
@@ -170,6 +176,8 @@ class UserData {
   String? disabled;
   bool activated;
   String locale;
+  double validationWeightPositive;
+  double validationWeightNegative;
   int submissionCount;
 
   UserData({
@@ -181,6 +189,8 @@ class UserData {
     required this.disabled,
     required this.activated,
     required this.locale,
+    required this.validationWeightPositive,
+    required this.validationWeightNegative,
     required this.submissionCount,
   });
 
@@ -221,6 +231,8 @@ class UserData {
     disabled: json["disabled"],
     activated: json["activated"]!,
     locale: json["locale"]!,
+    validationWeightPositive: json["validationWeightPositive"]!,
+    validationWeightNegative: json["validationWeightNegative"]!,
     submissionCount: json["submissionCount"]!,
   );
   Map<String, dynamic> toJson() => {
@@ -232,7 +244,9 @@ class UserData {
     "disabled": disabled,
     "activated": activated,
     "locale": locale,
-    "submissionCount": submissionCount,
+    "validationWeightPositive": validationWeightPositive,
+    "validationWeightNegative": validationWeightNegative,
+    // "submissionCount": submissionCount, // not in server source of truth
   };
 }
 
@@ -240,21 +254,29 @@ class SubmissionData {
   int id;
   int projectId;
   String user;
-  String status;
   DateTime submittedAt;
+  String status;
+  bool moderated;
   String? assetId;
   String? assetMimeType;
   String assetBlurHash;
+  String category;
+  double validationWeightPositive;
+  double validationWeightNegative;
 
   SubmissionData({
     required this.id,
     required this.projectId,
     required this.user,
-    required this.status,
     required this.submittedAt,
+    required this.status,
+    required this.moderated,
     required this.assetId,
     required this.assetMimeType,
     required this.assetBlurHash,
+    required this.category,
+    required this.validationWeightPositive,
+    required this.validationWeightNegative,
   });
 
   Color statusColor() => switch (status) {
@@ -273,24 +295,32 @@ class SubmissionData {
     id: json["id"]!,
     projectId: json["projectId"]!,
     user: json["user"]!,
-    status: json["status"]!,
     submittedAt: DateTime.fromMillisecondsSinceEpoch(
       json["submittedAt"],
       isUtc: true,
     ),
+    status: json["status"]!,
+    moderated: json["moderated"]!,
     assetId: json["assetId"],
     assetMimeType: json["assetMimeType"],
     assetBlurHash: json["assetBlurHash"]!,
+    category: json["category"]!,
+    validationWeightPositive: json["validationWeightPositive"]!,
+    validationWeightNegative: json["validationWeightNegative"]!,
   );
   Map<String, dynamic> toJson() => {
     "id": id,
     "projectId": projectId,
     "user": user,
-    "status": status,
     "submittedAt": submittedAt.millisecondsSinceEpoch,
+    "status": status,
+    "moderated": moderated,
     "assetId": assetId,
     "assetMimeType": assetMimeType,
     "assetBlurHash": assetBlurHash,
+    "category": category,
+    "validationWeightPositive": validationWeightPositive,
+    "validationWeightNegative": validationWeightNegative,
   };
 }
 
@@ -326,4 +356,15 @@ class ProjectData {
     "createdAt": createdAt.millisecondsSinceEpoch,
     "submissionCount": submissionCount,
   };
+}
+
+class CategoryData {
+  String name;
+  String? displayName;
+
+  CategoryData({required this.name, required this.displayName});
+
+  factory CategoryData.fromJson(Map<String, dynamic> json) =>
+      CategoryData(name: json["name"]!, displayName: json["displayName"]);
+  Map<String, dynamic> toJson() => {"name": name, "displayName": displayName};
 }

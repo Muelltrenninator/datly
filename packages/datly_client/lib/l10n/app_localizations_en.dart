@@ -45,7 +45,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginAccountDisabled =>
-      'Your account has been disabled. Learn about the details in the email sent to your linked email address.';
+      'Your account has been disabled. Learn about the details in the message sent to your linked email address.';
 
   @override
   String get loginUnknown => 'Unknown email or password.';

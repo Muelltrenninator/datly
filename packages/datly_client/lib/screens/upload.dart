@@ -187,6 +187,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 
     UploadConsentResult? signature = await showDialog<UploadConsentResult>(
       context: context,
+      barrierDismissible: false,
       builder: (_) => UploadConsentModal(),
     );
     if (signature == null) {

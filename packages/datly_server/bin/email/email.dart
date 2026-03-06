@@ -44,6 +44,18 @@ void initializeSmtpServer() {
   initializeDateFormatting();
 }
 
+enum MessagePriority {
+  highest,
+  high,
+  normal,
+  low,
+  lowest;
+
+  @override
+  String toString() =>
+      "${index + 1} (${name.substring(0, 1).toUpperCase()}${name.substring(1)})";
+}
+
 Message stylizedEmailMessage({
   required List<Address> recipients,
   required User user,
@@ -52,6 +64,7 @@ Message stylizedEmailMessage({
   required String summary,
   required String text,
   required List<Object> content,
+  MessagePriority? priority,
   List<Attachment>? attachments,
 }) => Intl.withLocale(user.locale, () {
   final payload = MessageContentPlaceholderPayload({
@@ -73,6 +86,7 @@ Message stylizedEmailMessage({
     ..ccRecipients.addAll(cc ?? [])
     ..subject = subject
     ..attachments.addAll(attachments ?? [])
+    ..headers.addAll({if (priority != null) "X-Priority": priority.toString()})
     ..text = processedText
     ..html = processedHtml;
 });
@@ -91,7 +105,12 @@ void queueEmail(Message message) {
     return;
   }
 
-  _emailQueue.add((message: message, failedIterations: 0));
+  if (message.headers["X-Priority"] == "1") {
+    _emailQueue.insert(0, (message: message, failedIterations: 0));
+  } else {
+    _emailQueue.add((message: message, failedIterations: 0));
+  }
+
   _processLoop();
 }
 
@@ -114,13 +133,13 @@ void _processLoop() async {
         onRetry: (e) => t.warn("Failed to send email, retrying", error: e),
       );
     } catch (e, s) {
-      t.error(
-        "Failed to send email after multiple attempts.",
-        error: e,
-        stack: s,
-      );
-
       if (message.failedIterations < 1) {
+        t.error(
+          "Failed to send email after multiple attempts.",
+          error: e,
+          stack: s,
+        );
+
         // add to end of the queue to try again later
         _emailQueue.add((
           message: message.message,
@@ -245,17 +264,21 @@ class EmailMessagesTemplates {
     required this.content,
   });
 
-  Message stylized({List<Address>? cc, List<Attachment>? attachments}) =>
-      stylizedEmailMessage(
-        recipients: [Address(user.email, user.username)],
-        user: user,
-        cc: cc,
-        subject: subject,
-        summary: summary,
-        text: text,
-        content: content,
-        attachments: attachments,
-      );
+  Message stylized({
+    List<Address>? cc,
+    MessagePriority? priority,
+    List<Attachment>? attachments,
+  }) => stylizedEmailMessage(
+    recipients: [Address(user.email, user.username)],
+    user: user,
+    cc: cc,
+    subject: subject,
+    summary: summary,
+    text: text,
+    content: content,
+    priority: priority,
+    attachments: attachments,
+  );
 
   // content
 
@@ -480,7 +503,7 @@ class EmailMessagesTemplates {
     );
 
     String emailAccountDisabledContentExtra1(reason) => Intl.message(
-      "Reason:<br>$reason",
+      "$reason",
       name: "emailAccountDisabledContentExtra1",
       args: [reason],
     );
@@ -504,6 +527,81 @@ class EmailMessagesTemplates {
           ], href: "mailto:support@con.bz"),
           emailAccountDisabledPart4(),
         ]),
+      ],
+    );
+  });
+
+  factory EmailMessagesTemplates.accountDisabledModerationAdmin({
+    required User user,
+    required Submission submission,
+    required String categories,
+  }) => Intl.withLocale(user.locale, () {
+    String emailAccountDisabledModerationAdminSubject(String username) =>
+        Intl.message(
+          "[URGENT] Prohibited content detected (@$username)",
+          name: "emailAccountDisabledModerationAdminSubject",
+          args: [username],
+        );
+    String emailAccountDisabledModerationAdminSummary(
+      String username,
+    ) => Intl.message(
+      "Prohibited content has been detected in a submission by $username. The account has been automatically suspended. Immediate review is required.",
+      name: "emailAccountDisabledModerationAdminSummary",
+      args: [username],
+    );
+
+    String emailAccountDisabledModerationAdminPart1(
+      String username,
+    ) => Intl.message(
+      "a submission by $username has been flagged for containing potentially illegal or prohibited content. The user's account has been suspended automatically.",
+      name: "emailAccountDisabledModerationAdminPart1",
+      args: [username],
+    );
+    String emailAccountDisabledModerationAdminPart2(
+      int submissionId,
+      String timestamp,
+      String categories,
+    ) => Intl.message(
+      "Submission ID: $submissionId<br>Submitted: $timestamp<br>Categories: $categories",
+      name: "emailAccountDisabledModerationAdminPart2",
+      args: [submissionId, timestamp, categories],
+    );
+    String emailAccountDisabledModerationAdminPart3() => Intl.message(
+      "This requires your immediate attention. Please review the flagged content and the user's other submissions as soon as possible, and take the appropriate administrative action.",
+      name: "emailAccountDisabledModerationAdminPart3",
+    );
+
+    String emailAccountDisabledModerationAdminContentExtra1() => Intl.message(
+      "Review user now",
+      name: "emailAccountDisabledModerationAdminContentExtra1",
+    );
+
+    final timestamp = DateFormat.yMMMMd().add_Hms().format(
+      submission.submittedAt,
+    );
+    return EmailMessagesTemplates._(
+      user: user,
+      subject: emailAccountDisabledModerationAdminSubject(submission.user),
+      summary: emailAccountDisabledModerationAdminSummary(submission.user),
+      text:
+          "${emailAccountDisabledModerationAdminPart1(submission.user)}\n\n${emailAccountDisabledModerationAdminPart2(submission.id, timestamp, categories).replaceAll("<br>", "\n")}\n\n${emailAccountDisabledModerationAdminPart3()}\n\nhttps://datly.con.bz/submissions?user=${Uri.encodeComponent(submission.user)}",
+      content: [
+        MessageContentParagraph([
+          emailAccountDisabledModerationAdminPart1(submission.user),
+        ]),
+        MessageContentParagraph.highlight([
+          emailAccountDisabledModerationAdminPart2(
+            submission.id,
+            timestamp,
+            categories,
+          ),
+        ]),
+        MessageContentParagraph([emailAccountDisabledModerationAdminPart3()]),
+        MessageContentButton(
+          [emailAccountDisabledModerationAdminContentExtra1()],
+          href:
+              "https://datly.con.bz/submissions?user=${Uri.encodeComponent(submission.user)}",
+        ),
       ],
     );
   });
@@ -806,6 +904,12 @@ class EmailMessagesTemplates {
 
 String emailHello(String username) =>
     Intl.message("Hello $username,", name: "emailHello", args: [username]);
+
+String emailAccountDisabledReasonModeration() => Intl.message(
+  "Section 5 of our Terms of Service:<br>“You represent that uploaded content [...] is not illegal, and does not contain prohibited content [...]. [Such] content may result in the <b>immediate disabling or permanent deletion</b> of your account without prior notice.”",
+  name: "emailAccountDisabledReasonModeration",
+);
+
 String emailFooter() => Intl.message(
   "You are receiving this email because you registered at our service.<br>To unsubscribe, please <a href=\"mailto:me@jhubi1.com\" style=\"color: #999999;text-decoration: underline;\">contact the admin</a> for removal from the app.<br><br>&copy; 2025–2026 JHubi1. All rights reserved.",
   name: "emailFooter",

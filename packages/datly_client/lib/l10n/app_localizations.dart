@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// Error message shown when the user's account has been disabled.
   ///
   /// In en, this message translates to:
-  /// **'Your account has been disabled. Learn about the details in the email sent to your linked email address.'**
+  /// **'Your account has been disabled. Learn about the details in the message sent to your linked email address.'**
   String get loginAccountDisabled;
 
   /// Error message shown when the provided user data is not recognized.
