@@ -165,6 +165,7 @@ void main(List<String> args) async {
 
   env = DotEnv(includePlatformEnvironment: true, quiet: true)
     ..load(["${dataDirectory.path}/.env"]);
+  initializeSmtpServer();
   captchaSecretKey = env["DATLY_CAPTCHA_SECRET"];
 
   await generateJwtKeys();
@@ -174,8 +175,6 @@ void main(List<String> args) async {
   defineApiRouter();
   db = AppDatabase();
   await db.customSelect("SELECT 1").get(); // await migration
-  
-  initializeSmtpServer();
   initializeModeration();
 
   final handler = Pipeline()
