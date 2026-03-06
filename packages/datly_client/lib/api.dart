@@ -246,7 +246,7 @@ class UserData {
     "locale": locale,
     "validationWeightPositive": validationWeightPositive,
     "validationWeightNegative": validationWeightNegative,
-    // "submissionCount": submissionCount, // not in server source of truth
+    "submissionCount": submissionCount,
   };
 }
 
