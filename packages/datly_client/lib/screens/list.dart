@@ -1060,7 +1060,7 @@ class _ListWidgetState extends State<ListWidget> {
                           avatar: Icon(
                             user!.disabled == null
                                 ? Icons.block_outlined
-                                : Icons.check_circle_outline,
+                                : Icons.sensor_occupied,
                             color: user!.disabled == null && showDeleteButton
                                 ? colorScheme.error
                                 : null,

@@ -436,16 +436,12 @@ void define(Router router) {
           }
 
           final updatedUser = UsersCompanion(
-            email: effectiveEmail != null
-                ? Value(effectiveEmail)
-                : Value.absent(),
+            email: Value.absentIfNull(effectiveEmail),
             password: password != null
                 ? Value(await hashPassword(password: password))
                 : Value.absent(),
-            projects: parsedProjects != null
-                ? Value(parsedProjects)
-                : Value.absent(),
-            role: effectiveRole != null ? Value(effectiveRole) : Value.absent(),
+            projects: Value.absentIfNull(parsedProjects),
+            role: Value.absentIfNull(effectiveRole),
           );
 
           await (db.update(

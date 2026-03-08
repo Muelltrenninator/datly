@@ -509,6 +509,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
         margin: EdgeInsets.zero,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.includeImage) ...[
               ClipRRect(
@@ -563,11 +564,49 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                         ),
                       ),
                     ),
+                    if (!widget.includeImage &&
+                        widget.data.moderationReason == null)
+                      Chip(
+                        backgroundColor: widget.data.moderated
+                            ? null
+                            : colorScheme.errorContainer,
+                        avatar: Icon(
+                          widget.data.moderated
+                              ? Icons.check_circle_outline_outlined
+                              : Icons.report_outlined,
+                        ),
+                        label: Builder(
+                          builder: (context) => Text(
+                            widget.data.moderated
+                                ? "Deemed appropriate"
+                                : "Pending moderation",
+                            style: DefaultTextStyle.of(context).style.copyWith(
+                              color: widget.data.moderated
+                                  ? null
+                                  : colorScheme.onErrorContainer,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (!widget.includeImage &&
+                        AuthManager.instance.authenticatedUserIsAdmin)
+                      ActionChip(
+                        avatar: Icon(Icons.share),
+                        label: Text("Share"),
+                        onPressed: () => Clipboard.setData(
+                          ClipboardData(
+                            text: Uri.parse(
+                              "${Uri.base.origin}/submissions/${widget.data.id}",
+                            ).toString(),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
             ),
             if ((!widget.includeImage &&
+                    widget.data.moderationReason != null &&
                     AuthManager.instance.authenticatedUserIsAdmin) ||
                 widget.data.status == "censored")
               Padding(
@@ -578,7 +617,8 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                     spacing: 2,
                     runSpacing: 2,
                     children: [
-                      if (!widget.includeImage)
+                      if (!widget.includeImage &&
+                          widget.data.moderationReason != null)
                         Chip(
                           backgroundColor: widget.data.moderated
                               ? null
@@ -587,9 +627,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           label: Builder(
                             builder: (context) => Text(
                               widget.data.moderated
-                                  ? widget.data.moderationReason == null
-                                        ? "Deemed appropriate"
-                                        : "Blocked"
+                                  ? "Blocked"
                                   : "Pending moderation",
                               style: DefaultTextStyle.of(context).style
                                   .copyWith(
@@ -805,6 +843,43 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                 ),
               ),
             ),
+            Padding(
+              padding: EdgeInsets.only(left: 8, right: 8, bottom: 2),
+              child: Chip(
+                avatar: Icon(Icons.topic_outlined),
+                label: Text(widget.data.category ?? "–"),
+              ),
+            ),
+            if (!widget.includeImage &&
+                AuthManager.instance.authenticatedUserIsAdmin)
+              Padding(
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 2,
+                    runSpacing: 2,
+                    children: [
+                      Chip(
+                        avatar: Icon(Icons.keyboard_arrow_up),
+                        label: Text(
+                          widget.data.validationWeightPositive.toStringAsFixed(
+                            3,
+                          ),
+                        ),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.keyboard_arrow_down),
+                        label: Text(
+                          widget.data.validationWeightNegative.toStringAsFixed(
+                            3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -1224,7 +1299,7 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
       children: [
         ConstrainedBox(
           constraints: BoxConstraints(
-            maxHeight: isColumn ? size.height * 0.5 : double.infinity,
+            maxHeight: isColumn ? size.height * 0.4 : double.infinity,
             maxWidth: isColumn ? double.infinity : size.width * 0.75,
           ),
           child: AspectRatio(

@@ -116,7 +116,7 @@ class _StatusModalState extends State<StatusModal> {
                           ? CircularProgressIndicator(padding: EdgeInsets.zero)
                           : _isSuccess
                           ? Icon(
-                              Icons.check_circle_outline,
+                              Icons.check_circle_outline_outlined,
                               size: 48,
                               color: Colors.green,
                             )

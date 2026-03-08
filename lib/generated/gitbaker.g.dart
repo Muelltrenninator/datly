@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-03-08T15:24:34
+/// Last generated: 2026-03-08T17:51:17
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 50,
+      revision: 51,
       ahead: 0,
       behind: 0,
       commits: [
@@ -477,6 +477,7 @@ final class GitBaker {
         "9fe9443a7fb279050fe2443e3895df82c99b1cec",
         "77c0ff81595a9c81a8b323fde023cdb2436f91ca",
         "21685ecafb25effb251310cc19dde7ad7590841c",
+        "cb7b8261be2cc4cb254f703215594a0c81f3edd1",
       ],
     ),
   ];
@@ -946,6 +947,15 @@ final class GitBaker {
       hashAbbreviated: "21685ec",
       message: "Single submission page, legal hotlink, date format",
       date: DateTime.parse("2026-03-08T14:22:58.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "cb7b8261be2cc4cb254f703215594a0c81f3edd1",
+      hashAbbreviated: "cb7b826",
+      message: "Moderation label, more consistent ban handling",
+      date: DateTime.parse("2026-03-08T16:50:44.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

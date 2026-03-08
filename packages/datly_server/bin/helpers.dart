@@ -16,6 +16,11 @@ final emailRegex = RegExp(
 );
 late final String? captchaSecretKey;
 
+extension NullIfEmpty on String {
+  String? get nullIfEmpty => isEmpty ? null : this;
+  String? get nullIfBlank => trim().nullIfEmpty;
+}
+
 Future<({bool secure, String? code, String? message})> isSecurePassword(
   String password, {
   bool checkPwned = true,

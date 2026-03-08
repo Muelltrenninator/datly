@@ -581,7 +581,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
-            Icons.check_circle_outline,
+            Icons.check_circle_outline_outlined,
             size: 64,
             color: Colors.lightGreen[900]!,
           ),

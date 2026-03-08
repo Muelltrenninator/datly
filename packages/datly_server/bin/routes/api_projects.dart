@@ -101,10 +101,8 @@ void define(Router router) {
           "description": String? description,
         }) {
           final updatedProject = ProjectsCompanion(
-            title: title != null ? Value(title.trim()) : Value.absent(),
-            description: description != null
-                ? Value(description.trim())
-                : Value.absent(),
+            title: Value.absentIfNull(title?.nullIfBlank),
+            description: Value.absentIfNull(description?.nullIfBlank),
           );
 
           await (db.update(
@@ -128,9 +126,7 @@ void define(Router router) {
         }) {
           final createdProject = ProjectsCompanion.insert(
             title: title.trim(),
-            description: description != null
-                ? Value(description.trim())
-                : Value.absent(),
+            description: Value.absentIfNull(description?.nullIfBlank),
           );
 
           await db.into(db.projects).insert(createdProject);
@@ -679,7 +675,9 @@ void define(Router router) {
               status: status != null
                   ? Value(SubmissionStatus.values.byName(status))
                   : Value.absent(),
-              moderationReason: Value.absentIfNull(moderationReason?.trim()),
+              moderationReason: Value.absentIfNull(
+                moderationReason?.nullIfBlank,
+              ),
             ),
           );
 
