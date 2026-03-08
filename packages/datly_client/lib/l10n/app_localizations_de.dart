@@ -266,6 +266,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get submissionStatusCensored => 'Zensiert';
 
   @override
+  String submissionModerationReasonAutomated(String categories) {
+    return 'Automatische Moderation: $categories';
+  }
+
+  @override
+  String get submissionModerationReasonAutomatedSelfHarm => 'Selbstverletzung';
+
+  @override
+  String get submissionModerationReasonAutomatedSexual => 'Sexuelle Inhalte';
+
+  @override
+  String get submissionModerationReasonAutomatedViolence => 'Gewalt';
+
+  @override
   String get submissionDeleteTitle => 'Einsendung löschen?';
 
   @override

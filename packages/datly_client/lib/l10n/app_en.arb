@@ -409,6 +409,32 @@
         "description": "The status 'Censored' for a submission. This string is formatted in MLA title case.",
         "context": "submissions:status"
     },
+    "submissionModerationReasonAutomated": "Automated moderation: {categories}",
+    "@submissionModerationReasonAutomated": {
+        "description": "Stand in text for the reason that a submission was automatically moderated due to flagged categories.",
+        "context": "submissions:moderation",
+        "placeholders": {
+            "categories": {
+                "type": "String",
+                "description": "A comma separated string of detected violations."
+            }
+        }
+    },
+    "submissionModerationReasonAutomatedSelfHarm": "self-harm",
+    "@submissionModerationReasonAutomatedSelfHarm": {
+        "description": "Category for automated moderation when self-harm content is detected.",
+        "context": "submissions:moderation"
+    },
+    "submissionModerationReasonAutomatedSexual": "sexual content",
+    "@submissionModerationReasonAutomatedSexual": {
+        "description": "Category for automated moderation when sexual content is detected.",
+        "context": "submissions:moderation"
+    },
+    "submissionModerationReasonAutomatedViolence": "violence",
+    "@submissionModerationReasonAutomatedViolence": {
+        "description": "Category for automated moderation when violent content is detected.",
+        "context": "submissions:moderation"
+    },
     "submissionDeleteTitle": "Delete submission?",
     "@submissionDeleteTitle": {
         "description": "Title for the dialog to confirm deletion of a submission.",

@@ -1301,6 +1301,17 @@ class $SubmissionsTable extends Submissions
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _moderationReasonMeta = const VerificationMeta(
+    'moderationReason',
+  );
+  @override
+  late final GeneratedColumn<String> moderationReason = GeneratedColumn<String>(
+    'moderation_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _assetIdMeta = const VerificationMeta(
     'assetId',
   );
@@ -1384,6 +1395,7 @@ class $SubmissionsTable extends Submissions
     submittedAt,
     status,
     moderated,
+    moderationReason,
     assetId,
     assetMimeType,
     assetBlurHash,
@@ -1435,6 +1447,15 @@ class $SubmissionsTable extends Submissions
       context.handle(
         _moderatedMeta,
         moderated.isAcceptableOrUnknown(data['moderated']!, _moderatedMeta),
+      );
+    }
+    if (data.containsKey('moderation_reason')) {
+      context.handle(
+        _moderationReasonMeta,
+        moderationReason.isAcceptableOrUnknown(
+          data['moderation_reason']!,
+          _moderationReasonMeta,
+        ),
       );
     }
     if (data.containsKey('asset_id')) {
@@ -1522,6 +1543,10 @@ class $SubmissionsTable extends Submissions
         DriftSqlType.bool,
         data['${effectivePrefix}moderated'],
       )!,
+      moderationReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}moderation_reason'],
+      ),
       assetId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}asset_id'],
@@ -1565,6 +1590,7 @@ class Submission extends DataClass implements Insertable<Submission> {
   final DateTime submittedAt;
   final SubmissionStatus status;
   final bool moderated;
+  final String? moderationReason;
   final String? assetId;
   final String? assetMimeType;
   final String assetBlurHash;
@@ -1578,6 +1604,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     required this.submittedAt,
     required this.status,
     required this.moderated,
+    this.moderationReason,
     this.assetId,
     this.assetMimeType,
     required this.assetBlurHash,
@@ -1598,6 +1625,9 @@ class Submission extends DataClass implements Insertable<Submission> {
       );
     }
     map['moderated'] = Variable<bool>(moderated);
+    if (!nullToAbsent || moderationReason != null) {
+      map['moderation_reason'] = Variable<String>(moderationReason);
+    }
     if (!nullToAbsent || assetId != null) {
       map['asset_id'] = Variable<String>(assetId);
     }
@@ -1625,6 +1655,9 @@ class Submission extends DataClass implements Insertable<Submission> {
       submittedAt: Value(submittedAt),
       status: Value(status),
       moderated: Value(moderated),
+      moderationReason: moderationReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(moderationReason),
       assetId: assetId == null && nullToAbsent
           ? const Value.absent()
           : Value(assetId),
@@ -1654,6 +1687,7 @@ class Submission extends DataClass implements Insertable<Submission> {
         serializer.fromJson<String>(json['status']),
       ),
       moderated: serializer.fromJson<bool>(json['moderated']),
+      moderationReason: serializer.fromJson<String?>(json['moderationReason']),
       assetId: serializer.fromJson<String?>(json['assetId']),
       assetMimeType: serializer.fromJson<String?>(json['assetMimeType']),
       assetBlurHash: serializer.fromJson<String>(json['assetBlurHash']),
@@ -1678,6 +1712,7 @@ class Submission extends DataClass implements Insertable<Submission> {
         $SubmissionsTable.$converterstatus.toJson(status),
       ),
       'moderated': serializer.toJson<bool>(moderated),
+      'moderationReason': serializer.toJson<String?>(moderationReason),
       'assetId': serializer.toJson<String?>(assetId),
       'assetMimeType': serializer.toJson<String?>(assetMimeType),
       'assetBlurHash': serializer.toJson<String>(assetBlurHash),
@@ -1698,6 +1733,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     DateTime? submittedAt,
     SubmissionStatus? status,
     bool? moderated,
+    Value<String?> moderationReason = const Value.absent(),
     Value<String?> assetId = const Value.absent(),
     Value<String?> assetMimeType = const Value.absent(),
     String? assetBlurHash,
@@ -1711,6 +1747,9 @@ class Submission extends DataClass implements Insertable<Submission> {
     submittedAt: submittedAt ?? this.submittedAt,
     status: status ?? this.status,
     moderated: moderated ?? this.moderated,
+    moderationReason: moderationReason.present
+        ? moderationReason.value
+        : this.moderationReason,
     assetId: assetId.present ? assetId.value : this.assetId,
     assetMimeType: assetMimeType.present
         ? assetMimeType.value
@@ -1732,6 +1771,9 @@ class Submission extends DataClass implements Insertable<Submission> {
           : this.submittedAt,
       status: data.status.present ? data.status.value : this.status,
       moderated: data.moderated.present ? data.moderated.value : this.moderated,
+      moderationReason: data.moderationReason.present
+          ? data.moderationReason.value
+          : this.moderationReason,
       assetId: data.assetId.present ? data.assetId.value : this.assetId,
       assetMimeType: data.assetMimeType.present
           ? data.assetMimeType.value
@@ -1758,6 +1800,7 @@ class Submission extends DataClass implements Insertable<Submission> {
           ..write('submittedAt: $submittedAt, ')
           ..write('status: $status, ')
           ..write('moderated: $moderated, ')
+          ..write('moderationReason: $moderationReason, ')
           ..write('assetId: $assetId, ')
           ..write('assetMimeType: $assetMimeType, ')
           ..write('assetBlurHash: $assetBlurHash, ')
@@ -1776,6 +1819,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     submittedAt,
     status,
     moderated,
+    moderationReason,
     assetId,
     assetMimeType,
     assetBlurHash,
@@ -1793,6 +1837,7 @@ class Submission extends DataClass implements Insertable<Submission> {
           other.submittedAt == this.submittedAt &&
           other.status == this.status &&
           other.moderated == this.moderated &&
+          other.moderationReason == this.moderationReason &&
           other.assetId == this.assetId &&
           other.assetMimeType == this.assetMimeType &&
           other.assetBlurHash == this.assetBlurHash &&
@@ -1808,6 +1853,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   final Value<DateTime> submittedAt;
   final Value<SubmissionStatus> status;
   final Value<bool> moderated;
+  final Value<String?> moderationReason;
   final Value<String?> assetId;
   final Value<String?> assetMimeType;
   final Value<String> assetBlurHash;
@@ -1821,6 +1867,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.submittedAt = const Value.absent(),
     this.status = const Value.absent(),
     this.moderated = const Value.absent(),
+    this.moderationReason = const Value.absent(),
     this.assetId = const Value.absent(),
     this.assetMimeType = const Value.absent(),
     this.assetBlurHash = const Value.absent(),
@@ -1835,6 +1882,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.submittedAt = const Value.absent(),
     this.status = const Value.absent(),
     this.moderated = const Value.absent(),
+    this.moderationReason = const Value.absent(),
     this.assetId = const Value.absent(),
     this.assetMimeType = const Value.absent(),
     required String assetBlurHash,
@@ -1851,6 +1899,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Expression<DateTime>? submittedAt,
     Expression<String>? status,
     Expression<bool>? moderated,
+    Expression<String>? moderationReason,
     Expression<String>? assetId,
     Expression<String>? assetMimeType,
     Expression<String>? assetBlurHash,
@@ -1865,6 +1914,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       if (submittedAt != null) 'submitted_at': submittedAt,
       if (status != null) 'status': status,
       if (moderated != null) 'moderated': moderated,
+      if (moderationReason != null) 'moderation_reason': moderationReason,
       if (assetId != null) 'asset_id': assetId,
       if (assetMimeType != null) 'asset_mime_type': assetMimeType,
       if (assetBlurHash != null) 'asset_blur_hash': assetBlurHash,
@@ -1883,6 +1933,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Value<DateTime>? submittedAt,
     Value<SubmissionStatus>? status,
     Value<bool>? moderated,
+    Value<String?>? moderationReason,
     Value<String?>? assetId,
     Value<String?>? assetMimeType,
     Value<String>? assetBlurHash,
@@ -1897,6 +1948,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
       submittedAt: submittedAt ?? this.submittedAt,
       status: status ?? this.status,
       moderated: moderated ?? this.moderated,
+      moderationReason: moderationReason ?? this.moderationReason,
       assetId: assetId ?? this.assetId,
       assetMimeType: assetMimeType ?? this.assetMimeType,
       assetBlurHash: assetBlurHash ?? this.assetBlurHash,
@@ -1930,6 +1982,9 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     }
     if (moderated.present) {
       map['moderated'] = Variable<bool>(moderated.value);
+    }
+    if (moderationReason.present) {
+      map['moderation_reason'] = Variable<String>(moderationReason.value);
     }
     if (assetId.present) {
       map['asset_id'] = Variable<String>(assetId.value);
@@ -1965,6 +2020,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
           ..write('submittedAt: $submittedAt, ')
           ..write('status: $status, ')
           ..write('moderated: $moderated, ')
+          ..write('moderationReason: $moderationReason, ')
           ..write('assetId: $assetId, ')
           ..write('assetMimeType: $assetMimeType, ')
           ..write('assetBlurHash: $assetBlurHash, ')
@@ -3803,6 +3859,7 @@ typedef $$SubmissionsTableCreateCompanionBuilder =
       Value<DateTime> submittedAt,
       Value<SubmissionStatus> status,
       Value<bool> moderated,
+      Value<String?> moderationReason,
       Value<String?> assetId,
       Value<String?> assetMimeType,
       required String assetBlurHash,
@@ -3818,6 +3875,7 @@ typedef $$SubmissionsTableUpdateCompanionBuilder =
       Value<DateTime> submittedAt,
       Value<SubmissionStatus> status,
       Value<bool> moderated,
+      Value<String?> moderationReason,
       Value<String?> assetId,
       Value<String?> assetMimeType,
       Value<String> assetBlurHash,
@@ -3914,6 +3972,11 @@ class $$SubmissionsTableFilterComposer
 
   ColumnFilters<bool> get moderated => $composableBuilder(
     column: $table.moderated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get moderationReason => $composableBuilder(
+    column: $table.moderationReason,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4041,6 +4104,11 @@ class $$SubmissionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get moderationReason => $composableBuilder(
+    column: $table.moderationReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get assetId => $composableBuilder(
     column: $table.assetId,
     builder: (column) => ColumnOrderings(column),
@@ -4158,6 +4226,11 @@ class $$SubmissionsTableAnnotationComposer
 
   GeneratedColumn<bool> get moderated =>
       $composableBuilder(column: $table.moderated, builder: (column) => column);
+
+  GeneratedColumn<String> get moderationReason => $composableBuilder(
+    column: $table.moderationReason,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get assetId =>
       $composableBuilder(column: $table.assetId, builder: (column) => column);
@@ -4286,6 +4359,7 @@ class $$SubmissionsTableTableManager
                 Value<DateTime> submittedAt = const Value.absent(),
                 Value<SubmissionStatus> status = const Value.absent(),
                 Value<bool> moderated = const Value.absent(),
+                Value<String?> moderationReason = const Value.absent(),
                 Value<String?> assetId = const Value.absent(),
                 Value<String?> assetMimeType = const Value.absent(),
                 Value<String> assetBlurHash = const Value.absent(),
@@ -4299,6 +4373,7 @@ class $$SubmissionsTableTableManager
                 submittedAt: submittedAt,
                 status: status,
                 moderated: moderated,
+                moderationReason: moderationReason,
                 assetId: assetId,
                 assetMimeType: assetMimeType,
                 assetBlurHash: assetBlurHash,
@@ -4314,6 +4389,7 @@ class $$SubmissionsTableTableManager
                 Value<DateTime> submittedAt = const Value.absent(),
                 Value<SubmissionStatus> status = const Value.absent(),
                 Value<bool> moderated = const Value.absent(),
+                Value<String?> moderationReason = const Value.absent(),
                 Value<String?> assetId = const Value.absent(),
                 Value<String?> assetMimeType = const Value.absent(),
                 required String assetBlurHash,
@@ -4327,6 +4403,7 @@ class $$SubmissionsTableTableManager
                 submittedAt: submittedAt,
                 status: status,
                 moderated: moderated,
+                moderationReason: moderationReason,
                 assetId: assetId,
                 assetMimeType: assetMimeType,
                 assetBlurHash: assetBlurHash,

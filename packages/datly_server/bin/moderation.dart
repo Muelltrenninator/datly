@@ -89,6 +89,16 @@ void _processLoop() async {
             .map((entry) => entry.key)
             .toList();
         if (affectedCategories.isNotEmpty) {
+          await (db.update(
+            db.submissions,
+          )..where((s) => s.id.equals(submission.submission.id))).write(
+            SubmissionsCompanion(
+              moderationReason: Value(
+                "Automated moderation: ${affectedCategories.join(", ")}",
+              ),
+            ),
+          );
+
           if (affectedCategories.contains("sexual") ||
               affectedCategories.contains("sexual/minors")) {
             final user =

@@ -264,6 +264,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submissionStatusCensored => 'Censored';
 
   @override
+  String submissionModerationReasonAutomated(String categories) {
+    return 'Automated moderation: $categories';
+  }
+
+  @override
+  String get submissionModerationReasonAutomatedSelfHarm => 'self-harm';
+
+  @override
+  String get submissionModerationReasonAutomatedSexual => 'sexual content';
+
+  @override
+  String get submissionModerationReasonAutomatedViolence => 'violence';
+
+  @override
   String get submissionDeleteTitle => 'Delete submission?';
 
   @override

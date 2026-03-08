@@ -101,9 +101,9 @@ void define(Router router) {
           "description": String? description,
         }) {
           final updatedProject = ProjectsCompanion(
-            title: title != null ? Value(title) : Value.absent(),
+            title: title != null ? Value(title.trim()) : Value.absent(),
             description: description != null
-                ? Value(description)
+                ? Value(description.trim())
                 : Value.absent(),
           );
 
@@ -127,9 +127,9 @@ void define(Router router) {
           "description": String? description,
         }) {
           final createdProject = ProjectsCompanion.insert(
-            title: title,
+            title: title.trim(),
             description: description != null
-                ? Value(description)
+                ? Value(description.trim())
                 : Value.absent(),
           );
 
@@ -192,6 +192,14 @@ void define(Router router) {
           ]);
         if (page != null) query.limit(96, offset: (page - 1) * 96);
         final submissions = await query.get();
+        for (var submission in List<Submission>.from(submissions)) {
+          final user = await (db.select(
+            db.users,
+          )..where((u) => u.username.equals(submission.user))).getSingle();
+          if (user.disabled != null) {
+            submissions.remove(submission);
+          }
+        }
 
         return Response.ok(
           jsonEncode(submissions.map((s) => s.toJson()).toList()),
@@ -400,19 +408,28 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        final query = db.select(db.submissions)
-          ..where((s) => s.projectId.equals(project.id))
-          ..orderBy([
-            (s) => OrderingTerm.desc(s.submittedAt),
-            (s) => OrderingTerm.desc(s.id),
-          ]);
+        final query =
+            db.select(db.submissions).join([
+                innerJoin(
+                  db.users,
+                  db.users.username.equalsExp(db.submissions.user),
+                ),
+              ])
+              ..where(
+                db.submissions.projectId.equals(project.id) &
+                    db.users.disabled.isNull(),
+              )
+              ..orderBy([
+                OrderingTerm.desc(db.submissions.submittedAt),
+                OrderingTerm.desc(db.submissions.id),
+              ]);
         if (page != null) query.limit(96, offset: (page - 1) * 96);
         final submissions = query.watch();
 
         return Response.ok(
           submissions.map(
-            (data) => utf8.encode(
-              "${jsonEncode(data.map((s) => s.toJson()).toList())}\n",
+            (rows) => utf8.encode(
+              "${jsonEncode(rows.map((r) => r.readTable(db.submissions).toJson()).toList())}\n",
             ),
           ),
           headers: {"Content-Type": "application/jsonl; charset=utf-8"},
@@ -645,6 +662,7 @@ void define(Router router) {
 
         if (jsonDecode(await req.readAsString()) case {
           "status": String? status,
+          "moderationReason": String? moderationReason,
         }) {
           if (status != null &&
               !SubmissionStatus.values.asNameMap().keys.contains(status)) {
@@ -661,6 +679,7 @@ void define(Router router) {
               status: status != null
                   ? Value(SubmissionStatus.values.byName(status))
                   : Value.absent(),
+              moderationReason: Value.absentIfNull(moderationReason?.trim()),
             ),
           );
 

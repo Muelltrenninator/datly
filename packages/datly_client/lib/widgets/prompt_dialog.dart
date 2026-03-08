@@ -22,6 +22,9 @@ typedef ValueValidatorSimple<T> = bool Function(T value);
 /// A function that manipulates an input value.
 typedef ValueManipulator<T> = T Function(T value);
 
+/// A function that builds a widget based on the input value.
+typedef ValueBuilder<T> = Widget? Function(T value);
+
 class PromptDialog extends StatefulWidget {
   /// An optional icon to display at the top of the dialog.
   ///
@@ -40,6 +43,15 @@ class PromptDialog extends StatefulWidget {
 
   /// The (optional) description of the dialog.
   final String? description;
+
+  /// An optional builder for a preview widget based on the input value.
+  /// 
+  /// This should exclusively be used for previewing the input value. The widget
+  /// will be rebuilt whenever the input value changes.
+  /// 
+  /// The preview widget will be displayed below the description and above the
+  /// input field itself.
+  final ValueBuilder<String>? previewBuilder;
 
   /// An optional text to display before the input field.
   ///
@@ -172,6 +184,7 @@ class PromptDialog extends StatefulWidget {
     this.iconColor,
     required this.title,
     this.description,
+    this.previewBuilder,
     this.prefixText,
     this.prefixIcon,
     this.content,
@@ -320,6 +333,9 @@ class _PromptDialogState extends State<PromptDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    final preview = widget.previewBuilder?.call(controller.text);
+
     return PopScope(
       canPop: !loading,
       child: AlertDialog(
@@ -343,6 +359,10 @@ class _PromptDialogState extends State<PromptDialog> {
                   offset: Offset(0, -16),
                   child: Text(widget.description!),
                 ),
+              if (preview != null) ...[
+                SizedBox(height: 12),
+                Transform.translate(offset: Offset(0, -16), child: preview),
+              ],
               Stack(
                 alignment: Alignment.bottomCenter,
                 children: [
@@ -462,6 +482,7 @@ Future<String?> showPromptDialog({
   Color? iconColor,
   required String title,
   String? description,
+  ValueBuilder<String>? previewBuilder,
   String? prefixText,
   Widget? prefixIcon,
   String? content,
@@ -489,6 +510,7 @@ Future<String?> showPromptDialog({
       iconColor: iconColor,
       title: title,
       description: description,
+      previewBuilder: previewBuilder,
       prefixText: prefixText,
       prefixIcon: prefixIcon,
       content: content,

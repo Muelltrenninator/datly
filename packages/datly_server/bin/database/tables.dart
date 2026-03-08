@@ -45,6 +45,7 @@ class Submissions extends Table {
     Constant(SubmissionStatus.pending.name),
   )();
   BoolColumn get moderated => boolean().withDefault(const Constant(false))();
+  TextColumn get moderationReason => text().nullable()();
 
   TextColumn get assetId => text().nullable().withLength(min: 32, max: 32)();
   TextColumn get assetMimeType => text().nullable()();

@@ -224,6 +224,18 @@ class UserData {
     );
   }
 
+  static Map<String, dynamic> modifying({
+    String? password,
+    String? email,
+    List<int>? projects,
+    String? role,
+  }) => {
+    "password": password,
+    "email": email,
+    "projects": projects,
+    "role": role,
+  };
+
   factory UserData.fromJson(Map<String, dynamic> json) => UserData(
     username: json["username"]!,
     email: json["email"]!,
@@ -262,6 +274,7 @@ class SubmissionData {
   DateTime submittedAt;
   String status;
   bool moderated;
+  String? moderationReason;
   String? assetId;
   String? assetMimeType;
   String assetBlurHash;
@@ -276,6 +289,7 @@ class SubmissionData {
     required this.submittedAt,
     required this.status,
     required this.moderated,
+    required this.moderationReason,
     required this.assetId,
     required this.assetMimeType,
     required this.assetBlurHash,
@@ -290,11 +304,46 @@ class SubmissionData {
     "censored" => Colors.blueAccent,
     _ => Colors.grey,
   };
+  String? moderationReasonDisplay(BuildContext context, [String? reason]) {
+    final input = reason ?? moderationReason;
+    if (input == null) return null;
+
+    final appLocalizations = AppLocalizations.of(context);
+    final tags = input
+        .split(": ")
+        .last
+        .split(",")
+        .map((category) {
+          switch (category.trim()) {
+            case "self-harm":
+              return appLocalizations
+                  .submissionModerationReasonAutomatedSelfHarm;
+            case "sexual":
+              return appLocalizations.submissionModerationReasonAutomatedSexual;
+            case "violence":
+              return appLocalizations
+                  .submissionModerationReasonAutomatedViolence;
+            default:
+              return category.trim();
+          }
+        })
+        .join(", ");
+    if (input.startsWith("Automated moderation: ")) {
+      return appLocalizations.submissionModerationReasonAutomated(tags);
+    }
+    return tags.isEmpty ? input : tags;
+  }
+
   Uri? assetUri() => assetId != null && assetMimeType != null
       ? Uri.parse(
           "${ApiManager.baseUri}/assets/${assetId!}.${extensionFromMime(assetMimeType!)}",
         )
       : null;
+
+  static Map<String, dynamic> modifying({
+    String? status,
+    String? moderationReason,
+  }) => {"status": status, "moderationReason": moderationReason};
 
   factory SubmissionData.fromJson(Map<String, dynamic> json) => SubmissionData(
     id: json["id"]!,
@@ -306,6 +355,7 @@ class SubmissionData {
     ),
     status: json["status"]!,
     moderated: json["moderated"]!,
+    moderationReason: json["moderationReason"],
     assetId: json["assetId"],
     assetMimeType: json["assetMimeType"],
     assetBlurHash: json["assetBlurHash"]!,
@@ -320,6 +370,7 @@ class SubmissionData {
     "submittedAt": submittedAt.millisecondsSinceEpoch,
     "status": status,
     "moderated": moderated,
+    "moderationReason": moderationReason,
     "assetId": assetId,
     "assetMimeType": assetMimeType,
     "assetBlurHash": assetBlurHash,
@@ -343,6 +394,9 @@ class ProjectData {
     required this.createdAt,
     required this.submissionCount,
   });
+
+  static Map<String, dynamic> modifying({String? title, String? description}) =>
+      {"title": title, "description": description};
 
   factory ProjectData.fromJson(Map<String, dynamic> json) => ProjectData(
     id: json["id"]!,
@@ -368,6 +422,12 @@ class CategoryData {
   String? displayName;
 
   CategoryData({required this.name, required this.displayName});
+
+  String displayOrName() => (displayName ?? name);
+
+  static Map<String, dynamic> modifying({String? displayName}) => {
+    "displayName": displayName,
+  };
 
   factory CategoryData.fromJson(Map<String, dynamic> json) =>
       CategoryData(name: json["name"]!, displayName: json["displayName"]);

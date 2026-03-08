@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
@@ -14,7 +15,9 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../registry.dart';
 import '../widgets/confirmation_dialog.dart';
+import '../widgets/prompt_dialog.dart';
 import '../widgets/radio_dialog.dart';
+import '../widgets/status_modal.dart';
 import 'list.dart';
 
 final Map<String, Uint8List?> _blurHashCache = {};
@@ -349,14 +352,14 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
 
 class SubmissionWidget extends StatefulWidget {
   final SubmissionData data;
-  final bool? includeImage;
+  final bool includeImage;
   final VoidCallback? onUpdate;
   final VoidCallback? onDelete;
 
   const SubmissionWidget({
     super.key,
     required this.data,
-    this.includeImage,
+    this.includeImage = true,
     this.onUpdate,
     this.onDelete,
   });
@@ -389,7 +392,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   }
 
   Future<void> _loadBlurHash() async {
-    if (!(widget.includeImage ?? true)) return;
+    if (!widget.includeImage) return;
     final hash = widget.data.assetBlurHash;
 
     if (_blurHashCache.containsKey(hash)) {
@@ -410,7 +413,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   }
 
   void _loadMetadata() {
-    if (!(widget.includeImage ?? true)) return;
+    if (!widget.includeImage) return;
     ProjectRegistry.instance.get(widget.data.projectId).then((projectData) {
       project = projectData;
       if (mounted) setState(() {});
@@ -428,7 +431,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
     final windowSizeClass = WindowSizeClass.of(context);
 
     Widget? image;
-    if (widget.includeImage ?? true) {
+    if (widget.includeImage) {
       if (blurHashImage == null) {
         image = SizedBox(
           width: 224,
@@ -507,7 +510,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.includeImage ?? true) ...[
+            if (widget.includeImage) ...[
               ClipRRect(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
@@ -525,7 +528,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                   spacing: 2,
                   runSpacing: 2,
                   children: [
-                    if (widget.includeImage ?? true) ...[
+                    if (widget.includeImage) ...[
                       ActionChip(
                         avatar: FittedBox(
                           fit: BoxFit.scaleDown,
@@ -564,6 +567,120 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                 ),
               ),
             ),
+            if ((!widget.includeImage &&
+                    AuthManager.instance.authenticatedUserIsAdmin) ||
+                widget.data.status == "censored")
+              Padding(
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 2,
+                    runSpacing: 2,
+                    children: [
+                      if (!widget.includeImage)
+                        Chip(
+                          backgroundColor: widget.data.moderated
+                              ? null
+                              : colorScheme.errorContainer,
+                          avatar: Icon(Icons.report_outlined),
+                          label: Builder(
+                            builder: (context) => Text(
+                              widget.data.moderated
+                                  ? widget.data.moderationReason == null
+                                        ? "Deemed appropriate"
+                                        : "Blocked"
+                                  : "Pending moderation",
+                              style: DefaultTextStyle.of(context).style
+                                  .copyWith(
+                                    color: widget.data.moderated
+                                        ? null
+                                        : colorScheme.onErrorContainer,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      if (widget.data.moderationReason != null ||
+                          widget.data.status == "censored")
+                        Chip(
+                          label: Text(
+                            widget.data.moderationReasonDisplay(context) ?? "–",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 8,
+                          ),
+                          deleteIcon: Icon(Icons.edit),
+                          onDeleted: !widget.includeImage
+                              ? () async {
+                                  final newReason = await showPromptDialog(
+                                    context: context,
+                                    title: "Set Moderation Reason",
+                                    description:
+                                        "The reason why this submission was blocked. Available format:\n•\t'Automated moderation: (self-harm|sexual|violence)'\n•\tComma separated list of reasons from the list above.\n•\tAny custom reason.",
+                                    previewBuilder: (value) => Card.outlined(
+                                      margin: EdgeInsets.zero,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Text(
+                                          widget.data.moderationReasonDisplay(
+                                            context,
+                                            value,
+                                          )!,
+                                        ),
+                                      ),
+                                    ),
+                                    content: widget.data.moderationReason,
+                                    maxLength: 256,
+                                    maxLines: 4,
+                                  );
+                                  if (newReason != null &&
+                                      newReason !=
+                                          widget.data.moderationReason &&
+                                      context.mounted) {
+                                    final completer = Completer<void>();
+                                    http.Response? response;
+                                    showStatusModal(
+                                      context: context,
+                                      completer: completer,
+                                      failureDetailsGenerator: () =>
+                                          responseFailureDetailsGenerator(
+                                            response,
+                                          ),
+                                    );
+
+                                    try {
+                                      response = await AuthManager.instance
+                                          .fetch(
+                                            http.Request("PUT", uri)
+                                              ..headers["Content-Type"] =
+                                                  "application/json"
+                                              ..body = jsonEncode(
+                                                SubmissionData.modifying(
+                                                  moderationReason: newReason,
+                                                ),
+                                              ),
+                                          );
+                                      if (response == null ||
+                                          response.statusCode != 200) {
+                                        completer.completeError("");
+                                        return;
+                                      }
+                                    } catch (_) {
+                                      completer.completeError("");
+                                      return;
+                                    }
+
+                                    project?.description = newReason;
+                                    if (mounted) setState(() {});
+                                    completer.complete();
+                                    widget.onUpdate?.call();
+                                  }
+                                }
+                              : null,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             Padding(
               padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
               child: SizedBox(
@@ -642,7 +759,11 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                                   http.Request("PUT", uri)
                                     ..headers["Content-Type"] =
                                         "application/json"
-                                    ..body = jsonEncode({"status": selection}),
+                                    ..body = jsonEncode(
+                                      SubmissionData.modifying(
+                                        status: selection,
+                                      ),
+                                    ),
                                 );
                                 widget.onUpdate?.call();
                               }
@@ -1086,11 +1207,13 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
           )
         : FittedBox(child: Image.memory(blurHashImage!, width: 64, height: 64));
 
-    void onDelete() {
+    void onDelete({bool toUser = false}) {
       if (context.router.stack.length > 1) {
         context.router.pop();
       } else {
-        context.navigateTo(MainRoute());
+        context.navigateTo(
+          toUser ? SubmissionsRoute(user: data!.user) : MainRoute(),
+        );
       }
     }
 
@@ -1122,7 +1245,7 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
                       data: data!,
                       includeImage: false,
                       onUpdate: _loadData,
-                      onDelete: onDelete,
+                      onDelete: () => onDelete(toUser: true),
                     ),
                     SizedBox(height: 8),
                     AnimatedSize(

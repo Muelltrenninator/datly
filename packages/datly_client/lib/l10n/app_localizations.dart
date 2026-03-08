@@ -542,6 +542,30 @@ abstract class AppLocalizations {
   /// **'Censored'**
   String get submissionStatusCensored;
 
+  /// Stand in text for the reason that a submission was automatically moderated due to flagged categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Automated moderation: {categories}'**
+  String submissionModerationReasonAutomated(String categories);
+
+  /// Category for automated moderation when self-harm content is detected.
+  ///
+  /// In en, this message translates to:
+  /// **'self-harm'**
+  String get submissionModerationReasonAutomatedSelfHarm;
+
+  /// Category for automated moderation when sexual content is detected.
+  ///
+  /// In en, this message translates to:
+  /// **'sexual content'**
+  String get submissionModerationReasonAutomatedSexual;
+
+  /// Category for automated moderation when violent content is detected.
+  ///
+  /// In en, this message translates to:
+  /// **'violence'**
+  String get submissionModerationReasonAutomatedViolence;
+
   /// Title for the dialog to confirm deletion of a submission.
   ///
   /// In en, this message translates to:

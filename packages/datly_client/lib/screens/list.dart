@@ -528,10 +528,9 @@ class _ListWidgetState extends State<ListWidget> {
           response = await AuthManager.instance.fetch(
             http.Request("PUT", uri)
               ..headers["Content-Type"] = "application/json"
-              ..body = jsonEncode({
-                "title": null,
-                "description": newDescription,
-              }),
+              ..body = jsonEncode(
+                ProjectData.modifying(description: newDescription),
+              ),
           );
           if (response == null || response.statusCode != 200) {
             completer.completeError("");
@@ -571,12 +570,7 @@ class _ListWidgetState extends State<ListWidget> {
           response = await AuthManager.instance.fetch(
             http.Request("PUT", uri)
               ..headers["Content-Type"] = "application/json"
-              ..body = jsonEncode({
-                "password": null,
-                "email": newEmail,
-                "projects": null,
-                "role": null,
-              }),
+              ..body = jsonEncode(UserData.modifying(email: newEmail)),
           );
           if (response == null || response.statusCode != 200) {
             completer.completeError("");
@@ -626,12 +620,11 @@ class _ListWidgetState extends State<ListWidget> {
           response = await AuthManager.instance.fetch(
             http.Request("PUT", uri)
               ..headers["Content-Type"] = "application/json"
-              ..body = jsonEncode({
-                "password": null,
-                "email": null,
-                "projects": newProjects.map((p) => p.id).toList(),
-                "role": null,
-              }),
+              ..body = jsonEncode(
+                UserData.modifying(
+                  projects: newProjects.map((p) => p.id).toList(),
+                ),
+              ),
           );
           if (response == null || response.statusCode != 200) {
             completer.completeError("");
@@ -782,9 +775,9 @@ class _ListWidgetState extends State<ListWidget> {
                             label: Text(project?.title.toTitleCase() ?? "–"),
                           ),
                           Chip(
-                            avatar: Icon(Icons.description_outlined),
                             label: Text(
                               project?.description ?? "–",
+                              overflow: TextOverflow.ellipsis,
                               maxLines: 5,
                             ),
                             deleteIcon: Icon(Icons.edit),

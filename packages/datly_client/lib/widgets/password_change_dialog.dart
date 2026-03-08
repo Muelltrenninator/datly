@@ -92,12 +92,7 @@ Future<void> showPasswordChangeDialog({
           ),
         )
         ..headers["Content-Type"] = "application/json"
-        ..body = jsonEncode({
-          "password": newPassword,
-          "email": null,
-          "projects": null,
-          "role": null,
-        }),
+        ..body = jsonEncode(UserData.modifying(password: newPassword)),
     );
     if (response == null || response.statusCode != 200) {
       completer.completeError("");
