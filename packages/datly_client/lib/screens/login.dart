@@ -11,7 +11,6 @@ import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../main.gr.dart';
 import '../widgets/title_bar.dart';
-import 'terms.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -509,11 +508,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                       decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => showMarkdownDialog(
-                        context: context,
-                        source: isPrivacy
-                            ? MarkdownDialogSource.privacyPolicy()
-                            : MarkdownDialogSource.termsOfService(),
+                      ..onTap = () => context.pushRoute(
+                        isPrivacy
+                            ? MarkdownDialogPrivacyPolicyRoute()
+                            : MarkdownDialogTermsOfServiceRoute(),
                       ),
                   ),
                 );
@@ -777,9 +775,8 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
                           text: appLocalizations.termsOfService,
                           style: TextStyle(fontWeight: FontWeight.w600),
                           recognizer: TapGestureRecognizer()
-                            ..onTap = () => showMarkdownDialog(
-                              context: context,
-                              source: MarkdownDialogSource.termsOfService(),
+                            ..onTap = () => context.pushRoute(
+                              MarkdownDialogTermsOfServiceRoute(),
                             ),
                         ),
                         TextSpan(text: " • "),
@@ -787,9 +784,8 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
                           text: appLocalizations.privacyPolicy,
                           style: TextStyle(fontWeight: FontWeight.w600),
                           recognizer: TapGestureRecognizer()
-                            ..onTap = () => showMarkdownDialog(
-                              context: context,
-                              source: MarkdownDialogSource.privacyPolicy(),
+                            ..onTap = () => context.pushRoute(
+                              MarkdownDialogPrivacyPolicyRoute(),
                             ),
                         ),
                         TextSpan(text: " • "),
@@ -797,10 +793,8 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
                           text: appLocalizations.imprint,
                           style: TextStyle(fontWeight: FontWeight.w600),
                           recognizer: TapGestureRecognizer()
-                            ..onTap = () => showMarkdownDialog(
-                              context: context,
-                              source: MarkdownDialogSource.imprint(),
-                            ),
+                            ..onTap = () =>
+                                context.pushRoute(MarkdownDialogImprintRoute()),
                         ),
                       ],
                     ),

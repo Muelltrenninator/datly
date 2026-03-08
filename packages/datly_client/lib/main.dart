@@ -15,6 +15,18 @@ import 'main.gr.dart';
 import 'widgets/password_change_dialog.dart';
 import 'widgets/title_bar.dart';
 
+export 'main.gr.dart';
+
+Route<T> _dialogRoute<T>(
+  BuildContext context,
+  Widget child,
+  AutoRoutePage<T> page,
+) => DialogRoute<T>(
+  context: context,
+  settings: page,
+  builder: (context) => child,
+);
+
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
   @override
@@ -34,9 +46,25 @@ class AppRouter extends RootStackRouter {
         //   ],
         // ),
         AutoRoute(page: SubmissionsRoute.page, path: "submissions"),
+        AutoRoute(page: SubmissionDetailsRoute.page, path: "submissions/:id"),
         AutoRoute(page: ListUsersRoute.page, path: "users"),
         AutoRoute(page: ListProjectsRoute.page, path: "projects"),
       ],
+    ),
+    CustomRoute(
+      page: MarkdownDialogTermsOfServiceRoute.page,
+      path: "/termsOfService",
+      customRouteBuilder: _dialogRoute,
+    ),
+    CustomRoute(
+      page: MarkdownDialogPrivacyPolicyRoute.page,
+      path: "/privacyPolicy",
+      customRouteBuilder: _dialogRoute,
+    ),
+    CustomRoute(
+      page: MarkdownDialogImprintRoute.page,
+      path: "/imprint",
+      customRouteBuilder: _dialogRoute,
     ),
     AutoRoute(
       page: LoginRegisterParentRoute.page,

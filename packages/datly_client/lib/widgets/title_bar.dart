@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../main.gr.dart';
-import '../screens/terms.dart';
 import 'password_change_dialog.dart';
 
 class TitleBarTitle extends StatelessWidget {
@@ -125,26 +124,19 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               SizedBox(height: 12),
               ListTile(
-                onTap: () => showMarkdownDialog(
-                  context: context,
-                  source: MarkdownDialogSource.termsOfService(),
-                ),
+                onTap: () =>
+                    context.pushRoute(MarkdownDialogTermsOfServiceRoute()),
                 leading: Icon(Icons.description_outlined),
                 title: Text(AppLocalizations.of(context).termsOfService),
               ),
               ListTile(
-                onTap: () => showMarkdownDialog(
-                  context: context,
-                  source: MarkdownDialogSource.privacyPolicy(),
-                ),
+                onTap: () =>
+                    context.pushRoute(MarkdownDialogPrivacyPolicyRoute()),
                 leading: Icon(Icons.privacy_tip_outlined),
                 title: Text(AppLocalizations.of(context).privacyPolicy),
               ),
               ListTile(
-                onTap: () => showMarkdownDialog(
-                  context: context,
-                  source: MarkdownDialogSource.imprint(),
-                ),
+                onTap: () => context.pushRoute(MarkdownDialogImprintRoute()),
                 leading: Icon(Icons.gavel_outlined),
                 title: Text(AppLocalizations.of(context).imprint),
               ),

@@ -20,32 +20,10 @@
         "description": "Button text to delete an item.",
         "context": "global"
     },
-    "invite": "Hello {username} 👋\nYou're invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}{projectCount, plural, =0{} other{\n- Member of: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!",
-    "@invite": {
-        "description": "Invitation message sent to users to invite them to a project on Datly.",
-        "context": "global",
-        "placeholders": {
-            "username": {
-                "type": "String",
-                "example": "johndoe"
-            },
-            "host": {
-                "type": "String",
-                "example": "https://datly.example.com"
-            },
-            "projectCount": {
-                "type": "int",
-                "example": "3"
-            },
-            "projects": {
-                "type": "String",
-                "example": "Wildlife Survey, Urban Noise Mapping, Air Quality Monitoring"
-            },
-            "code": {
-                "type": "String",
-                "example": "A1B2C3D4"
-            }
-        }
+    "failedToLoadDocument": "Failed to load document.",
+    "@failedToLoadDocument": {
+        "description": "Error message shown when a legal document fails to load.",
+        "context": "global"
     },
     "loginInvalidEmail": "Please enter a valid email address.",
     "@loginInvalidEmail": {

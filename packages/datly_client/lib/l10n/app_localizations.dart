@@ -116,17 +116,11 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
-  /// Invitation message sent to users to invite them to a project on Datly.
+  /// Error message shown when a legal document fails to load.
   ///
   /// In en, this message translates to:
-  /// **'Hello {username} 👋\nYou\'re invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- {host}{projectCount, plural, =0{} other{\n- Member of: {projects}}}\n- Login code: `{code}` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!'**
-  String invite(
-    String username,
-    String host,
-    int projectCount,
-    String projects,
-    String code,
-  );
+  /// **'Failed to load document.'**
+  String get failedToLoadDocument;
 
   /// Error message shown when the user enters an invalid email address during login.
   ///

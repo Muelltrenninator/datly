@@ -5,14 +5,12 @@ import 'dart:js_interop';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:web/web.dart' as web;
 
 import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
-import '../main.gr.dart';
 import '../registry.dart';
 import '../widgets/confirmation_dialog.dart';
 import '../widgets/multi_prompt_dialog.dart';
@@ -798,14 +796,11 @@ class _ListWidgetState extends State<ListWidget> {
                           Chip(
                             avatar: Icon(Icons.event),
                             label: Text(
-                              project?.createdAt
-                                      .toLocal()
-                                      .toIso8601String()
-                                      .split("T")
-                                      .join(" ")
-                                      .split(".")
-                                      .first ??
-                                  "–",
+                              project != null
+                                  ? dateFormat(
+                                      context,
+                                    ).format(project!.createdAt)
+                                  : "–",
                             ),
                           ),
                           Chip(
@@ -844,14 +839,9 @@ class _ListWidgetState extends State<ListWidget> {
                           Chip(
                             avatar: Icon(Icons.event),
                             label: Text(
-                              user?.joinedAt
-                                      .toLocal()
-                                      .toIso8601String()
-                                      .split("T")
-                                      .join(" ")
-                                      .split(".")
-                                      .first ??
-                                  "–",
+                              user != null
+                                  ? dateFormat(context).format(user!.joinedAt)
+                                  : "–",
                             ),
                           ),
                           Chip(
@@ -1066,7 +1056,7 @@ class _ListWidgetState extends State<ListWidget> {
                             style: DefaultTextStyle.of(context).style.copyWith(
                               color: showDeleteButton
                                   ? colorScheme.onError
-                                  : theme.disabledColor,
+                                  : null,
                             ),
                           ),
                         ),

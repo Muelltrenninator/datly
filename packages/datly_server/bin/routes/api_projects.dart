@@ -570,7 +570,7 @@ void define(Router router) {
             .insert(
               SignaturesCompanion.insert(
                 submissionId: Value(newSubmission.id),
-                submissionSnapshot: jsonEncode(newSubmission.toJson()),
+                submissionSnapshot: newSubmission.toJsonString(),
                 user: auth.user.username,
                 userSnapshot: jsonEncode(auth.user.toJson().remove("password")),
                 ipAddress: identifierFromRequest(req)!,
@@ -584,6 +584,36 @@ void define(Router router) {
             );
 
         return Response(201, headers: {"Content-Type": "application/json"});
+      }),
+    )
+    ..get(
+      "/projects/u/submissions/<submissionId>", // MARK: [GET] /projects/u/submissions/<submissionId>
+      apiAuthWall((req, auth) async {
+        final submission =
+            await (db.select(db.submissions)..where(
+                  (s) => s.id.equals(
+                    int.tryParse(req.params["submissionId"]!) ?? -1,
+                  ),
+                ))
+                .getSingleOrNull();
+        if (submission == null) {
+          return Response.notFound(
+            jsonEncode({"error": "Submission not found"}),
+          );
+        }
+
+        if (submission.user != auth!.user.username &&
+            auth.user.role.index < UserRole.admin.index) {
+          return Response.forbidden(
+            jsonEncode({"error": "Insufficient permissions"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
+        return Response.ok(
+          submission.toJsonString(),
+          headers: {"Content-Type": "application/json"},
+        );
       }),
     )
     ..put(

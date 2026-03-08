@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "@@last_modified": "2026-03-06T16:54:27.835109",
+  "@@last_modified": "2026-03-08T15:18:26.252196",
   "emailWelcomeSubject": "Welcome to Datly",
   "@emailWelcomeSubject": {
     "type": "text",
@@ -182,7 +182,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "emailAccountDisabledModerationAdminContentExtra1": "Review user now",
+  "emailAccountDisabledModerationAdminContentExtra1": "Review submission now",
   "@emailAccountDisabledModerationAdminContentExtra1": {
     "type": "text",
     "placeholders": {}

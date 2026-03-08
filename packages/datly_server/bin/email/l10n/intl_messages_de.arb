@@ -33,7 +33,7 @@
   "emailAccountDisabledModerationAdminPart1": "eine Einsendung von {username} wurde wegen potenziell illegaler oder verbotener Inhalte markiert. Das Konto des Nutzers wurde automatisch gesperrt.",
   "emailAccountDisabledModerationAdminPart2": "Einsendungs-ID: {submissionId}<br>Eingereicht: {timestamp}<br>Kategorien: {categories}",
   "emailAccountDisabledModerationAdminPart3": "Dies erfordert deine sofortige Aufmerksamkeit. Bitte überprüfe den markierten Inhalt und die anderen Einsendungen des Nutzers so schnell wie möglich und ergreife die entsprechenden administrativen Maßnahmen.",
-  "emailAccountDisabledModerationAdminContentExtra1": "Nutzer jetzt überprüfen",
+  "emailAccountDisabledModerationAdminContentExtra1": "Einsendung jetzt überprüfen",
   "emailAccountReenabledSubject": "Dein Datly-Konto wurde reaktiviert",
   "emailAccountReenabledSummary": "Dein Datly-Konto wurde reaktiviert.",
   "emailAccountReenabledPart1": "gute Nachrichten — dein Konto wurde reaktiviert! Wir entschuldigen uns für die Unannehmlichkeiten und danken dir für deine Geduld während der Überprüfung.",

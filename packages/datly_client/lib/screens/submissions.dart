@@ -12,7 +12,6 @@ import 'package:image/image.dart' as img;
 import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
-import '../main.gr.dart';
 import '../registry.dart';
 import '../widgets/confirmation_dialog.dart';
 import '../widgets/radio_dialog.dart';
@@ -350,7 +349,17 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
 
 class SubmissionWidget extends StatefulWidget {
   final SubmissionData data;
-  const SubmissionWidget({super.key, required this.data});
+  final bool? includeImage;
+  final VoidCallback? onUpdate;
+  final VoidCallback? onDelete;
+
+  const SubmissionWidget({
+    super.key,
+    required this.data,
+    this.includeImage,
+    this.onUpdate,
+    this.onDelete,
+  });
 
   @override
   State<SubmissionWidget> createState() => _SubmissionWidgetState();
@@ -380,6 +389,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   }
 
   Future<void> _loadBlurHash() async {
+    if (!(widget.includeImage ?? true)) return;
     final hash = widget.data.assetBlurHash;
 
     if (_blurHashCache.containsKey(hash)) {
@@ -400,6 +410,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   }
 
   void _loadMetadata() {
+    if (!(widget.includeImage ?? true)) return;
     ProjectRegistry.instance.get(widget.data.projectId).then((projectData) {
       project = projectData;
       if (mounted) setState(() {});
@@ -417,57 +428,77 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
     final windowSizeClass = WindowSizeClass.of(context);
 
     Widget? image;
-    if (blurHashImage == null) {
-      image = SizedBox(
-        width: 224,
-        height: 224,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-    image ??= widget.data.assetUri() != null
-        ? FadeInImage.memoryNetwork(
-            placeholder: blurHashImage!,
-            image: widget.data.assetUri().toString(),
-            fadeInDuration: Duration(milliseconds: 1),
-            fadeOutDuration: Duration(milliseconds: 1),
-            imageErrorBuilder: (_, _, _) => SizedBox(
-              height: 224,
-              width: 224,
-              child: Stack(
-                children: [
-                  SizedBox.expand(
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: Image.memory(
-                        blurHashImage!,
-                        width: 64,
-                        height: 64,
+    if (widget.includeImage ?? true) {
+      if (blurHashImage == null) {
+        image = SizedBox(
+          width: 224,
+          height: 224,
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      image ??= widget.data.assetUri() != null
+          ? FadeInImage.memoryNetwork(
+              placeholder: blurHashImage!,
+              image: widget.data.assetUri().toString(),
+              fadeInDuration: Duration(milliseconds: 1),
+              fadeOutDuration: Duration(milliseconds: 1),
+              imageErrorBuilder: (_, _, _) => SizedBox(
+                height: 224,
+                width: 224,
+                child: Stack(
+                  children: [
+                    SizedBox.expand(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Image.memory(
+                          blurHashImage!,
+                          width: 64,
+                          height: 64,
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    height: double.infinity,
-                    width: double.infinity,
-                    color: colorScheme.error.withAlpha(128),
-                  ),
-                  Center(
-                    child: Icon(
-                      Icons.broken_image_outlined,
-                      color: colorScheme.onError,
-                      size: 48,
+                    Container(
+                      height: double.infinity,
+                      width: double.infinity,
+                      color: colorScheme.error.withAlpha(128),
                     ),
-                  ),
-                ],
+                    Center(
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: colorScheme.onError,
+                        size: 48,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            width: 224,
-            height: 224,
-            fit: BoxFit.cover,
-          )
-        : FittedBox(child: Image.memory(blurHashImage!, width: 64, height: 64));
-    image = AuthManager.instance.authenticatedUserIsAdmin
-        ? SizedBox(width: 224, height: 224, child: image)
-        : AspectRatio(aspectRatio: 1 / 1, child: image);
+              width: 224,
+              height: 224,
+              fit: BoxFit.cover,
+            )
+          : FittedBox(
+              child: Image.memory(blurHashImage!, width: 64, height: 64),
+            );
+      image = AuthManager.instance.authenticatedUserIsAdmin
+          ? InkWell(
+              onTap: () => context.navigateTo(
+                SubmissionDetailsRoute(
+                  submissionId: widget.data.id,
+                  data: widget.data,
+                ),
+              ),
+              hoverColor: Colors.transparent,
+              child: SizedBox(
+                width: 224,
+                height: 224,
+                child: Hero(
+                  tag: "submissionImage${widget.data.id}",
+                  child: image,
+                ),
+              ),
+            )
+          : AspectRatio(aspectRatio: 1 / 1, child: image);
+    }
 
     final card = SizedBox(
       width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
@@ -476,14 +507,16 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+            if (widget.includeImage ?? true) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                child: image,
               ),
-              child: image,
-            ),
-            Divider(height: 1),
+              Divider(height: 1),
+            ],
             Padding(
               padding: EdgeInsets.all(8),
               child: SizedBox(
@@ -492,35 +525,38 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                   spacing: 2,
                   runSpacing: 2,
                   children: [
-                    ActionChip(
-                      avatar: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: user?.avatar(context),
+                    if (widget.includeImage ?? true) ...[
+                      ActionChip(
+                        avatar: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: user?.avatar(context),
+                        ),
+                        label: Text(
+                          widget.data.user,
+                          style: TextStyle(color: user?.roleColor()),
+                        ),
+                        onPressed: () => context.navigateTo(
+                          SubmissionsRoute(user: widget.data.user),
+                        ),
                       ),
-                      label: Text(
-                        widget.data.user,
-                        style: TextStyle(color: user?.roleColor()),
+                      ActionChip(
+                        avatar: Icon(Icons.widgets_outlined),
+                        label: Text(project?.title ?? "–"),
+                        onPressed: AuthManager.instance.authenticatedUserIsAdmin
+                            ? () => context.navigateTo(
+                                SubmissionsRoute(
+                                  project: widget.data.projectId.toString(),
+                                ),
+                              )
+                            : null,
                       ),
-                      onPressed: () => context.navigateTo(
-                        SubmissionsRoute(user: widget.data.user),
-                      ),
-                    ),
-                    ActionChip(
-                      avatar: Icon(Icons.widgets_outlined),
-                      label: Text(project?.title ?? "–"),
-                      onPressed: AuthManager.instance.authenticatedUserIsAdmin
-                          ? () => context.navigateTo(
-                              SubmissionsRoute(
-                                project: widget.data.projectId.toString(),
-                              ),
-                            )
-                          : null,
-                    ),
+                    ],
                     Chip(
                       label: Text(
                         GetTimeAgo.parse(
                           widget.data.submittedAt,
                           locale: AppLocalizations.of(context).localeName,
+                          pattern: dateFormat(context).pattern,
                         ),
                       ),
                     ),
@@ -608,6 +644,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                                         "application/json"
                                     ..body = jsonEncode({"status": selection}),
                                 );
+                                widget.onUpdate?.call();
                               }
                             }
                           : null,
@@ -640,6 +677,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                         await AuthManager.instance.fetch(
                           http.Request("DELETE", uri),
                         );
+                        widget.onDelete?.call();
                       },
                     ),
                   ],
@@ -776,7 +814,13 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
                                                   as dynamic)
                                         .toJson(),
                                 isProject: widget.effectiveProject != null,
-                                onDelete: () => context.navigateTo(MainRoute()),
+                                onDelete: () {
+                                  if (context.router.stack.length > 1) {
+                                    context.router.pop();
+                                  } else {
+                                    context.navigateTo(MainRoute());
+                                  }
+                                },
                               )
                             : Padding(
                                 padding: EdgeInsets.only(
@@ -876,4 +920,240 @@ class SubmissionsPageControl extends StatelessWidget {
       );
     },
   );
+}
+
+@RoutePage()
+class SubmissionDetailsPage extends StatefulWidget {
+  final int submissionId;
+  final SubmissionData? data;
+  const SubmissionDetailsPage({
+    super.key,
+    @PathParam("id") required this.submissionId,
+    this.data,
+  });
+
+  @override
+  State<SubmissionDetailsPage> createState() => _SubmissionDetailsPageState();
+}
+
+class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
+  SubmissionData? data;
+  ProjectData? project;
+  UserData? user;
+  Uint8List? blurHashImage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.data != null) {
+      data = widget.data;
+      if (mounted) setState(() {});
+      _loadBlurHash();
+      _loadMetadata();
+    } else {
+      _loadData().then((_) {
+        _loadBlurHash();
+        _loadMetadata();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(SubmissionDetailsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.submissionId != widget.submissionId) {
+      if (widget.data != null) {
+        data = widget.data;
+        if (mounted) setState(() {});
+
+        _loadBlurHash();
+        _loadMetadata();
+      } else {
+        _loadData().then((_) {
+          _loadBlurHash();
+          _loadMetadata();
+        });
+      }
+    }
+  }
+
+  Future<void> _loadData() async {
+    final response = await AuthManager.instance.fetch(
+      http.Request(
+        "GET",
+        Uri.parse(
+          "${ApiManager.baseUri}/projects/u/submissions/${widget.submissionId}",
+        ),
+      ),
+    );
+    if (response != null && response.statusCode == 200) {
+      data = SubmissionData.fromJson(jsonDecode(response.body));
+      if (mounted) setState(() {});
+    } else {
+      if (mounted) context.replaceRoute(MainRoute());
+    }
+  }
+
+  Future<void> _loadBlurHash() async {
+    final hash = data!.assetBlurHash;
+
+    if (_blurHashCache.containsKey(hash)) {
+      blurHashImage = _blurHashCache[hash];
+      if (mounted) setState(() {});
+      return;
+    }
+    _blurHashCache[hash] = null; // blocking
+
+    try {
+      final decoded = await compute(_decodeBlurHash, hash);
+      _blurHashCache[hash] = decoded;
+      blurHashImage = decoded;
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (kDebugMode) print("Failed to decode BlurHash: $e");
+    }
+  }
+
+  void _loadMetadata() {
+    ProjectRegistry.instance.get(data!.projectId).then((projectData) {
+      project = projectData;
+      if (mounted) setState(() {});
+    });
+    UserRegistry.instance.get(data!.user).then((userData) {
+      user = userData;
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (data == null) return Center(child: CircularProgressIndicator());
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final windowSizeClass = WindowSizeClass.of(context);
+
+    Widget? image;
+    if (blurHashImage == null) {
+      image = SizedBox(
+        width: 224,
+        height: 224,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    image ??= data!.assetUri() != null
+        ? Hero(
+            tag: "submissionImage${data!.id}",
+            child: FadeInImage.memoryNetwork(
+              placeholder: blurHashImage!,
+              image: data!.assetUri().toString(),
+              fadeInDuration: Duration(milliseconds: 1),
+              fadeOutDuration: Duration(milliseconds: 1),
+              imageErrorBuilder: (_, _, _) => SizedBox(
+                height: 224,
+                width: 224,
+                child: Stack(
+                  children: [
+                    SizedBox.expand(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Image.memory(
+                          blurHashImage!,
+                          width: 64,
+                          height: 64,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: double.infinity,
+                      width: double.infinity,
+                      color: colorScheme.error.withAlpha(128),
+                    ),
+                    Center(
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: colorScheme.onError,
+                        size: 48,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              width: 224,
+              height: 224,
+              fit: BoxFit.contain,
+            ),
+          )
+        : FittedBox(child: Image.memory(blurHashImage!, width: 64, height: 64));
+
+    void onDelete() {
+      if (context.router.stack.length > 1) {
+        context.router.pop();
+      } else {
+        context.navigateTo(MainRoute());
+      }
+    }
+
+    final isColumn = windowSizeClass <= WindowSizeClass.medium;
+    final size = MediaQuery.sizeOf(context);
+    return (isColumn ? Column.new : Row.new)(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: isColumn ? size.height * 0.5 : double.infinity,
+            maxWidth: isColumn ? double.infinity : size.width * 0.75,
+          ),
+          child: AspectRatio(
+            aspectRatio: 1 / 1,
+            child: Card.outlined(clipBehavior: Clip.antiAlias, child: image),
+          ),
+        ),
+        Flexible(
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: SizedBox(
+              height: double.infinity,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SubmissionWidget(
+                      data: data!,
+                      includeImage: false,
+                      onUpdate: _loadData,
+                      onDelete: onDelete,
+                    ),
+                    SizedBox(height: 8),
+                    AnimatedSize(
+                      duration: Durations.medium1,
+                      curve: Curves.easeInOutCubicEmphasized,
+                      child: user != null && project != null
+                          ? Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                ListWidget(
+                                  data: user!.toJson(),
+                                  isProject: false,
+                                  onDelete: onDelete,
+                                ),
+                                ListWidget(
+                                  data: project!.toJson(),
+                                  isProject: true,
+                                  onDelete: onDelete,
+                                ),
+                              ],
+                            )
+                          : SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

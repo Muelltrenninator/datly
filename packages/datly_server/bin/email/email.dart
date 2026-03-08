@@ -572,7 +572,7 @@ class EmailMessagesTemplates {
     );
 
     String emailAccountDisabledModerationAdminContentExtra1() => Intl.message(
-      "Review user now",
+      "Review submission now",
       name: "emailAccountDisabledModerationAdminContentExtra1",
     );
 
@@ -597,11 +597,9 @@ class EmailMessagesTemplates {
           ),
         ]),
         MessageContentParagraph([emailAccountDisabledModerationAdminPart3()]),
-        MessageContentButton(
-          [emailAccountDisabledModerationAdminContentExtra1()],
-          href:
-              "https://datly.con.bz/submissions?user=${Uri.encodeComponent(submission.user)}",
-        ),
+        MessageContentButton([
+          emailAccountDisabledModerationAdminContentExtra1(),
+        ], href: "{{canonical}}/submissions/${submission.id}"),
       ],
     );
   });
@@ -692,14 +690,14 @@ class EmailMessagesTemplates {
       subject: emailLegalChangedTermsSubject(),
       summary: emailLegalChangedTermsSummary(),
       text:
-          "${emailLegalChangedTermsPart1(date)}\n\n${emailLegalChangedTermsPart2()}\n\n${emailLegalChangedTermsPart3()}\n\n{{canonical}}/legal/terms\n\n${emailLegalChangedTermsPart4()}${emailLegalChangedTermsPart5()} (support@con.bz)${emailLegalChangedTermsPart6()}",
+          "${emailLegalChangedTermsPart1(date)}\n\n${emailLegalChangedTermsPart2()}\n\n${emailLegalChangedTermsPart3()}\n\n{{canonical}}/termsOfService\n\n${emailLegalChangedTermsPart4()}${emailLegalChangedTermsPart5()} (support@con.bz)${emailLegalChangedTermsPart6()}",
       content: [
         MessageContentParagraph([emailLegalChangedTermsPart1(date)]),
         MessageContentParagraph([emailLegalChangedTermsPart2()]),
         MessageContentParagraph([emailLegalChangedTermsPart3()]),
         MessageContentButton([
           emailLegalChangedTermsContentExtra1(),
-        ], href: "{{canonical}}/legal/terms"),
+        ], href: "{{canonical}}/termsOfService"),
         MessageContentParagraph([
           emailLegalChangedTermsPart4(),
           MessageContentLink([
@@ -757,14 +755,14 @@ class EmailMessagesTemplates {
       subject: emailLegalChangedPrivacySubject(),
       summary: emailLegalChangedPrivacySummary(),
       text:
-          "${emailLegalChangedPrivacyPart1(date)}\n\n${emailLegalChangedPrivacyPart2()}\n\n${emailLegalChangedPrivacyPart3()}\n\n{{canonical}}/legal/privacy\n\n${emailLegalChangedPrivacyPart4()}${emailLegalChangedPrivacyPart5()} (support@con.bz)${emailLegalChangedPrivacyPart6()}",
+          "${emailLegalChangedPrivacyPart1(date)}\n\n${emailLegalChangedPrivacyPart2()}\n\n${emailLegalChangedPrivacyPart3()}\n\n{{canonical}}/privacyPolicy\n\n${emailLegalChangedPrivacyPart4()}${emailLegalChangedPrivacyPart5()} (support@con.bz)${emailLegalChangedPrivacyPart6()}",
       content: [
         MessageContentParagraph([emailLegalChangedPrivacyPart1(date)]),
         MessageContentParagraph([emailLegalChangedPrivacyPart2()]),
         MessageContentParagraph([emailLegalChangedPrivacyPart3()]),
         MessageContentButton([
           emailLegalChangedPrivacyContentExtra1(),
-        ], href: "{{canonical}}/legal/privacy"),
+        ], href: "{{canonical}}/privacyPolicy"),
         MessageContentParagraph([
           emailLegalChangedPrivacyPart4(),
           MessageContentLink([
@@ -826,17 +824,17 @@ class EmailMessagesTemplates {
       subject: emailLegalChangedAllSubject(),
       summary: emailLegalChangedAllSummary(),
       text:
-          "${emailLegalChangedAllPart1(date)}\n\n${emailLegalChangedAllPart2()}\n\n${emailLegalChangedAllPart3()}\n\n{{canonical}}/legal/terms\n{{canonical}}/legal/privacy\n\n${emailLegalChangedAllPart4()}${emailLegalChangedAllPart5()} (support@con.bz)${emailLegalChangedAllPart6()}",
+          "${emailLegalChangedAllPart1(date)}\n\n${emailLegalChangedAllPart2()}\n\n${emailLegalChangedAllPart3()}\n\n{{canonical}}/termsOfService\n{{canonical}}/privacyPolicy\n\n${emailLegalChangedAllPart4()}${emailLegalChangedAllPart5()} (support@con.bz)${emailLegalChangedAllPart6()}",
       content: [
         MessageContentParagraph([emailLegalChangedAllPart1(date)]),
         MessageContentParagraph([emailLegalChangedAllPart2()]),
         MessageContentParagraph([emailLegalChangedAllPart3()]),
         MessageContentButton([
           emailLegalChangedAllContentExtra1(),
-        ], href: "{{canonical}}/legal/terms"),
+        ], href: "{{canonical}}/termsOfService"),
         MessageContentButton([
           emailLegalChangedAllContentExtra2(),
-        ], href: "{{canonical}}/legal/privacy"),
+        ], href: "{{canonical}}/privacyPolicy"),
         MessageContentParagraph([
           emailLegalChangedAllPart4(),
           MessageContentLink([

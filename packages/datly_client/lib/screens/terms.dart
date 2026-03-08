@@ -1,23 +1,26 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:markdown_widget/markdown_widget.dart';
 
 import '../api.dart';
+import '../l10n/app_localizations.dart';
+import '../main.gr.dart';
 
 abstract class MarkdownDialogSource {
   MarkdownDialogSource();
   FutureOr<String> getMarkdown();
   MarkdownDialogSource copyWith();
 
-  factory MarkdownDialogSource.termsOfService() => MarkdownDialogHttpSource(
+  factory MarkdownDialogSource._termsOfService() => MarkdownDialogHttpSource(
     Uri.parse("${ApiManager.baseUri.replace(path: "")}/legal/terms"),
   );
-  factory MarkdownDialogSource.privacyPolicy() => MarkdownDialogHttpSource(
+  factory MarkdownDialogSource._privacyPolicy() => MarkdownDialogHttpSource(
     Uri.parse("${ApiManager.baseUri.replace(path: "")}/legal/privacy"),
   );
-  factory MarkdownDialogSource.imprint() => MarkdownDialogHttpSource(
+  factory MarkdownDialogSource._imprint() => MarkdownDialogHttpSource(
     Uri.parse("${ApiManager.baseUri.replace(path: "")}/legal/imprint"),
   );
 }
@@ -44,7 +47,7 @@ class MarkdownDialogHttpSource extends MarkdownDialogSource {
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return response.body;
     } else {
-      throw Exception("Failed to load document.");
+      throw Exception();
     }
   }
 
@@ -123,11 +126,13 @@ class _MarkdownDialogState extends State<MarkdownDialog> {
                     )
             : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  "Failed to load document.",
-                  style: DefaultTextStyle.of(
-                    context,
-                  ).style.copyWith(color: ColorScheme.of(context).error),
+                child: Builder(
+                  builder: (context) => Text(
+                    AppLocalizations.of(context).failedToLoadDocument,
+                    style: DefaultTextStyle.of(
+                      context,
+                    ).style.copyWith(color: ColorScheme.of(context).error),
+                  ),
                 ),
               ),
       ),
@@ -146,6 +151,90 @@ Future<void> showMarkdownDialog({
   required MarkdownDialogSource source,
 }) async => showDialog<void>(
   context: context,
-  fullscreenDialog: true,
   builder: (_) => MarkdownDialog(source: source),
 );
+
+// MARK: Routes
+
+@RoutePage()
+class MarkdownDialogTermsOfServicePage extends StatefulWidget {
+  const MarkdownDialogTermsOfServicePage({super.key});
+
+  @override
+  State<MarkdownDialogTermsOfServicePage> createState() =>
+      _MarkdownDialogTermsOfServicePageState();
+}
+
+class _MarkdownDialogTermsOfServicePageState
+    extends State<MarkdownDialogTermsOfServicePage> {
+  @override
+  void initState() {
+    super.initState();
+    if (context.router.stack.length <= 1) {
+      context.router.insert(
+        AuthManager.instance.authenticatedUser != null
+            ? MainRoute()
+            : LoginRoute(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      MarkdownDialog(source: MarkdownDialogSource._termsOfService());
+}
+
+@RoutePage()
+class MarkdownDialogPrivacyPolicyPage extends StatefulWidget {
+  const MarkdownDialogPrivacyPolicyPage({super.key});
+
+  @override
+  State<MarkdownDialogPrivacyPolicyPage> createState() =>
+      _MarkdownDialogPrivacyPolicyPageState();
+}
+
+class _MarkdownDialogPrivacyPolicyPageState
+    extends State<MarkdownDialogPrivacyPolicyPage> {
+  @override
+  void initState() {
+    super.initState();
+    if (context.router.stack.length <= 1) {
+      context.router.insert(
+        AuthManager.instance.authenticatedUser != null
+            ? MainRoute()
+            : LoginRoute(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      MarkdownDialog(source: MarkdownDialogSource._privacyPolicy());
+}
+
+@RoutePage()
+class MarkdownDialogImprintPage extends StatefulWidget {
+  const MarkdownDialogImprintPage({super.key});
+
+  @override
+  State<MarkdownDialogImprintPage> createState() =>
+      _MarkdownDialogImprintPageState();
+}
+
+class _MarkdownDialogImprintPageState extends State<MarkdownDialogImprintPage> {
+  @override
+  void initState() {
+    super.initState();
+    if (context.router.stack.length <= 1) {
+      context.router.insert(
+        AuthManager.instance.authenticatedUser != null
+            ? MainRoute()
+            : LoginRoute(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      MarkdownDialog(source: MarkdownDialogSource._imprint());
+}

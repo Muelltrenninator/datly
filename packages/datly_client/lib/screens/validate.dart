@@ -4,10 +4,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
-import 'terms.dart';
 
 typedef ValidatePageGridCoordinate = ({int x, int y});
 
@@ -145,10 +143,8 @@ class _ValidatePageState extends State<ValidatePage> {
                                     style: DefaultTextStyle.of(context).style
                                         .copyWith(fontWeight: FontWeight.bold),
                                     recognizer: TapGestureRecognizer()
-                                      ..onTap = () => showMarkdownDialog(
-                                        context: context,
-                                        source:
-                                            MarkdownDialogSource.privacyPolicy(),
+                                      ..onTap = () => context.pushRoute(
+                                        MarkdownDialogPrivacyPolicyRoute(),
                                       ),
                                   ),
                                   TextSpan(text: " • "),
@@ -157,10 +153,8 @@ class _ValidatePageState extends State<ValidatePage> {
                                     style: DefaultTextStyle.of(context).style
                                         .copyWith(fontWeight: FontWeight.bold),
                                     recognizer: TapGestureRecognizer()
-                                      ..onTap = () => showMarkdownDialog(
-                                        context: context,
-                                        source:
-                                            MarkdownDialogSource.termsOfService(),
+                                      ..onTap = () => context.pushRoute(
+                                        MarkdownDialogTermsOfServiceRoute(),
                                       ),
                                   ),
                                 ],

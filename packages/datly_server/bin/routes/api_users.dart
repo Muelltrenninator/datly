@@ -598,13 +598,13 @@ void define(Router router) {
         }
 
         final password = await generatePlaintextPassword();
-      await  (db.update(db.users)
-          ..where((u) => u.username.equals(user.username))
-          ).write(
-            UsersCompanion(
-              password: Value(await hashPassword(password: password)),
-            ),
-          );
+        await (db.update(
+          db.users,
+        )..where((u) => u.username.equals(user.username))).write(
+          UsersCompanion(
+            password: Value(await hashPassword(password: password)),
+          ),
+        );
 
         queueEmail(
           EmailMessagesTemplates.passwordResetTemporary(

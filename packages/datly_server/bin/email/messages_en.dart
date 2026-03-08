@@ -55,7 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailAccountDeletedSubject': MessageLookupByLibrary.simpleMessage('Your Datly account has been deleted'),
     'emailAccountDeletedSummary': MessageLookupByLibrary.simpleMessage('Your Datly account has been fully deleted.'),
     'emailAccountDisabledContentExtra1': m0,
-    'emailAccountDisabledModerationAdminContentExtra1': MessageLookupByLibrary.simpleMessage('Review user now'),
+    'emailAccountDisabledModerationAdminContentExtra1': MessageLookupByLibrary.simpleMessage('Review submission now'),
     'emailAccountDisabledModerationAdminPart1': m1,
     'emailAccountDisabledModerationAdminPart2': m2,
     'emailAccountDisabledModerationAdminPart3': MessageLookupByLibrary.simpleMessage('This requires your immediate attention. Please review the flagged content and the user\'s other submissions as soon as possible, and take the appropriate administrative action.'),

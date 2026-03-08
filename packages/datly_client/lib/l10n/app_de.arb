@@ -3,7 +3,7 @@
     "quote": "„{content}“",
     "retry": "Erneut Versuchen",
     "delete": "Löschen",
-    "invite":"Hallo {username} 👋\nDu bist eingeladen, an einem Crowdsourcing teilzunehmen! Logg dich gleich ein, ein Account wurde schon für dich erstellt:\n\n- {host}{projectCount, plural, =0{} other{\n- Mitglied von: {projects}}}\n- Logincode: `{code}` (NICHT TEILEN!)\n\nHilf uns unser Ziel zu verwirklichen. Man sieht sich dort!",
+    "failedToLoadDocument": "Fehler beim Laden des Dokuments.",
     "loginInvalidEmail": "Ungültige E‑Mail‑Adresse.",
     "loginError": "Server nicht erreichbar. Bitte überprüfe deine Internetverbindung.",
     "loginAccountDisabled": "Dein Account wurde deaktiviert. Erfahre mehr in der Nachricht, die an deine verknüpfte E‑Mail‑Adresse gesendet wurde.",

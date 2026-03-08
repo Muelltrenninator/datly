@@ -4,13 +4,18 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
 
+import 'l10n/app_localizations.dart';
 import 'main.dart';
 import 'registry.dart';
 import 'widgets/title_bar.dart';
 
 typedef AuthUser = ({String email, String password});
+DateFormat dateFormat(BuildContext context) => DateFormat.yMMMd(
+  AppLocalizations.of(context).localeName,
+).addPattern("", ",").add_jm();
 final emailRegex = RegExp(
   r"""^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$""",
 );
@@ -292,22 +297,22 @@ class SubmissionData {
       : null;
 
   factory SubmissionData.fromJson(Map<String, dynamic> json) => SubmissionData(
-      id: json["id"]!,
-      projectId: json["projectId"]!,
-      user: json["user"]!,
-      submittedAt: DateTime.fromMillisecondsSinceEpoch(
-        json["submittedAt"],
-        isUtc: true,
-      ),
-      status: json["status"]!,
-      moderated: json["moderated"]!,
-      assetId: json["assetId"],
-      assetMimeType: json["assetMimeType"],
-      assetBlurHash: json["assetBlurHash"]!,
-      category: json["category"],
-      validationWeightPositive: json["validationWeightPositive"]!,
-      validationWeightNegative: json["validationWeightNegative"]!,
-    );
+    id: json["id"]!,
+    projectId: json["projectId"]!,
+    user: json["user"]!,
+    submittedAt: DateTime.fromMillisecondsSinceEpoch(
+      json["submittedAt"],
+      isUtc: true,
+    ),
+    status: json["status"]!,
+    moderated: json["moderated"]!,
+    assetId: json["assetId"],
+    assetMimeType: json["assetMimeType"],
+    assetBlurHash: json["assetBlurHash"]!,
+    category: json["category"],
+    validationWeightPositive: json["validationWeightPositive"]!,
+    validationWeightNegative: json["validationWeightNegative"]!,
+  );
   Map<String, dynamic> toJson() => {
     "id": id,
     "projectId": projectId,

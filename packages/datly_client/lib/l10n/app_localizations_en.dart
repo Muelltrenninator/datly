@@ -20,21 +20,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String invite(
-    String username,
-    String host,
-    int projectCount,
-    String projects,
-    String code,
-  ) {
-    String _temp0 = intl.Intl.pluralLogic(
-      projectCount,
-      locale: localeName,
-      other: '\n- Member of: $projects',
-      zero: '',
-    );
-    return 'Hello $username 👋\nYou\'re invited to participate in a crowdsource! Log right in, an account has already been created for you:\n\n- $host$_temp0\n- Login code: `$code` (DO NOT SHARE!)\n\nHelp us achieve our goals. See you there soon!';
-  }
+  String get failedToLoadDocument => 'Failed to load document.';
 
   @override
   String get loginInvalidEmail => 'Please enter a valid email address.';
