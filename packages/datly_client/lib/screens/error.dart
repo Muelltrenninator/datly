@@ -32,12 +32,12 @@ class ErrorScreen extends StatelessWidget {
               context.router.canPop()
                   ? FilledButton.icon(
                       onPressed: () => context.router.pop(),
-                      label: Text("Go Back"),
+                      label: Text("Go back"),
                       icon: Icon(Icons.arrow_back),
                     )
                   : OutlinedButton.icon(
                       onPressed: () => context.router.navigate(MainRoute()),
-                      label: Text("Go Home"),
+                      label: Text("Go home"),
                       icon: Icon(Icons.home),
                     ),
             ],

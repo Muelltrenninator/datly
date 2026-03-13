@@ -343,7 +343,12 @@ class SubmissionData {
   static Map<String, dynamic> modifying({
     String? status,
     String? moderationReason,
-  }) => {"status": status, "moderationReason": moderationReason};
+    String? category,
+  }) => {
+    "status": status,
+    "moderationReason": moderationReason,
+    "category": category,
+  };
 
   factory SubmissionData.fromJson(Map<String, dynamic> json) => SubmissionData(
     id: json["id"]!,

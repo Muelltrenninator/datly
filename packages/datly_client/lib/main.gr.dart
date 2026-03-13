@@ -38,6 +38,22 @@ class ErrorRoute extends _i9.PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [_i2.ListCategoriesPage]
+class ListCategoriesRoute extends _i9.PageRouteInfo<void> {
+  const ListCategoriesRoute({List<_i9.PageRouteInfo>? children})
+    : super(ListCategoriesRoute.name, initialChildren: children);
+
+  static const String name = 'ListCategoriesRoute';
+
+  static _i9.PageInfo page = _i9.PageInfo(
+    name,
+    builder: (data) {
+      return const _i2.ListCategoriesPage();
+    },
+  );
+}
+
+/// generated route for
 /// [_i2.ListProjectsPage]
 class ListProjectsRoute extends _i9.PageRouteInfo<void> {
   const ListProjectsRoute({List<_i9.PageRouteInfo>? children})

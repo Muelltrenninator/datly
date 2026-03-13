@@ -296,22 +296,22 @@ abstract class AppLocalizations {
   /// **'Select camera'**
   String get selectCamera;
 
-  /// The word 'Back' used to describe a camera facing away from the user. This string is formatted in MLA title case.
+  /// The word 'Back' used to describe a camera facing away from the user.
   ///
   /// In en, this message translates to:
-  /// **'Back Camera'**
+  /// **'Back camera'**
   String get selectCameraDescriptionBack;
 
-  /// The word 'Front' used to describe a camera facing towards the user. This string is formatted in MLA title case.
+  /// The word 'Front' used to describe a camera facing towards the user.
   ///
   /// In en, this message translates to:
-  /// **'Front Camera'**
+  /// **'Front camera'**
   String get selectCameraDescriptionFront;
 
-  /// The word 'External' used to describe an external camera. This string is formatted in MLA title case.
+  /// The word 'External' used to describe an external camera.
   ///
   /// In en, this message translates to:
-  /// **'External Camera'**
+  /// **'External camera'**
   String get selectCameraDescriptionExternal;
 
   /// Title for the project selection dialog.
@@ -335,7 +335,7 @@ abstract class AppLocalizations {
   /// Explanation text for the image submission consent dialog.
   ///
   /// In en, this message translates to:
-  /// **'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile; this will only not include the image in the next data export, but already publicized images may cannot be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.'**
+  /// **'To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile; doing so will exclude the image from the next data export, but already publicized images may not be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.'**
   String get consentExplanation1;
 
   /// Additional explanation text for the image submission consent dialog.
@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// Label for the guardian consent checkbox in the consent dialog.
   ///
   /// In en, this message translates to:
-  /// **'I am the guardian of the minor, have read the above conditions and agree them'**
+  /// **'I am the guardian of the minor, have read the above conditions and agree to them'**
   String get consentParental;
 
   /// Button text to give consent and submit the image.
@@ -497,7 +497,7 @@ abstract class AppLocalizations {
   /// Error message shown when the new password has appeared in a data breach in the change password dialog.
   ///
   /// In en, this message translates to:
-  /// **'It has appeared in a data breach is not to be considered secure'**
+  /// **'It has appeared in a data breach and is not to be considered secure'**
   String get passwordChangeErrorInsecureCodeCompromised;
 
   /// Shown when there are no submissions available for the selected project.

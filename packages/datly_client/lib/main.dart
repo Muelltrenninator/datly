@@ -49,6 +49,7 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: SubmissionDetailsRoute.page, path: "submissions/:id"),
         AutoRoute(page: ListUsersRoute.page, path: "users"),
         AutoRoute(page: ListProjectsRoute.page, path: "projects"),
+        AutoRoute(page: ListCategoriesRoute.page, path: "categories"),
       ],
     ),
     CustomRoute(

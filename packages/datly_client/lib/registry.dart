@@ -131,3 +131,16 @@ class ProjectRegistry extends _Registry<int, ProjectData> {
   @override
   ProjectData _fromJson(json) => ProjectData.fromJson(json);
 }
+
+class CategoryRegistry extends _Registry<String, CategoryData> {
+  CategoryRegistry._() : super._();
+  static final CategoryRegistry _instance = CategoryRegistry._();
+  static CategoryRegistry get instance => _instance;
+
+  @override
+  Uri _uriFromId(String identifier) =>
+      Uri.parse("${ApiManager.baseUri}/categories/$identifier");
+
+  @override
+  CategoryData _fromJson(json) => CategoryData.fromJson(json);
+}

@@ -170,19 +170,19 @@
         "description": "Title for the camera selection dialog.",
         "context": "upload:cameraSelection"
     },
-    "selectCameraDescriptionBack": "Back Camera",
+    "selectCameraDescriptionBack": "Back camera",
     "@selectCameraDescriptionBack": {
-        "description": "The word 'Back' used to describe a camera facing away from the user. This string is formatted in MLA title case.",
+        "description": "The word 'Back' used to describe a camera facing away from the user.",
         "context": "upload:cameraSelection"
     },
-    "selectCameraDescriptionFront": "Front Camera",
+    "selectCameraDescriptionFront": "Front camera",
     "@selectCameraDescriptionFront": {
-        "description": "The word 'Front' used to describe a camera facing towards the user. This string is formatted in MLA title case.",
+        "description": "The word 'Front' used to describe a camera facing towards the user.",
         "context": "upload:cameraSelection"
     },
-    "selectCameraDescriptionExternal": "External Camera",
+    "selectCameraDescriptionExternal": "External camera",
     "@selectCameraDescriptionExternal": {
-        "description": "The word 'External' used to describe an external camera. This string is formatted in MLA title case.",
+        "description": "The word 'External' used to describe an external camera.",
         "context": "upload:cameraSelection"
     },
     "selectProject": "Select project",
@@ -210,7 +210,7 @@
             }
         }
     },
-    "consentExplanation1": "To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile; this will only not include the image in the next data export, but already publicized images may cannot be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.",
+    "consentExplanation1": "To store, process, and eventually publish your image directly or indirectly, we need your explicit consent. Your username will be associated with the image submission and may be visible in future publications. You may withdraw your consent at any time by deleting your submission via your profile; doing so will exclude the image from the next data export, but already publicized images may not be fully deleted until the next publication. If you do not agree, please do not proceed with the submission.",
     "@consentExplanation1": {
         "description": "Explanation text for the image submission consent dialog.",
         "context": "upload:consent"
@@ -273,7 +273,7 @@
         "description": "Label for the signature input field for guardian in the consent dialog.",
         "context": "upload:consent"
     },
-    "consentParental": "I am the guardian of the minor, have read the above conditions and agree them",
+    "consentParental": "I am the guardian of the minor, have read the above conditions and agree to them",
     "@consentParental": {
         "description": "Label for the guardian consent checkbox in the consent dialog.",
         "context": "upload:consent"
@@ -369,7 +369,7 @@
         "description": "Error message shown when the new password does not contain a special character in the change password dialog.",
         "context": "about:changePassword"
     },
-    "passwordChangeErrorInsecureCodeCompromised": "It has appeared in a data breach is not to be considered secure",
+    "passwordChangeErrorInsecureCodeCompromised": "It has appeared in a data breach and is not to be considered secure",
     "@passwordChangeErrorInsecureCodeCompromised": {
         "description": "Error message shown when the new password has appeared in a data breach in the change password dialog.",
         "context": "about:changePassword"

@@ -158,6 +158,11 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
                 leadingIcon: Icon(Icons.widgets),
                 child: Text("Projects"),
               ),
+              MenuItemButton(
+                onPressed: () => context.navigateTo(ListCategoriesRoute()),
+                leadingIcon: Icon(Icons.topic),
+                child: Text("Categories"),
+              ),
             ],
             builder: (_, controller, _) {
               return IconButton(

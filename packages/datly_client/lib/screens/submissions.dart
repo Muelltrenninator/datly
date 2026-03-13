@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'package:intl/intl.dart';
 
 import '../api.dart';
 import '../l10n/app_localizations.dart';
@@ -371,7 +372,10 @@ class SubmissionWidget extends StatefulWidget {
 class _SubmissionWidgetState extends State<SubmissionWidget> {
   ProjectData? project;
   UserData? user;
+  CategoryData? category;
   Uint8List? blurHashImage;
+
+  List<CategoryData> availableCategories = [];
 
   @override
   void initState() {
@@ -383,6 +387,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   @override
   void didUpdateWidget(SubmissionWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _preloadCategories();
     if (oldWidget.data.id != widget.data.id) {
       _loadBlurHash();
       _loadMetadata();
@@ -424,11 +429,257 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
     });
   }
 
+  Future<void> _preloadCategories() async {
+    final categories = await _listAvailableCategories() ?? [];
+    availableCategories
+      ..clear()
+      ..addAll(categories)
+      ..sort((a, b) => a.name.compareTo(b.name));
+    if (widget.data.category != null &&
+        availableCategories.any((c) => c.name == widget.data.category)) {
+      category = availableCategories.firstWhere(
+        (c) => c.name == widget.data.category,
+      );
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<List<CategoryData>?> _listAvailableCategories() async {
+    final request = await AuthManager.instance.fetch(
+      http.Request("GET", Uri.parse("${ApiManager.baseUri}/categories/list")),
+    );
+    if (request == null || request.statusCode != 200) return null;
+
+    var data = jsonDecode(request.body);
+    if (data is! List) return null;
+    data = data.whereType<Map>().toList();
+
+    final processed = List<Map<String, dynamic>>.from(data)
+        .map((c) {
+          try {
+            return CategoryData.fromJson(c);
+          } catch (_) {
+            return null;
+          }
+        })
+        .whereType<CategoryData>()
+        .toList();
+
+    CategoryRegistry.instance.addAll(
+      Map.fromEntries(processed.map((c) => MapEntry(c.name, c))),
+    );
+
+    return processed;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final windowSizeClass = WindowSizeClass.of(context);
+
+    void setModerationReason() async {
+      final newReason = await showPromptDialog(
+        context: context,
+        title: "Set moderation reason",
+        description:
+            "The reason why this submission was blocked. Available format:\n\u2022\t'Automated moderation: (self-harm|sexual|violence)'\n\u2022\tComma separated list of reasons from the list above.\n\u2022\tAny custom reason.",
+        previewBuilder: (value) => Card.outlined(
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Builder(
+              builder: (context) => Text(
+                value.trim().isEmpty
+                    ? "Moderation reason will be cleared."
+                    : widget.data.moderationReasonDisplay(context, value)!,
+                style: DefaultTextStyle.of(context).style.copyWith(
+                  fontStyle: value.trim().isEmpty ? FontStyle.italic : null,
+                  color: value.trim().isEmpty ? theme.disabledColor : null,
+                ),
+              ),
+            ),
+          ),
+        ),
+        content: widget.data.moderationReason,
+        maxLength: 256,
+        maxLines: 4,
+      );
+      if (newReason != null &&
+          newReason != widget.data.moderationReason &&
+          context.mounted) {
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        try {
+          response = await AuthManager.instance.fetch(
+            http.Request("PUT", uri)
+              ..headers["Content-Type"] = "application/json"
+              ..body = jsonEncode(
+                SubmissionData.modifying(moderationReason: newReason),
+              ),
+          );
+          if (response == null || response.statusCode != 200) {
+            completer.completeError("");
+            return;
+          }
+        } catch (_) {
+          completer.completeError("");
+          return;
+        }
+
+        project?.description = newReason;
+        if (mounted) setState(() {});
+        completer.complete();
+        widget.onUpdate?.call();
+      }
+    }
+
+    void setStatus() async {
+      String? selection;
+      if (HardwareKeyboard.instance.isShiftPressed) {
+        selection ??= widget.data.status == "accepted"
+            ? "rejected"
+            : "accepted";
+      } else if (HardwareKeyboard.instance.isControlPressed) {
+        selection ??= "rejected";
+      }
+
+      selection ??= await showRadioDialog(
+        context: context,
+        title: "Set status",
+        items: ["pending", "accepted", "rejected", "censored"],
+        initialValue: widget.data.status,
+        titleGenerator: (item) => item.toTitleCase(),
+        subtitleGenerator: (item) => switch (item) {
+          "pending" =>
+            "The submission will be reviewed again later. Don't use this unless necessary.",
+          "accepted" => "This will add the asset to asset dumps.",
+          "rejected" => "The asset will be ignored.",
+          "censored" =>
+            "While the submission will not be deleted, the asset will be, only keeping metadata and a crude thumbnail. This is not reversible.",
+          _ => "",
+        },
+      );
+      if (!context.mounted) return;
+      if (selection == "censored" &&
+          !(await showConfirmationDialog(
+            context: context,
+            title: "Censor submission?",
+            description:
+                "All associated image data will be permanently deleted. The submission data and a blurhash will remain in the database. This action cannot be undone.",
+          ))) {
+        return;
+      }
+      if (selection != null &&
+          selection != widget.data.status &&
+          context.mounted) {
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        response = await AuthManager.instance.fetch(
+          http.Request("PUT", uri)
+            ..headers["Content-Type"] = "application/json"
+            ..body = jsonEncode(SubmissionData.modifying(status: selection)),
+        );
+        if (response != null && response.statusCode == 200) {
+          widget.onUpdate?.call();
+          completer.complete();
+        } else {
+          completer.completeError("");
+        }
+      }
+    }
+
+    void setCategory() async {
+      bool submitted = false;
+      final newCategory = await showRadioDialog<CategoryData>(
+        context: context,
+        title: "Set category",
+        description:
+            "This will be used to sort and validate the submission in the 3×3 crowd sourcing validation grid.",
+        items: availableCategories,
+        initialValue: category,
+        titleGenerator: (item) => item.displayName ?? item.name,
+        iconGenerator: (item) =>
+            item.displayName != null ? Text(item.name) : null,
+        allowEmptySelection: true,
+        toggleable: true,
+        onSubmit: (_) => submitted = true,
+      );
+      if (submitted &&
+          newCategory?.name != widget.data.category &&
+          context.mounted &&
+          await showConfirmationDialog(
+            context: context,
+            title: "Reset validation weights to set new category?",
+            description:
+                "To change the category of a submission it is necessary to reset the positive and negative validation score of the submission. This action cannot be undone.",
+          )) {
+        if (!context.mounted) return;
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        response = await AuthManager.instance.fetch(
+          http.Request("PUT", uri)
+            ..headers["Content-Type"] = "application/json"
+            ..body = jsonEncode(
+              SubmissionData.modifying(category: newCategory?.name ?? ""),
+            ),
+        );
+        if (response != null && response.statusCode == 200) {
+          widget.onUpdate?.call();
+          completer.complete();
+        } else {
+          completer.completeError("");
+        }
+      }
+    }
+
+    void deleteSubmission() async {
+      final selection = await showConfirmationDialog(
+        context: context,
+        title: AppLocalizations.of(context).submissionDeleteTitle,
+        description: AppLocalizations.of(context).submissionDeleteMessage,
+      );
+
+      if (!context.mounted) return;
+      final completer = Completer<void>();
+      http.Response? response;
+      showStatusModal(
+        context: context,
+        completer: completer,
+        failureDetailsGenerator: () =>
+            responseFailureDetailsGenerator(response),
+      );
+
+      if (!selection) return;
+      response = await AuthManager.instance.fetch(http.Request("DELETE", uri));
+      if (response != null && response.statusCode == 200) {
+        widget.onDelete?.call();
+        completer.complete();
+        return;
+      }
+      completer.completeError("");
+    }
 
     Widget? image;
     if (widget.includeImage) {
@@ -608,7 +859,9 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
             if ((!widget.includeImage &&
                     widget.data.moderationReason != null &&
                     AuthManager.instance.authenticatedUserIsAdmin) ||
-                widget.data.status == "censored")
+                (widget.data.status == "censored" &&
+                    (widget.data.moderationReason != null ||
+                        !widget.includeImage)))
               Padding(
                 padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
                 child: SizedBox(
@@ -648,77 +901,95 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           ),
                           deleteIcon: Icon(Icons.edit),
                           onDeleted: !widget.includeImage
-                              ? () async {
-                                  final newReason = await showPromptDialog(
-                                    context: context,
-                                    title: "Set Moderation Reason",
-                                    description:
-                                        "The reason why this submission was blocked. Available format:\n•\t'Automated moderation: (self-harm|sexual|violence)'\n•\tComma separated list of reasons from the list above.\n•\tAny custom reason.",
-                                    previewBuilder: (value) => Card.outlined(
-                                      margin: EdgeInsets.zero,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Text(
-                                          widget.data.moderationReasonDisplay(
-                                            context,
-                                            value,
-                                          )!,
-                                        ),
-                                      ),
-                                    ),
-                                    content: widget.data.moderationReason,
-                                    maxLength: 256,
-                                    maxLines: 4,
-                                  );
-                                  if (newReason != null &&
-                                      newReason !=
-                                          widget.data.moderationReason &&
-                                      context.mounted) {
-                                    final completer = Completer<void>();
-                                    http.Response? response;
-                                    showStatusModal(
-                                      context: context,
-                                      completer: completer,
-                                      failureDetailsGenerator: () =>
-                                          responseFailureDetailsGenerator(
-                                            response,
-                                          ),
-                                    );
-
-                                    try {
-                                      response = await AuthManager.instance
-                                          .fetch(
-                                            http.Request("PUT", uri)
-                                              ..headers["Content-Type"] =
-                                                  "application/json"
-                                              ..body = jsonEncode(
-                                                SubmissionData.modifying(
-                                                  moderationReason: newReason,
-                                                ),
-                                              ),
-                                          );
-                                      if (response == null ||
-                                          response.statusCode != 200) {
-                                        completer.completeError("");
-                                        return;
-                                      }
-                                    } catch (_) {
-                                      completer.completeError("");
-                                      return;
-                                    }
-
-                                    project?.description = newReason;
-                                    if (mounted) setState(() {});
-                                    completer.complete();
-                                    widget.onUpdate?.call();
-                                  }
-                                }
+                              ? setModerationReason
                               : null,
                         ),
                     ],
                   ),
                 ),
               ),
+            if (!widget.includeImage &&
+                AuthManager.instance.authenticatedUserIsAdmin) ...[
+              Padding(
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 2),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 2,
+                    runSpacing: 2,
+                    children: [
+                      Chip(
+                        avatar: Icon(Icons.keyboard_arrow_up),
+                        label: Text(
+                          NumberFormat.decimalPatternDigits(
+                            locale: AppLocalizations.of(context).localeName,
+                            decimalDigits: 3,
+                          ).format(widget.data.validationWeightPositive),
+                        ),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.keyboard_arrow_down),
+                        label: Text(
+                          NumberFormat.decimalPatternDigits(
+                            locale: AppLocalizations.of(context).localeName,
+                            decimalDigits: 3,
+                          ).format(widget.data.validationWeightNegative),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 2,
+                    runSpacing: 2,
+                    children: [
+                      Chip(
+                        avatar: Icon(Icons.credit_score),
+                        label: Text(
+                          NumberFormat.decimalPatternDigits(
+                            locale: AppLocalizations.of(context).localeName,
+                            decimalDigits: 3,
+                          ).format(
+                            (1 + widget.data.validationWeightPositive) /
+                                (2 +
+                                    widget.data.validationWeightPositive +
+                                    widget.data.validationWeightNegative),
+                          ),
+                        ),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.topic_outlined),
+                        label: Text(
+                          widget.data.category != null
+                              ? availableCategories.any(
+                                      (c) => c.name == widget.data.category,
+                                    )
+                                    ? availableCategories
+                                              .firstWhere(
+                                                (c) =>
+                                                    c.name ==
+                                                    widget.data.category,
+                                              )
+                                              .displayName ??
+                                          widget.data.category!
+                                    : widget.data.category!
+                              : "–",
+                        ),
+                        deleteIcon: Icon(Icons.edit),
+                        onDeleted: availableCategories.isNotEmpty
+                            ? setCategory
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             Padding(
               padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
               child: SizedBox(
@@ -758,54 +1029,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                       onDeleted:
                           AuthManager.instance.authenticatedUserIsAdmin &&
                               widget.data.status != "censored"
-                          ? () async {
-                              String? selection;
-                              if (HardwareKeyboard.instance.isShiftPressed) {
-                                selection ??= widget.data.status == "accepted"
-                                    ? "rejected"
-                                    : "accepted";
-                              } else if (HardwareKeyboard
-                                  .instance
-                                  .isControlPressed) {
-                                selection ??= "rejected";
-                              }
-
-                              selection ??= await showRadioDialog(
-                                context: context,
-                                title: "Set Status",
-                                items: [
-                                  "pending",
-                                  "accepted",
-                                  "rejected",
-                                  "censored",
-                                ],
-                                initialValue: widget.data.status,
-                                titleGenerator: (item) => item.toTitleCase(),
-                                subtitleGenerator: (item) => switch (item) {
-                                  "pending" =>
-                                    "The submission will be reviewed again later. Don't use this unless necessary.",
-                                  "accepted" =>
-                                    "This will add the asset to asset dumps.",
-                                  "rejected" => "The asset will be ignored.",
-                                  "censored" =>
-                                    "While the submission will not be deleted, the asset will be, only keeping metadata and a crude thumbnail. This is not reversible.",
-                                  _ => "",
-                                },
-                              );
-                              if (selection != widget.data.status) {
-                                await AuthManager.instance.fetch(
-                                  http.Request("PUT", uri)
-                                    ..headers["Content-Type"] =
-                                        "application/json"
-                                    ..body = jsonEncode(
-                                      SubmissionData.modifying(
-                                        status: selection,
-                                      ),
-                                    ),
-                                );
-                                widget.onUpdate?.call();
-                              }
-                            }
+                          ? setStatus
                           : null,
                     ),
                     ActionChip(
@@ -822,64 +1046,12 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           ).style.copyWith(color: colorScheme.onError),
                         ),
                       ),
-                      onPressed: () async {
-                        final selection = await showConfirmationDialog(
-                          context: context,
-                          title: AppLocalizations.of(
-                            context,
-                          ).submissionDeleteTitle,
-                          description: AppLocalizations.of(
-                            context,
-                          ).submissionDeleteMessage,
-                        );
-                        if (!selection) return;
-                        await AuthManager.instance.fetch(
-                          http.Request("DELETE", uri),
-                        );
-                        widget.onDelete?.call();
-                      },
+                      onPressed: deleteSubmission,
                     ),
                   ],
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(left: 8, right: 8, bottom: 2),
-              child: Chip(
-                avatar: Icon(Icons.topic_outlined),
-                label: Text(widget.data.category ?? "–"),
-              ),
-            ),
-            if (!widget.includeImage &&
-                AuthManager.instance.authenticatedUserIsAdmin)
-              Padding(
-                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    spacing: 2,
-                    runSpacing: 2,
-                    children: [
-                      Chip(
-                        avatar: Icon(Icons.keyboard_arrow_up),
-                        label: Text(
-                          widget.data.validationWeightPositive.toStringAsFixed(
-                            3,
-                          ),
-                        ),
-                      ),
-                      Chip(
-                        avatar: Icon(Icons.keyboard_arrow_down),
-                        label: Text(
-                          widget.data.validationWeightNegative.toStringAsFixed(
-                            3,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -1009,7 +1181,9 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
                                             : widget.effectiveUserData!
                                                   as dynamic)
                                         .toJson(),
-                                isProject: widget.effectiveProject != null,
+                                type: widget.effectiveProject != null
+                                    ? ListType.project
+                                    : ListType.user,
                                 onDelete: () {
                                   if (context.router.stack.length > 1) {
                                     context.router.pop();
@@ -1333,12 +1507,12 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
                               children: [
                                 ListWidget(
                                   data: user!.toJson(),
-                                  isProject: false,
+                                  type: ListType.user,
                                   onDelete: onDelete,
                                 ),
                                 ListWidget(
                                   data: project!.toJson(),
-                                  isProject: true,
+                                  type: ListType.project,
                                   onDelete: onDelete,
                                 ),
                               ],

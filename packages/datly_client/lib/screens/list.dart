@@ -6,6 +6,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:web/web.dart' as web;
 
 import '../api.dart';
@@ -19,23 +20,34 @@ import '../widgets/prompt_dialog.dart';
 import '../widgets/status_modal.dart';
 import '../widgets/title_bar.dart';
 
+enum ListType { user, project, category }
+
 @RoutePage()
 class ListUsersPage extends StatelessWidget {
   const ListUsersPage({super.key});
   @override
-  Widget build(BuildContext context) => const ListScreen(isProjects: false);
+  Widget build(BuildContext context) => const ListScreen(type: ListType.user);
 }
 
 @RoutePage()
 class ListProjectsPage extends StatelessWidget {
   const ListProjectsPage({super.key});
   @override
-  Widget build(BuildContext context) => const ListScreen(isProjects: true);
+  Widget build(BuildContext context) =>
+      const ListScreen(type: ListType.project);
+}
+
+@RoutePage()
+class ListCategoriesPage extends StatelessWidget {
+  const ListCategoriesPage({super.key});
+  @override
+  Widget build(BuildContext context) =>
+      const ListScreen(type: ListType.category);
 }
 
 class ListScreen extends StatefulWidget {
-  final bool isProjects;
-  const ListScreen({super.key, required this.isProjects});
+  final ListType type;
+  const ListScreen({super.key, required this.type});
 
   @override
   State<ListScreen> createState() => _ListScreenState();
@@ -56,7 +68,8 @@ class _ListScreenState extends State<ListScreen> {
     response = null;
     if (mounted) setState(() {});
 
-    if (!AuthManager.instance.authenticatedUserIsAdmin && widget.isProjects) {
+    if (!AuthManager.instance.authenticatedUserIsAdmin &&
+        widget.type == ListType.project) {
       error = true;
       if (mounted) setState(() {});
       return;
@@ -65,12 +78,15 @@ class _ListScreenState extends State<ListScreen> {
     try {
       AuthManager.instance
           .fetch(
-            http.Request(
-              "GET",
-              widget.isProjects
-                  ? Uri.parse("${ApiManager.baseUri}/projects/list")
-                  : Uri.parse("${ApiManager.baseUri}/users/list"),
-            ),
+            http.Request("GET", switch (widget.type) {
+              ListType.user => Uri.parse("${ApiManager.baseUri}/users/list"),
+              ListType.project => Uri.parse(
+                "${ApiManager.baseUri}/projects/list",
+              ),
+              ListType.category => Uri.parse(
+                "${ApiManager.baseUri}/categories/list",
+              ),
+            }),
           )
           .then((value) {
             if (value == null ||
@@ -95,171 +111,261 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final adminOptions = (widget.isProjects
-        ? [
-            MenuItemButton(
-              onPressed: () async {
-                var inputRaw = await showMultiPromptDialog(
-                  context: context,
-                  title: "Create Project",
-                  description:
-                      "Creates a new project with the specified information.",
-                  prompts: {
-                    "title": MultiPromptPrompt(
-                      label: "Title",
-                      validator: (v) =>
-                          v.isEmpty ? "Title cannot be empty." : null,
-                      capitalization: TextCapitalization.words,
-                    ),
-                    "description": MultiPromptPrompt(
-                      label: "Description",
-                      placeholder: "Training data for a model to detect…",
-                      maxLength: 256,
-                      maxLines: 4,
-                    ),
-                  },
-                );
-                if (inputRaw == null) return;
-                final input = Map<String, dynamic>.from(inputRaw);
-
-                input["description"] = (input["description"]! as String).trim();
-                if (input["description"]!.isEmpty) {
-                  input["description"] = null;
-                }
-
-                final response = await AuthManager.instance.fetch(
-                  http.Request(
-                      "POST",
-                      Uri.parse("${ApiManager.baseUri}/projects"),
-                    )
-                    ..headers["Content-Type"] = "application/json"
-                    ..body = jsonEncode(input),
-                );
-                if (response?.statusCode == 201) fetch();
+    final List<Widget> adminOptions = switch (widget.type) {
+      ListType.user => [
+        MenuItemButton(
+          onPressed: () async {
+            final allProjectsFuture = AuthManager.instance.fetch(
+              http.Request(
+                "GET",
+                Uri.parse("${ApiManager.baseUri}/projects/list"),
+              ),
+            );
+            var inputRaw = await showMultiPromptDialog(
+              context: context,
+              title: "Create user",
+              description:
+                  "Creates a new user with the specified information and generates a login code for them. Meaning this should only be used during direct user onboarding.",
+              prompts: {
+                "username": MultiPromptPrompt(
+                  label: "Username",
+                  validator: (v) =>
+                      v.isEmpty ? "Username cannot be empty." : null,
+                  capitalization: TextCapitalization.none,
+                  autofillHints: [],
+                ),
+                "email": MultiPromptPrompt(
+                  label: "Email address",
+                  placeholder: "user@example.com",
+                  validator: (v) =>
+                      !validateEmail(v) ? "Not a valid email address." : null,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: [],
+                ),
+                "role": MultiPromptPrompt(
+                  label: "Role",
+                  placeholder: "user, admin",
+                  content: "user",
+                  validator: (value) => !["user", "admin"].contains(value)
+                      ? "Role must be one of: user, admin"
+                      : null,
+                  capitalization: TextCapitalization.none,
+                ),
+                "locale": MultiPromptPrompt(
+                  label: "Account locale",
+                  placeholder: "en, de, …",
+                  content: "en",
+                  validator: (value) =>
+                      !AppLocalizations.supportedLocales
+                          .map((e) => e.languageCode)
+                          .contains(value)
+                      ? "Locale must be one of: ${AppLocalizations.supportedLocales.map((e) => e.languageCode).join(", ")}"
+                      : null,
+                  capitalization: TextCapitalization.none,
+                ),
               },
-              leadingIcon: Icon(Icons.add),
-              child: Text("Create Project"),
-            ),
-          ]
-        : [
-            MenuItemButton(
-              onPressed: () async {
-                final allProjectsFuture = AuthManager.instance.fetch(
-                  http.Request(
-                    "GET",
-                    Uri.parse("${ApiManager.baseUri}/projects/list"),
-                  ),
-                );
-                var inputRaw = await showMultiPromptDialog(
-                  context: context,
-                  title: "Create User",
-                  description:
-                      "Creates a new user with the specified information and generates a login code for them. Meaning this should only be used during direct user onboarding.",
-                  prompts: {
-                    "username": MultiPromptPrompt(
-                      label: "Username",
-                      validator: (v) =>
-                          v.isEmpty ? "Username cannot be empty." : null,
-                      capitalization: TextCapitalization.none,
-                      autofillHints: [],
-                    ),
-                    "email": MultiPromptPrompt(
-                      label: "Email Address",
-                      placeholder: "user@example.com",
-                      validator: (v) => !validateEmail(v)
-                          ? "Not a valid email address."
-                          : null,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: [],
-                    ),
-                    "role": MultiPromptPrompt(
-                      label: "Role",
-                      placeholder: "user, admin",
-                      content: "user",
-                      validator: (value) => !["user", "admin"].contains(value)
-                          ? "Role must be one of: user, admin"
-                          : null,
-                      capitalization: TextCapitalization.none,
-                    ),
-                    "locale": MultiPromptPrompt(
-                      label: "Account Locale",
-                      placeholder: "en, de, …",
-                      content: "en",
-                      validator: (value) =>
-                          !AppLocalizations.supportedLocales
-                              .map((e) => e.languageCode)
-                              .contains(value)
-                          ? "Locale must be one of: ${AppLocalizations.supportedLocales.map((e) => e.languageCode).join(", ")}"
-                          : null,
-                      capitalization: TextCapitalization.none,
-                    ),
-                  },
-                );
-                if (inputRaw == null) return;
-                final input = Map<String, dynamic>.from(inputRaw)
-                  ..["captcha"] = null;
+            );
+            if (inputRaw == null) return;
+            final input = Map<String, dynamic>.from(inputRaw)
+              ..["captcha"] = null;
 
-                final allProjectsResponse = await allProjectsFuture;
-                if (allProjectsResponse == null ||
-                    allProjectsResponse.statusCode != 200 ||
-                    !(allProjectsResponse.headers["content-type"]?.startsWith(
-                          "application/json",
+            final allProjectsResponse = await allProjectsFuture;
+            if (allProjectsResponse == null ||
+                allProjectsResponse.statusCode != 200 ||
+                !(allProjectsResponse.headers["content-type"]?.startsWith(
+                      "application/json",
+                    ) ??
+                    false)) {
+              return;
+            }
+            final allProjects =
+                (jsonDecode(allProjectsResponse.body) as List<dynamic>)
+                    .map((e) => ProjectData.fromJson(e as Map<String, dynamic>))
+                    .toList();
+            if (allProjects.isEmpty) {
+              input["projects"] = [];
+            } else {
+              if (!context.mounted) return;
+              final selectedProjects =
+                  (await showMultipleChoiceDialog(
+                          context: context,
+                          title: "Assign projects",
+                          description:
+                              "Select the projects to assign to this user.",
+                          initialValue: allProjects.length == 1
+                              ? allProjects
+                              : null,
+                          items: allProjects,
+                          titleGenerator: (item) => item.title,
+                          subtitleGenerator: (item) => item.description,
+                          allowEmptySelection: true,
                         ) ??
-                        false)) {
-                  return;
-                }
-                final allProjects =
-                    (jsonDecode(allProjectsResponse.body) as List<dynamic>)
-                        .map(
-                          (e) =>
-                              ProjectData.fromJson(e as Map<String, dynamic>),
-                        )
-                        .toList();
-                if (allProjects.isEmpty) {
-                  input["projects"] = [];
-                } else {
-                  if (!context.mounted) return;
-                  final selectedProjects =
-                      (await showMultipleChoiceDialog(
-                              context: context,
-                              title: "Assign Projects",
-                              description:
-                                  "Select the projects to assign to this user.",
-                              initialValue: allProjects.length == 1
-                                  ? allProjects
-                                  : null,
-                              items: allProjects,
-                              titleGenerator: (item) => item.title,
-                              subtitleGenerator: (item) => item.description,
-                              allowEmptySelection: true,
-                            ) ??
-                            [])
-                        ..sort((a, b) => a.id.compareTo(b.id));
-                  input["projects"] = selectedProjects
-                      .map((p) => p.id)
-                      .toList();
-                }
+                        [])
+                    ..sort((a, b) => a.id.compareTo(b.id));
+              input["projects"] = selectedProjects.map((p) => p.id).toList();
+            }
 
-                final username = input.remove("username");
-                final response = await AuthManager.instance.fetch(
-                  http.Request(
-                      "POST",
-                      Uri.parse("${ApiManager.baseUri}/user/$username"),
-                    )
-                    ..headers["Content-Type"] = "application/json"
-                    ..body = jsonEncode(input),
-                );
-                if (response?.statusCode == 201) fetch();
+            if (!context.mounted) return;
+            final completer = Completer<void>();
+            http.Response? response;
+            showStatusModal(
+              context: context,
+              completer: completer,
+              failureDetailsGenerator: () =>
+                  responseFailureDetailsGenerator(response),
+            );
+
+            final username = input.remove("username");
+            response = await AuthManager.instance.fetch(
+              http.Request(
+                  "POST",
+                  Uri.parse("${ApiManager.baseUri}/user/$username"),
+                )
+                ..headers["Content-Type"] = "application/json"
+                ..body = jsonEncode(input),
+            );
+            if (response?.statusCode == 201) {
+              fetch();
+              completer.complete();
+              return;
+            }
+            completer.completeError("");
+          },
+          leadingIcon: Icon(Icons.add),
+          child: Text("Create user"),
+        ),
+      ],
+      ListType.project => [
+        MenuItemButton(
+          onPressed: () async {
+            while (true) {
+              if (!context.mounted) return;
+              var inputRaw = await showMultiPromptDialog(
+                context: context,
+                title: "Create project",
+                description:
+                    "Creates a new project with the specified information.",
+                prompts: {
+                  "title": MultiPromptPrompt(
+                    label: "Title",
+                    validator: (v) =>
+                        v.isEmpty ? "Title cannot be empty." : null,
+                    capitalization: TextCapitalization.words,
+                  ),
+                  "description": MultiPromptPrompt(
+                    label: "Description",
+                    placeholder: "Training data for a model to detect…",
+                    maxLength: 256,
+                    maxLines: 4,
+                  ),
+                },
+              );
+              if (inputRaw == null || !context.mounted) return;
+              final input = Map<String, dynamic>.from(inputRaw);
+
+              input["description"] = (input["description"]! as String).trim();
+              if (input["description"]!.isEmpty) {
+                input["description"] = null;
+              }
+
+              final completer = Completer<void>();
+              http.Response? response;
+              showStatusModal(
+                context: context,
+                completer: completer,
+                failureDetailsGenerator: () =>
+                    responseFailureDetailsGenerator(response),
+              );
+
+              response = await AuthManager.instance.fetch(
+                http.Request(
+                    "POST",
+                    Uri.parse("${ApiManager.baseUri}/projects"),
+                  )
+                  ..headers["Content-Type"] = "application/json"
+                  ..body = jsonEncode(input),
+              );
+              if (response?.statusCode == 201) {
+                fetch();
+                completer.complete();
+                return;
+              }
+              completer.completeError("");
+            }
+          },
+          leadingIcon: Icon(Icons.add),
+          child: Text("Create project"),
+        ),
+      ],
+      ListType.category => [
+        MenuItemButton(
+          onPressed: () async {
+            var inputRaw = await showMultiPromptDialog(
+              context: context,
+              title: "Create category",
+              description:
+                  "Creates a new category with the specified information.",
+              prompts: {
+                "name": MultiPromptPrompt(
+                  label: "Name",
+                  placeholder: "residual",
+                  validator: (v) => v.trim().isEmpty
+                      ? "Name cannot be empty."
+                      : !RegExp(r"^[a-z0-9]+(?:-[a-z0-9]+)*$").hasMatch(v)
+                      ? "Name must only contain lowercase letters, numbers and hyphens, cannot start or end with a hyphen and cannot contain consecutive hyphens."
+                      : null,
+                  capitalization: TextCapitalization.none,
+                ),
+                "displayName": MultiPromptPrompt(
+                  label: "Display name",
+                  placeholder: "Residual Waste",
+                ),
               },
-              leadingIcon: Icon(Icons.add),
-              child: Text("Create User"),
-            ),
-          ]);
+            );
+            if (inputRaw == null || !context.mounted) return;
+            final input = Map<String, dynamic>.from(inputRaw);
+
+            input["name"] = (input["name"]! as String).trim();
+
+            input["displayName"] = (input["displayName"]! as String).trim();
+            if (input["displayName"]!.isEmpty) {
+              input["displayName"] = null;
+            }
+
+            final completer = Completer<void>();
+            http.Response? response;
+            showStatusModal(
+              context: context,
+              completer: completer,
+              failureDetailsGenerator: () =>
+                  responseFailureDetailsGenerator(response),
+            );
+
+            response = await AuthManager.instance.fetch(
+              http.Request(
+                  "POST",
+                  Uri.parse("${ApiManager.baseUri}/categories"),
+                )
+                ..headers["Content-Type"] = "application/json"
+                ..body = jsonEncode(input),
+            );
+            if (response?.statusCode == 201) {
+              fetch();
+              completer.complete();
+              return;
+            }
+            completer.completeError("");
+          },
+          leadingIcon: Icon(Icons.add),
+          child: Text("Create category"),
+        ),
+      ],
+    };
     adminOptions.add(
       MenuItemButton(
         onPressed: () => fetch(),
         leadingIcon: Icon(Icons.refresh),
-        child: Text("Refetch Data"),
+        child: Text("Refetch data"),
       ),
     );
 
@@ -308,13 +414,16 @@ class _ListScreenState extends State<ListScreen> {
                                 children: List.generate(
                                   data.length,
                                   (i) => ListWidget(
-                                    key: ValueKey(
-                                      widget.isProjects
-                                          ? "project_${data[i]["id"]}"
-                                          : "user_${data[i]["username"]}",
-                                    ),
+                                    key: ValueKey(switch (widget.type) {
+                                      ListType.user =>
+                                        "user_${data[i]["username"]}",
+                                      ListType.project =>
+                                        "project_${data[i]["id"]}",
+                                      ListType.category =>
+                                        "category_${data[i]["name"]}",
+                                    }),
                                     data: data[i],
-                                    isProject: widget.isProjects,
+                                    type: widget.type,
                                     onDelete: fetch,
                                   ),
                                 ),
@@ -378,13 +487,13 @@ class _ListScreenState extends State<ListScreen> {
 
 class ListWidget extends StatefulWidget {
   final Map<String, dynamic> data;
-  final bool isProject;
+  final ListType type;
   final VoidCallback onDelete;
 
   const ListWidget({
     super.key,
     required this.data,
-    required this.isProject,
+    required this.type,
     required this.onDelete,
   });
 
@@ -402,9 +511,9 @@ class _ListWidgetState extends State<ListWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.isProject) {
+    if (widget.type == ListType.project) {
       project = ProjectData.fromJson(widget.data);
-    } else {
+    } else if (widget.type == ListType.user) {
       user = UserData.fromJson(widget.data);
       _preloadUserProjects();
       if (AuthManager.instance.authenticatedUserIsAdmin) {
@@ -455,23 +564,32 @@ class _ListWidgetState extends State<ListWidget> {
     final colorScheme = theme.colorScheme;
     final windowSizeClass = WindowSizeClass.of(context);
     final submissionRoute = SubmissionsRoute(
-      user: widget.isProject ? null : user!.username,
-      project: widget.isProject ? project!.id.toString() : null,
+      user: widget.type == ListType.user ? user!.username : null,
+      project: widget.type == ListType.project ? project!.id.toString() : null,
     );
 
     final showSubmissionsButton =
         context.router.current.route.name != submissionRoute.routeName ||
         context.router.current.queryParams != submissionRoute.queryParams;
-    final showDeleteButton = widget.isProject
+    final showDeleteButton = widget.type != ListType.user
         ? true
         : AuthManager.instance.authenticatedUser?.username != user?.username;
 
     void delete() async {
       if (!await showConfirmationDialog(
             context: context,
-            title: "Delete ${widget.isProject ? "Project" : "User"}",
+            title:
+                "Delete ${switch (widget.type) {
+                  ListType.user => "User",
+                  ListType.project => "Project",
+                  ListType.category => "Category",
+                }}",
             description:
-                "Are you sure you want to delete this ${widget.isProject ? "project" : "user"}? This action cannot be undone.",
+                "Are you sure you want to delete this ${switch (widget.type) {
+                  ListType.user => "user",
+                  ListType.project => "project",
+                  ListType.category => "category",
+                }}? This action cannot be undone.",
           ) ||
           !context.mounted) {
         return;
@@ -506,7 +624,7 @@ class _ListWidgetState extends State<ListWidget> {
     void projectSetDescription() async {
       final newDescription = await showPromptDialog(
         context: context,
-        title: "Set Description",
+        title: "Set description",
         content: project?.description,
         placeholder: "Training data for a model to detect…",
         maxLength: 256,
@@ -550,7 +668,7 @@ class _ListWidgetState extends State<ListWidget> {
     void userSetEmail() async {
       final newEmail = await showPromptDialog(
         context: context,
-        title: "Set Email Address",
+        title: "Set email address",
         content: user?.email,
         quickValidator: (e) => validateEmail(e),
         keyboardType: TextInputType.emailAddress,
@@ -594,7 +712,7 @@ class _ListWidgetState extends State<ListWidget> {
       if (!context.mounted) return;
       final newProjects = (await showMultipleChoiceDialog(
         context: context,
-        title: "Change Assigned Projects",
+        title: "Change assigned projects",
         initialValue: userAssignedProjects,
         items: items,
         titleGenerator: (item) => item.title,
@@ -754,6 +872,169 @@ class _ListWidgetState extends State<ListWidget> {
       completer.complete();
     }
 
+    void categorySetDisplayName() async {
+      final newDisplayName = await showPromptDialog(
+        context: context,
+        title: "Set display name",
+        content: widget.data["displayName"],
+        placeholder: "Residual Waste",
+      );
+      if (newDisplayName != null &&
+          newDisplayName != widget.data["displayName"] &&
+          context.mounted) {
+        final completer = Completer<void>();
+        http.Response? response;
+        showStatusModal(
+          context: context,
+          completer: completer,
+          failureDetailsGenerator: () =>
+              responseFailureDetailsGenerator(response),
+        );
+
+        response = await AuthManager.instance.fetch(
+          http.Request("PUT", uri)
+            ..headers["Content-Type"] = "application/json"
+            ..body = jsonEncode(
+              CategoryData.modifying(
+                displayName: newDisplayName.trim().isEmpty
+                    ? null
+                    : newDisplayName.trim(),
+              ),
+            ),
+        );
+        if (response == null || response.statusCode != 200) {
+          completer.completeError("");
+          return;
+        }
+
+        widget.data["displayName"] = newDisplayName.trim().isEmpty
+            ? null
+            : newDisplayName.trim();
+        if (mounted) setState(() {});
+        completer.complete();
+      }
+    }
+
+    final List<Widget> contents = switch (widget.type) {
+      ListType.user => [
+        Chip(
+          avatar: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: user?.avatar(context),
+          ),
+          label: Text(
+            user?.username ?? "–",
+            style: TextStyle(color: user?.roleColor()),
+          ),
+        ),
+        Chip(
+          avatar: Icon(Icons.email_outlined),
+          label: Text(
+            user?.email ?? "–",
+            style: validateEmail(user?.email ?? "")
+                ? null
+                : TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: theme.disabledColor,
+                  ),
+          ),
+          deleteIcon: Icon(Icons.edit),
+          onDeleted: AuthManager.instance.authenticatedUserIsAdmin
+              ? userSetEmail
+              : null,
+        ),
+        Chip(
+          avatar: Icon(Icons.event),
+          label: Text(
+            user != null ? dateFormat(context).format(user!.joinedAt) : "–",
+          ),
+        ),
+        Chip(
+          avatar: Icon(Icons.key),
+          label: Text(user?.role.toTitleCase() ?? "–"),
+        ),
+        Chip(
+          avatar: Icon(Icons.widgets_outlined),
+          label: Text(
+            user?.projects.isNotEmpty ?? false
+                ? userAssignedProjects.isNotEmpty
+                      ? user!.projects
+                            .map((e) {
+                              if (userAssignedProjects
+                                  .where((p) => p.id == e)
+                                  .isEmpty) {
+                                return "#$e";
+                              }
+                              return "“${userAssignedProjects.singleWhere((p) => p.id == e).title}”";
+                            })
+                            .join(", ")
+                      : "–"
+                : (AuthManager.instance.authenticatedUserIsAdmin
+                      ? "None"
+                      : "–"),
+            style:
+                user?.projects.isEmpty ??
+                    true && AuthManager.instance.authenticatedUserIsAdmin
+                ? TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: theme.disabledColor,
+                  )
+                : null,
+          ),
+          deleteIcon: Icon(Icons.edit),
+          onDeleted: AuthManager.instance.authenticatedUserIsAdmin
+              ? userSetProjects
+              : null,
+        ),
+        Chip(
+          avatar: Icon(Icons.list_alt_outlined),
+          label: Text("${user?.submissionCount}"),
+        ),
+      ],
+      ListType.project => [
+        Chip(
+          avatar: Icon(Icons.title_outlined),
+          label: Text(project?.title.toTitleCase() ?? "–"),
+        ),
+        Chip(
+          label: Text(
+            project?.description ?? "–",
+            overflow: TextOverflow.ellipsis,
+            maxLines: 5,
+          ),
+          deleteIcon: Icon(Icons.edit),
+          onDeleted: AuthManager.instance.authenticatedUserIsAdmin
+              ? projectSetDescription
+              : null,
+        ),
+        Chip(
+          avatar: Icon(Icons.event),
+          label: Text(
+            project != null
+                ? dateFormat(context).format(project!.createdAt)
+                : "–",
+          ),
+        ),
+        Chip(
+          avatar: Icon(Icons.list_alt_outlined),
+          label: Text("${project?.submissionCount}"),
+        ),
+      ],
+      ListType.category => [
+        Chip(
+          avatar: Icon(Icons.title_outlined),
+          label: Text(widget.data["name"] ?? "–"),
+        ),
+        Chip(
+          avatar: Icon(Icons.campaign_outlined),
+          label: Text(widget.data["displayName"] ?? "–"),
+          deleteIcon: Icon(Icons.edit),
+          onDeleted: AuthManager.instance.authenticatedUserIsAdmin
+              ? categorySetDisplayName
+              : null,
+        ),
+      ],
+    };
     final card = SizedBox(
       width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
       child: Card.filled(
@@ -765,130 +1046,42 @@ class _ListWidgetState extends State<ListWidget> {
               padding: EdgeInsets.all(8),
               child: SizedBox(
                 width: double.infinity,
-                child: Wrap(
-                  spacing: 2,
-                  runSpacing: 2,
-                  children: widget.isProject
-                      ? [
-                          Chip(
-                            avatar: Icon(Icons.title_outlined),
-                            label: Text(project?.title.toTitleCase() ?? "–"),
-                          ),
-                          Chip(
-                            label: Text(
-                              project?.description ?? "–",
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 5,
-                            ),
-                            deleteIcon: Icon(Icons.edit),
-                            onDeleted:
-                                AuthManager.instance.authenticatedUserIsAdmin
-                                ? projectSetDescription
-                                : null,
-                          ),
-                          Chip(
-                            avatar: Icon(Icons.event),
-                            label: Text(
-                              project != null
-                                  ? dateFormat(
-                                      context,
-                                    ).format(project!.createdAt)
-                                  : "–",
-                            ),
-                          ),
-                          Chip(
-                            avatar: Icon(Icons.list_alt_outlined),
-                            label: Text("${project?.submissionCount}"),
-                          ),
-                        ]
-                      : [
-                          Chip(
-                            avatar: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: user?.avatar(context),
-                            ),
-                            label: Text(
-                              user?.username ?? "–",
-                              style: TextStyle(color: user?.roleColor()),
-                            ),
-                          ),
-                          Chip(
-                            avatar: Icon(Icons.email_outlined),
-                            label: Text(
-                              user?.email ?? "–",
-                              style: validateEmail(user?.email ?? "")
-                                  ? null
-                                  : TextStyle(
-                                      fontStyle: FontStyle.italic,
-                                      color: theme.disabledColor,
-                                    ),
-                            ),
-                            deleteIcon: Icon(Icons.edit),
-                            onDeleted:
-                                AuthManager.instance.authenticatedUserIsAdmin
-                                ? userSetEmail
-                                : null,
-                          ),
-                          Chip(
-                            avatar: Icon(Icons.event),
-                            label: Text(
-                              user != null
-                                  ? dateFormat(context).format(user!.joinedAt)
-                                  : "–",
-                            ),
-                          ),
-                          Chip(
-                            avatar: Icon(Icons.key),
-                            label: Text(user?.role.toTitleCase() ?? "–"),
-                          ),
-                          Chip(
-                            avatar: Icon(Icons.widgets_outlined),
-                            label: Text(
-                              user?.projects.isNotEmpty ?? false
-                                  ? userAssignedProjects.isNotEmpty
-                                        ? user!.projects
-                                              .map((e) {
-                                                if (userAssignedProjects
-                                                    .where((p) => p.id == e)
-                                                    .isEmpty) {
-                                                  return "#$e";
-                                                }
-                                                return "“${userAssignedProjects.singleWhere((p) => p.id == e).title}”";
-                                              })
-                                              .join(", ")
-                                        : "–"
-                                  : (AuthManager
-                                            .instance
-                                            .authenticatedUserIsAdmin
-                                        ? "None"
-                                        : "–"),
-                              style:
-                                  user?.projects.isEmpty ??
-                                      true &&
-                                          AuthManager
-                                              .instance
-                                              .authenticatedUserIsAdmin
-                                  ? TextStyle(
-                                      fontStyle: FontStyle.italic,
-                                      color: theme.disabledColor,
-                                    )
-                                  : null,
-                            ),
-                            deleteIcon: Icon(Icons.edit),
-                            onDeleted:
-                                AuthManager.instance.authenticatedUserIsAdmin
-                                ? userSetProjects
-                                : null,
-                          ),
-                          Chip(
-                            avatar: Icon(Icons.list_alt_outlined),
-                            label: Text("${user?.submissionCount}"),
-                          ),
-                        ],
-                ),
+                child: Wrap(spacing: 2, runSpacing: 2, children: contents),
               ),
             ),
-            if (AuthManager.instance.authenticatedUserIsAdmin) ...[
+
+            if (widget.type == ListType.user &&
+                AuthManager.instance.authenticatedUserIsAdmin) ...[
+              Padding(
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 2),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 2,
+                    runSpacing: 2,
+                    children: [
+                      Chip(
+                        avatar: Icon(Icons.keyboard_arrow_up),
+                        label: Text(
+                          NumberFormat.decimalPatternDigits(
+                            locale: AppLocalizations.of(context).localeName,
+                            decimalDigits: 3,
+                          ).format(widget.data["validationWeightPositive"]),
+                        ),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.keyboard_arrow_down),
+                        label: Text(
+                          NumberFormat.decimalPatternDigits(
+                            locale: AppLocalizations.of(context).localeName,
+                            decimalDigits: 3,
+                          ).format(widget.data["validationWeightNegative"]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               Padding(
                 padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
                 child: SizedBox(
@@ -897,16 +1090,45 @@ class _ListWidgetState extends State<ListWidget> {
                     spacing: 2,
                     runSpacing: 2,
                     children: [
-                      if (showSubmissionsButton)
+                      Chip(
+                        avatar: Icon(Icons.credit_score),
+                        label: Text(
+                          NumberFormat.decimalPatternDigits(
+                            locale: AppLocalizations.of(context).localeName,
+                            decimalDigits: 3,
+                          ).format(
+                            (1 + widget.data["validationWeightPositive"]) /
+                                (2 +
+                                    widget.data["validationWeightPositive"] +
+                                    widget.data["validationWeightNegative"]),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            if (AuthManager.instance.authenticatedUserIsAdmin)
+              Padding(
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 2,
+                    runSpacing: 2,
+                    children: [
+                      if (widget.type != ListType.category &&
+                          showSubmissionsButton)
                         ActionChip(
                           avatar: Icon(Icons.arrow_forward),
                           label: Text("Submissions"),
                           onPressed: () => context.navigateTo(submissionRoute),
                         ),
-                      if (widget.isProject) ...[
+                      if (widget.type == ListType.project) ...[
                         ActionChip(
                           avatar: Icon(Icons.cloud_download_outlined),
-                          label: Text("Asset Dump"),
+                          label: Text("Asset dump"),
                           onPressed: () async {
                             final completer = Completer();
                             String? error;
@@ -969,7 +1191,7 @@ class _ListWidgetState extends State<ListWidget> {
                         ),
                         ActionChip(
                           avatar: Icon(Icons.attribution),
-                          label: Text("Copy Attributions"),
+                          label: Text("Copy attributions"),
                           onPressed: () async {
                             final completer = Completer();
                             String? error;
@@ -1055,7 +1277,7 @@ class _ListWidgetState extends State<ListWidget> {
                         ),
                         onPressed: showDeleteButton ? delete : null,
                       ),
-                      if (!widget.isProject) ...[
+                      if (widget.type == ListType.user) ...[
                         ActionChip(
                           avatar: Icon(
                             user!.disabled == null
@@ -1082,7 +1304,6 @@ class _ListWidgetState extends State<ListWidget> {
                   ),
                 ),
               ),
-            ],
           ],
         ),
       ),
@@ -1090,7 +1311,11 @@ class _ListWidgetState extends State<ListWidget> {
     return card;
   }
 
-  Uri get uri => widget.isProject
-      ? Uri.parse("${ApiManager.baseUri}/projects/${project!.id}")
-      : Uri.parse("${ApiManager.baseUri}/user/${user!.username}");
+  Uri get uri => Uri.parse(
+    "${ApiManager.baseUri}/${switch (widget.type) {
+      ListType.user => "user/${user!.username}",
+      ListType.project => "projects/${project!.id}",
+      ListType.category => "categories/${widget.data["name"]}",
+    }}",
+  );
 }

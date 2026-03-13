@@ -9,7 +9,9 @@ import 'package:shelf_router/shelf_router.dart';
 import '../database/database.dart';
 import '../helpers.dart';
 import '../server.dart';
+
 import 'api_assets.dart' as api_assets;
+import 'api_categories.dart' as api_categories;
 import 'api_projects.dart' as api_projects;
 import 'api_users.dart' as api_user;
 
@@ -64,6 +66,7 @@ Handler get apiPipeline => Pipeline()
 
 void defineApiRouter() {
   api_assets.define(apiRouter);
+  api_categories.define(apiRouter);
   api_projects.define(apiRouter);
   api_user.define(apiRouter);
 }

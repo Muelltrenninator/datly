@@ -1,7 +1,7 @@
 {
     "@@locale": "de",
     "quote": "„{content}“",
-    "retry": "Erneut Versuchen",
+    "retry": "Erneut versuchen",
     "delete": "Löschen",
     "failedToLoadDocument": "Fehler beim Laden des Dokuments.",
     "loginInvalidEmail": "Ungültige E‑Mail‑Adresse.",

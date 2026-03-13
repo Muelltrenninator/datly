@@ -102,7 +102,7 @@ void define(Router router) {
         }) {
           final updatedProject = ProjectsCompanion(
             title: Value.absentIfNull(title?.nullIfBlank),
-            description: Value.absentIfNull(description?.nullIfBlank),
+            description: description.absentOrNullIfBlank,
           );
 
           await (db.update(
@@ -126,7 +126,7 @@ void define(Router router) {
         }) {
           final createdProject = ProjectsCompanion.insert(
             title: title.trim(),
-            description: Value.absentIfNull(description?.nullIfBlank),
+            description: description.absentOrNullIfBlank,
           );
 
           await db.into(db.projects).insert(createdProject);
@@ -508,6 +508,21 @@ void define(Router router) {
           );
         }
 
+        final category = req.url.queryParameters["category"];
+        final effectiveCategory = category.absentOrNullIfBlank;
+        if (effectiveCategory.value != null) {
+          final existingCategory =
+              await (db.select(db.categories)
+                    ..where((c) => c.name.equals(effectiveCategory.value!)))
+                  .getSingleOrNull();
+          if (existingCategory == null) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Category not found"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+        }
+
         late final Multipart part;
         String mime;
         try {
@@ -571,6 +586,7 @@ void define(Router router) {
                 assetId: Value(uuid),
                 assetMimeType: Value(mime),
                 assetBlurHash: blurHash,
+                category: category.absentOrNullIfBlank,
               ),
             );
         final newSubmission = await (db.select(
@@ -587,9 +603,9 @@ void define(Router router) {
                 user: auth.user.username,
                 userSnapshot: jsonEncode(auth.user.toJson().remove("password")),
                 ipAddress: identifierFromRequest(req)!,
-                userAgent: Value.absentIfNull(req.headers["user-agent"]),
+                userAgent: req.headers["user-agent"].absentOrNullIfBlank,
                 signature: signature,
-                signatureParental: Value.absentIfNull(signatureParental),
+                signatureParental: signatureParental.absentOrNullIfBlank,
                 signatureMethod: SignatureMethod.typed,
                 signatureSnapshot: signatureSnapshot,
                 consentVersion: consentVersion,
@@ -659,6 +675,7 @@ void define(Router router) {
         if (jsonDecode(await req.readAsString()) case {
           "status": String? status,
           "moderationReason": String? moderationReason,
+          "category": String? category,
         }) {
           if (status != null &&
               !SubmissionStatus.values.asNameMap().keys.contains(status)) {
@@ -668,16 +685,39 @@ void define(Router router) {
             );
           }
 
+          final effectiveCategory = category.absentOrNullIfBlank;
+          if (effectiveCategory.value != null) {
+            final existingCategory =
+                await (db.select(db.categories)
+                      ..where((c) => c.name.equals(effectiveCategory.value!)))
+                    .getSingleOrNull();
+            if (existingCategory == null) {
+              return Response.badRequest(
+                body: jsonEncode({"error": "Category not found"}),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+          }
+
           await (db.update(
             db.submissions,
           )..where((s) => s.id.equals(submission.id))).write(
             SubmissionsCompanion(
               status: status != null
                   ? Value(SubmissionStatus.values.byName(status))
+                  : effectiveCategory.present
+                  ? Value(SubmissionStatus.pending)
                   : Value.absent(),
-              moderationReason: Value.absentIfNull(
-                moderationReason?.nullIfBlank,
-              ),
+              moderationReason: moderationReason.absentOrNullIfBlank,
+              category: effectiveCategory,
+
+              // reset validation weights if category is removed
+              validationWeightNegative: effectiveCategory.present
+                  ? const Value(0)
+                  : Value.absent(),
+              validationWeightPositive: effectiveCategory.present
+                  ? const Value(0)
+                  : Value.absent(),
             ),
           );
 
@@ -698,6 +738,10 @@ void define(Router router) {
               SubmissionsCompanion(
                 assetId: const Value(null),
                 assetMimeType: const Value(null),
+
+                category: Value(null),
+                validationWeightNegative: Value(0),
+                validationWeightPositive: Value(0),
               ),
             ));
           }

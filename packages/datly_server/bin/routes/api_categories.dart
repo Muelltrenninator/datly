@@ -1,0 +1,119 @@
+import 'dart:convert';
+
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
+
+import '../database/database.dart';
+import '../helpers.dart';
+import '../server.dart';
+import 'api.dart';
+
+void define(Router router) {
+  router
+    ..get(
+      "/categories/list", // MARK: [GET] /categories/list
+      apiAuthWall((req, auth) async {
+        final categories = await db.select(db.categories).get();
+        return Response.ok(
+          jsonEncode(categories.map((u) => u.toJson()).toList()),
+          headers: {"Content-Type": "application/json"},
+        );
+      }),
+    )
+    ..get(
+      "/categories/<name>", // MARK: [GET] /categories/<name>
+      apiAuthWall((req, auth) async {
+        final category =
+            await (db.select(db.categories)
+                  ..where((u) => u.name.equals(req.params["name"] ?? "")))
+                .getSingleOrNull();
+        if (category == null) {
+          return Response.notFound(jsonEncode({"error": "Category not found"}));
+        }
+
+        return Response.ok(
+          category.toJsonString(),
+          headers: {"Content-Type": "application/json"},
+        );
+      }),
+    )
+    ..put(
+      "/categories/<name>", // MARK: [PUT] /categories/<name>
+      apiAuthWall((req, _) async {
+        final category =
+            await (db.select(db.categories)
+                  ..where((u) => u.name.equals(req.params["name"] ?? "")))
+                .getSingleOrNull();
+        if (category == null) {
+          return Response.notFound(jsonEncode({"error": "Category not found"}));
+        }
+
+        if (jsonDecode(await req.readAsString()) case {
+          "displayName": String? displayName,
+        }) {
+          final updatedCategory = CategoriesCompanion(
+            displayName: displayName.absentOrNullIfBlank,
+          );
+
+          await (db.update(
+            db.categories,
+          )..where((u) => u.name.equals(category.name))).write(updatedCategory);
+          return Response.ok(null);
+        } else {
+          return Response.badRequest(
+            body: jsonEncode({"error": "Invalid category data"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+      }, minimumRole: UserRole.admin),
+    )
+    ..post(
+      "/categories", // MARK: [POST] /categories
+      apiAuthWall((req, _) async {
+        if (jsonDecode(await req.readAsString()) case {
+          "name": String name,
+          "displayName": String? displayName,
+        }) {
+          if (!RegExp(r"^[a-z0-9]+(?:-[a-z0-9]+)*$").hasMatch(name)) {
+            return Response.badRequest(
+              body: jsonEncode({
+                "error":
+                    "Invalid category name. Only lowercase letters, numbers, and hyphens are allowed.",
+              }),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+
+          final createdCategory = CategoriesCompanion.insert(
+            name: name,
+            displayName: displayName.absentOrNullIfBlank,
+          );
+
+          await db.into(db.categories).insert(createdCategory);
+          return Response(201);
+        } else {
+          return Response.badRequest(
+            body: jsonEncode({"error": "Invalid category data"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+      }, minimumRole: UserRole.admin),
+    )
+    ..delete(
+      "/categories/<name>", // MARK: [DELETE] /categories/<name>
+      apiAuthWall((req, _) async {
+        final category =
+            await (db.select(db.categories)
+                  ..where((u) => u.name.equals(req.params["name"] ?? "")))
+                .getSingleOrNull();
+        if (category == null) {
+          return Response.notFound(jsonEncode({"error": "Category not found"}));
+        }
+
+        await (db.delete(
+          db.categories,
+        )..where((u) => u.name.equals(category.name))).go();
+        return Response.ok(null);
+      }, minimumRole: UserRole.admin),
+    );
+}

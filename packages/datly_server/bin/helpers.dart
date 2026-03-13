@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:datly/generated/gitbaker.g.dart';
+import 'package:drift/drift.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:shelf/shelf.dart';
@@ -19,6 +20,19 @@ late final String? captchaSecretKey;
 extension NullIfEmpty on String {
   String? get nullIfEmpty => isEmpty ? null : this;
   String? get nullIfBlank => trim().nullIfEmpty;
+}
+
+extension NullableStringToValue on String? {
+  /// For nullable string DB columns:
+  /// - `null` -> [Value.absent] (field not provided, don't update)
+  /// - blank/empty -> [Value(null)] (explicitly set DB value to NULL)
+  /// - non-blank -> [Value(trimmed)] (set to the trimmed value)
+  Value<String?> get absentOrNullIfBlank {
+    if (this == null) return const Value.absent();
+    final trimmed = this!.trim();
+    if (trimmed.isEmpty) return const Value(null);
+    return Value(trimmed);
+  }
 }
 
 Future<({bool secure, String? code, String? message})> isSecurePassword(
