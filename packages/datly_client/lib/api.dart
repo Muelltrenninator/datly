@@ -281,6 +281,7 @@ class SubmissionData {
   String? category;
   double validationWeightPositive;
   double validationWeightNegative;
+  List<String> validationReports;
 
   SubmissionData({
     required this.id,
@@ -296,11 +297,13 @@ class SubmissionData {
     required this.category,
     required this.validationWeightPositive,
     required this.validationWeightNegative,
+    required this.validationReports,
   });
 
   Color statusColor() => switch (status) {
     "accepted" => Colors.green,
     "rejected" => Colors.redAccent,
+    "reported" => Colors.deepOrangeAccent,
     "censored" => Colors.blueAccent,
     _ => Colors.grey,
   };
@@ -333,6 +336,17 @@ class SubmissionData {
     }
     return tags.isEmpty ? input : tags;
   }
+   String? statusDisplay(BuildContext context, [String? status]) {
+    final appLocalizations = AppLocalizations.of(context);
+    return switch (status ?? this.status) {
+      "pending" => appLocalizations.submissionStatusPending,
+      "accepted" => appLocalizations.submissionStatusAccepted,
+      "rejected" => appLocalizations.submissionStatusRejected,
+      "reported" => appLocalizations.submissionStatusReported,
+      "censored" => appLocalizations.submissionStatusCensored,
+      _ => null,
+    };
+  }
 
   Uri? assetUri() => assetId != null && assetMimeType != null
       ? Uri.parse(
@@ -344,10 +358,12 @@ class SubmissionData {
     String? status,
     String? moderationReason,
     String? category,
+    List<String>? validationReports,
   }) => {
     "status": status,
     "moderationReason": moderationReason,
     "category": category,
+    "validationReports": validationReports,
   };
 
   factory SubmissionData.fromJson(Map<String, dynamic> json) => SubmissionData(
@@ -367,6 +383,7 @@ class SubmissionData {
     category: json["category"],
     validationWeightPositive: json["validationWeightPositive"]!,
     validationWeightNegative: json["validationWeightNegative"]!,
+    validationReports: List<String>.from(json["validationReports"]),
   );
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -382,6 +399,7 @@ class SubmissionData {
     "category": category,
     "validationWeightPositive": validationWeightPositive,
     "validationWeightNegative": validationWeightNegative,
+    "validationReports": validationReports,
   };
 }
 
@@ -425,16 +443,42 @@ class ProjectData {
 class CategoryData {
   String name;
   String? displayName;
+  int submissionCount;
 
-  CategoryData({required this.name, required this.displayName});
+  CategoryData({
+    required this.name,
+    required this.displayName,
+    required this.submissionCount,
+  });
 
-  String displayOrName() => (displayName ?? name);
+  String resolveDisplayName() => displayName ?? name;
+  static String? preName({
+    required BuildContext context,
+    required String name,
+  }) {
+    final appLocalizations = AppLocalizations.of(context);
+    return switch (name) {
+      "organic" => appLocalizations.listCategoryPreOrganic,
+      "hazardous" => appLocalizations.listCategoryPreHazardous,
+      "plastic" => appLocalizations.listCategoryPrePlastic,
+      "paper" => appLocalizations.listCategoryPrePaper,
+      "residual" => appLocalizations.listCategoryPreResidual,
+      _ => null,
+    };
+  }
 
   static Map<String, dynamic> modifying({String? displayName}) => {
     "displayName": displayName,
   };
 
-  factory CategoryData.fromJson(Map<String, dynamic> json) =>
-      CategoryData(name: json["name"]!, displayName: json["displayName"]);
-  Map<String, dynamic> toJson() => {"name": name, "displayName": displayName};
+  factory CategoryData.fromJson(Map<String, dynamic> json) => CategoryData(
+    name: json["name"]!,
+    displayName: json["displayName"],
+    submissionCount: json["submissionCount"]!,
+  );
+  Map<String, dynamic> toJson() => {
+    "name": name,
+    "displayName": displayName,
+    "submissionCount": submissionCount,
+  };
 }

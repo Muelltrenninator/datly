@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';
@@ -27,6 +28,8 @@ Uint8List _decodeBlurHash(String blurHash) {
     img.encodePng(BlurHash.decode(blurHash).toImage(64, 64)),
   );
 }
+
+CategoryData? _lastSelectedCategory;
 
 @RoutePage()
 class SubmissionsPage extends StatefulWidget {
@@ -162,7 +165,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                         "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}",
                       )
                     : Uri.parse(
-                        "${ApiManager.baseUri}/user/$effectiveUser/submissions/live",
+                        "${ApiManager.baseUri}/user/$effectiveUser/submissions/live?page=${widget.page.abs()}",
                       ),
               ),
             ),
@@ -227,8 +230,11 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final availablePages = effectiveProjectData?.submissionCount != null
-        ? (effectiveProjectData!.submissionCount / 96).ceil()
+    final submissionCount =
+        effectiveProjectData?.submissionCount ??
+        effectiveUserData?.submissionCount;
+    final availablePages = submissionCount != null
+        ? (submissionCount / 96).ceil()
         : null;
     return Stack(
       children: [
@@ -258,8 +264,8 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                             if (data.isEmpty) {
                               return Text(
                                 widget.page < 1 ||
-                                        (availablePages != null &&
-                                            widget.page > availablePages)
+                                        ((availablePages ?? 0) != 0 &&
+                                            widget.page > availablePages!)
                                     ? AppLocalizations.of(context).invalidPage
                                     : AppLocalizations.of(
                                         context,
@@ -290,15 +296,15 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                                     }),
                                   ),
                                 ),
-                                if (effectiveProject != null &&
-                                    availablePages! > 1)
+                                if (availablePages != null &&
+                                    availablePages > 1)
                                   Container(
                                     margin: const EdgeInsets.only(
                                       top: 32,
-                                      left: 64,
-                                      right: 64,
+                                      left: 32,
+                                      right: 32,
                                     ),
-                                    constraints: BoxConstraints(maxWidth: 320),
+                                    constraints: BoxConstraints(maxWidth: 480),
                                     child: Column(
                                       children: [
                                         SizedBox(
@@ -380,6 +386,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   @override
   void initState() {
     super.initState();
+    _preloadCategories();
     _loadBlurHash();
     _loadMetadata();
   }
@@ -543,29 +550,44 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
 
     void setStatus() async {
       String? selection;
+      late final bool isQuickAction;
       if (HardwareKeyboard.instance.isShiftPressed) {
         selection ??= widget.data.status == "accepted"
             ? "rejected"
             : "accepted";
+        isQuickAction = true;
       } else if (HardwareKeyboard.instance.isControlPressed) {
         selection ??= "rejected";
+        isQuickAction = true;
+      } else {
+        isQuickAction = false;
+      }
+
+      if (selection == "accepted" && widget.data.category == null) {
+        selection = null;
       }
 
       selection ??= await showRadioDialog(
         context: context,
         title: "Set status",
-        items: ["pending", "accepted", "rejected", "censored"],
+        items: ["pending", "accepted", "rejected", "reported", "censored"],
         initialValue: widget.data.status,
-        titleGenerator: (item) => item.toTitleCase(),
+        titleGenerator: (item) =>
+            widget.data.statusDisplay(context, item) ?? item.toTitleCase(),
         subtitleGenerator: (item) => switch (item) {
           "pending" =>
             "The submission will be reviewed again later. Don't use this unless necessary.",
-          "accepted" => "This will add the asset to asset dumps.",
+          "accepted" =>
+            "This will add the asset to asset dumps. Only available if category is set.",
           "rejected" => "The asset will be ignored.",
+          "reported" =>
+            "The submission has been reported by users during validation. This status is automatically set and should not be set manually.",
           "censored" =>
             "While the submission will not be deleted, the asset will be, only keeping metadata and a crude thumbnail. This is not reversible.",
           _ => "",
         },
+        enabledGenerator: (item) =>
+            item == "accepted" && widget.data.category == null ? false : true,
       );
       if (!context.mounted) return;
       if (selection == "censored" &&
@@ -582,12 +604,14 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
           context.mounted) {
         final completer = Completer<void>();
         http.Response? response;
-        showStatusModal(
-          context: context,
-          completer: completer,
-          failureDetailsGenerator: () =>
-              responseFailureDetailsGenerator(response),
-        );
+        if (!isQuickAction) {
+          showStatusModal(
+            context: context,
+            completer: completer,
+            failureDetailsGenerator: () =>
+                responseFailureDetailsGenerator(response),
+          );
+        }
 
         response = await AuthManager.instance.fetch(
           http.Request("PUT", uri)
@@ -604,39 +628,59 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
     }
 
     void setCategory() async {
+      CategoryData? newCategory;
+      late final bool isQuickAction;
+      if (HardwareKeyboard.instance.isShiftPressed) {
+        newCategory ??= _lastSelectedCategory;
+        isQuickAction = true;
+      } else {
+        isQuickAction = false;
+      }
+
       bool submitted = false;
-      final newCategory = await showRadioDialog<CategoryData>(
+      newCategory ??= await showRadioDialog<CategoryData>(
         context: context,
         title: "Set category",
         description:
             "This will be used to sort and validate the submission in the 3×3 crowd sourcing validation grid.",
         items: availableCategories,
         initialValue: category,
-        titleGenerator: (item) => item.displayName ?? item.name,
+        titleGenerator: (item) =>
+            CategoryData.preName(context: context, name: item.name) ??
+            item.resolveDisplayName(),
         iconGenerator: (item) =>
-            item.displayName != null ? Text(item.name) : null,
+            CategoryData.preName(context: context, name: item.name) != null ||
+                item.displayName != null
+            ? Text(item.name)
+            : null,
         allowEmptySelection: true,
         toggleable: true,
         onSubmit: (_) => submitted = true,
       );
-      if (submitted &&
+      if ((isQuickAction || submitted) &&
           newCategory?.name != widget.data.category &&
           context.mounted &&
-          await showConfirmationDialog(
-            context: context,
-            title: "Reset validation weights to set new category?",
-            description:
-                "To change the category of a submission it is necessary to reset the positive and negative validation score of the submission. This action cannot be undone.",
-          )) {
+          ((widget.data.validationWeightPositive == 0 &&
+                  widget.data.validationWeightNegative == 0) ||
+              await showConfirmationDialog(
+                context: context,
+                title: "Reset validation weights to set new category?",
+                description:
+                    "To change the category of a submission it is necessary to reset the positive and negative validation score of the submission. This action cannot be undone.",
+              ))) {
+        _lastSelectedCategory = newCategory;
+
         if (!context.mounted) return;
         final completer = Completer<void>();
         http.Response? response;
-        showStatusModal(
-          context: context,
-          completer: completer,
-          failureDetailsGenerator: () =>
-              responseFailureDetailsGenerator(response),
-        );
+        if (!isQuickAction) {
+          showStatusModal(
+            context: context,
+            completer: completer,
+            failureDetailsGenerator: () =>
+                responseFailureDetailsGenerator(response),
+          );
+        }
 
         response = await AuthManager.instance.fetch(
           http.Request("PUT", uri)
@@ -679,6 +723,29 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
         return;
       }
       completer.completeError("");
+    }
+
+    void clearReports() async {
+      final completer = Completer<void>();
+      http.Response? response;
+      showStatusModal(
+        context: context,
+        completer: completer,
+        failureDetailsGenerator: () =>
+            responseFailureDetailsGenerator(response),
+      );
+
+      response = await AuthManager.instance.fetch(
+        http.Request("PUT", uri)
+          ..headers["Content-Type"] = "application/json"
+          ..body = jsonEncode(SubmissionData.modifying(validationReports: [])),
+      );
+      if (response != null && response.statusCode == 200) {
+        widget.onUpdate?.call();
+        completer.complete();
+      } else {
+        completer.completeError("");
+      }
     }
 
     Widget? image;
@@ -754,13 +821,26 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
           : AspectRatio(aspectRatio: 1 / 1, child: image);
     }
 
+    final categoryName = widget.data.category != null
+        ? CategoryData.preName(
+                context: context,
+                name: widget.data.category ?? "",
+              ) ??
+              (availableCategories.any((c) => c.name == widget.data.category)
+                  ? availableCategories
+                            .firstWhere((c) => c.name == widget.data.category)
+                            .displayName ??
+                        widget.data.category!
+                  : widget.data.category!)
+        : "–";
+
     final card = SizedBox(
       width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
       child: Card.filled(
         margin: EdgeInsets.zero,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (widget.includeImage) ...[
               ClipRRect(
@@ -908,38 +988,39 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                   ),
                 ),
               ),
-            if (!widget.includeImage &&
+            if ((!widget.includeImage || widget.data.status != "censored") &&
                 AuthManager.instance.authenticatedUserIsAdmin) ...[
-              Padding(
-                padding: EdgeInsets.only(left: 8, right: 8, bottom: 2),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    spacing: 2,
-                    runSpacing: 2,
-                    children: [
-                      Chip(
-                        avatar: Icon(Icons.keyboard_arrow_up),
-                        label: Text(
-                          NumberFormat.decimalPatternDigits(
-                            locale: AppLocalizations.of(context).localeName,
-                            decimalDigits: 3,
-                          ).format(widget.data.validationWeightPositive),
+              if (!widget.includeImage)
+                Padding(
+                  padding: EdgeInsets.only(left: 8, right: 8, bottom: 2),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      spacing: 2,
+                      runSpacing: 2,
+                      children: [
+                        Chip(
+                          avatar: Icon(Icons.keyboard_arrow_up),
+                          label: Text(
+                            NumberFormat.decimalPatternDigits(
+                              locale: AppLocalizations.of(context).localeName,
+                              decimalDigits: 3,
+                            ).format(widget.data.validationWeightPositive),
+                          ),
                         ),
-                      ),
-                      Chip(
-                        avatar: Icon(Icons.keyboard_arrow_down),
-                        label: Text(
-                          NumberFormat.decimalPatternDigits(
-                            locale: AppLocalizations.of(context).localeName,
-                            decimalDigits: 3,
-                          ).format(widget.data.validationWeightNegative),
+                        Chip(
+                          avatar: Icon(Icons.keyboard_arrow_down),
+                          label: Text(
+                            NumberFormat.decimalPatternDigits(
+                              locale: AppLocalizations.of(context).localeName,
+                              decimalDigits: 3,
+                            ).format(widget.data.validationWeightNegative),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
               Padding(
                 padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
                 child: SizedBox(
@@ -948,43 +1029,39 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                     spacing: 2,
                     runSpacing: 2,
                     children: [
-                      Chip(
-                        avatar: Icon(Icons.credit_score),
-                        label: Text(
-                          NumberFormat.decimalPatternDigits(
-                            locale: AppLocalizations.of(context).localeName,
-                            decimalDigits: 3,
-                          ).format(
-                            (1 + widget.data.validationWeightPositive) /
-                                (2 +
-                                    widget.data.validationWeightPositive +
-                                    widget.data.validationWeightNegative),
+                      if (!widget.includeImage)
+                        Chip(
+                          avatar: Icon(Icons.credit_score),
+                          label: Text(
+                            NumberFormat.decimalPatternDigits(
+                              locale: AppLocalizations.of(context).localeName,
+                              decimalDigits: 3,
+                            ).format(
+                              (1 + widget.data.validationWeightPositive) /
+                                  (2 +
+                                      widget.data.validationWeightPositive +
+                                      widget.data.validationWeightNegative),
+                            ),
                           ),
                         ),
-                      ),
                       Chip(
                         avatar: Icon(Icons.topic_outlined),
-                        label: Text(
-                          widget.data.category != null
-                              ? availableCategories.any(
-                                      (c) => c.name == widget.data.category,
-                                    )
-                                    ? availableCategories
-                                              .firstWhere(
-                                                (c) =>
-                                                    c.name ==
-                                                    widget.data.category,
-                                              )
-                                              .displayName ??
-                                          widget.data.category!
-                                    : widget.data.category!
-                              : "–",
-                        ),
+                        label: Text(categoryName),
                         deleteIcon: Icon(Icons.edit),
                         onDeleted: availableCategories.isNotEmpty
                             ? setCategory
                             : null,
                       ),
+                      if (widget.data.validationReports.isNotEmpty)
+                        Chip(
+                          avatar: Icon(Icons.report),
+                          label: Text(
+                            "“${widget.data.validationReports.join("”, “")}”",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 3,
+                          ),
+                          onDeleted: clearReports,
+                        ),
                     ],
                   ),
                 ),
@@ -1002,21 +1079,8 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                       backgroundColor: widget.data.statusColor(),
                       label: Builder(
                         builder: (context) => Text(
-                          switch (widget.data.status) {
-                            "pending" => AppLocalizations.of(
-                              context,
-                            ).submissionStatusPending,
-                            "accepted" => AppLocalizations.of(
-                              context,
-                            ).submissionStatusAccepted,
-                            "rejected" => AppLocalizations.of(
-                              context,
-                            ).submissionStatusRejected,
-                            "censored" => AppLocalizations.of(
-                              context,
-                            ).submissionStatusCensored,
-                            _ => widget.data.status.toTitleCase(),
-                          },
+                          widget.data.statusDisplay(context) ??
+                              widget.data.status.toTitleCase(),
                           style: DefaultTextStyle.of(context).style.copyWith(
                             color: widget.data.statusColor().onColor(),
                           ),
@@ -1158,50 +1222,44 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
               ),
               child: ColoredBox(
                 color: ColorScheme.of(context).surfaceContainerHighest,
-                child: SizeTransition(
-                  axis: Axis.horizontal,
+                child: DoubledSizeTransition(
                   sizeFactor: animation,
-                  axisAlignment: -1,
-                  child: SizeTransition(
-                    axis: Axis.vertical,
-                    sizeFactor: animation,
-                    axisAlignment: 1,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Divider(height: 1),
-                        (widget.effectiveProject == null ||
-                                    widget.effectiveProjectData != null) &&
-                                (widget.effectiveProject != null ||
-                                    widget.effectiveUserData != null)
-                            ? ListWidget(
-                                data:
-                                    (widget.effectiveProject != null
-                                            ? widget.effectiveProjectData!
-                                            : widget.effectiveUserData!
-                                                  as dynamic)
-                                        .toJson(),
-                                type: widget.effectiveProject != null
-                                    ? ListType.project
-                                    : ListType.user,
-                                onDelete: () {
-                                  if (context.router.stack.length > 1) {
-                                    context.router.pop();
-                                  } else {
-                                    context.navigateTo(MainRoute());
-                                  }
-                                },
-                              )
-                            : Padding(
-                                padding: EdgeInsets.only(
-                                  left: 52,
-                                  top: 32,
-                                  bottom: 32,
-                                ),
-                                child: CircularProgressIndicator(),
+                  minSizeFactor: 150.2 / 224,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Divider(height: 1),
+                      (widget.effectiveProject == null ||
+                                  widget.effectiveProjectData != null) &&
+                              (widget.effectiveProject != null ||
+                                  widget.effectiveUserData != null)
+                          ? ListWidget(
+                              data:
+                                  (widget.effectiveProject != null
+                                          ? widget.effectiveProjectData!
+                                          : widget.effectiveUserData!
+                                                as dynamic)
+                                      .toJson(),
+                              type: widget.effectiveProject != null
+                                  ? ListType.project
+                                  : ListType.user,
+                              onDelete: () {
+                                if (context.router.stack.length > 1) {
+                                  context.router.pop();
+                                } else {
+                                  context.navigateTo(MainRoute());
+                                }
+                              },
+                            )
+                          : Padding(
+                              padding: EdgeInsets.only(
+                                left: 52,
+                                top: 32,
+                                bottom: 32,
                               ),
-                      ],
-                    ),
+                              child: CircularProgressIndicator(),
+                            ),
+                    ],
                   ),
                 ),
               ),
@@ -1227,62 +1285,84 @@ class SubmissionsPageControl extends StatelessWidget {
     this.enabled = true,
   });
 
+  void _navigateTo(BuildContext context, int targetPage) {
+    context.navigateTo(
+      SubmissionsRoute(
+        project: routeParams.project,
+        user: routeParams.user,
+        page: targetPage,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final tileCount = (constraints.maxWidth / 40).floor() - 2;
-      assert(tileCount > 0);
+      final theme = Theme.of(context);
+      final colorScheme = theme.colorScheme;
 
-      var startPage = (page - (tileCount / 2).floor()).clamp(1, availablePages);
-      var endPage = (startPage + tileCount - 1).clamp(1, availablePages);
+      final totalSlots = math.max((constraints.maxWidth / 40).floor() - 2, 1);
 
-      while (endPage - startPage + 1 < tileCount && startPage > 1) {
-        startPage = (startPage - 1).clamp(1, availablePages);
+      var rangeBudget = totalSlots;
+      late int startPage, endPage;
+      for (var i = 0; i < 3; i++) {
+        startPage = (page - (rangeBudget / 2).floor()).clamp(1, availablePages);
+        endPage = (startPage + rangeBudget - 1).clamp(1, availablePages);
+        while (endPage - startPage + 1 < rangeBudget && startPage > 1) {
+          startPage--;
+        }
+
+        var extraItems = 0;
+        if (startPage > 1) extraItems++; // first-page button
+        if (startPage > 2) extraItems++; // leading ellipsis
+        if (endPage < availablePages) extraItems++; // last-page button
+        if (endPage < availablePages - 1) extraItems++; // trailing ellipsis
+
+        if ((endPage - startPage + 1) + extraItems <= totalSlots) break;
+        rangeBudget = math.max(totalSlots - extraItems, 1);
+      }
+
+      final items = <Widget>[];
+      if (startPage > 1) {
+        items.add(_pageButton(context, 1, colorScheme));
+        if (startPage > 2) {
+          items.add(_ellipsis(colorScheme));
+        }
+      }
+
+      for (var i = startPage; i <= endPage; i++) {
+        items.add(_pageButton(context, i, colorScheme));
+      }
+
+      if (endPage < availablePages) {
+        if (endPage < availablePages - 1) {
+          items.add(_ellipsis(colorScheme));
+        }
+        items.add(_pageButton(context, availablePages, colorScheme));
       }
 
       return Row(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-            onPressed: page > 1
-                ? () {
-                    context.navigateTo(
-                      SubmissionsRoute(
-                        project: routeParams.project,
-                        user: routeParams.user,
-                        page: page - 1,
-                      ),
-                    );
-                  }
+            tooltip: MaterialLocalizations.of(context).previousPageTooltip,
+            onPressed: enabled && page > 1
+                ? () => _navigateTo(context, page - 1)
                 : null,
             icon: Icon(Icons.navigate_before),
           ),
-          for (var i = startPage; i <= endPage; i++)
-            (i == page ? IconButton.filledTonal : IconButton.new)(
-              onPressed: () {
-                if (i == page) return;
-                context.navigateTo(
-                  SubmissionsRoute(
-                    project: routeParams.project,
-                    user: routeParams.user,
-                    page: i,
-                  ),
-                );
-              },
-              icon: Builder(builder: (context) => Text("$i")),
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: items,
             ),
+          ),
           IconButton(
-            onPressed: page < availablePages
-                ? () {
-                    context.navigateTo(
-                      SubmissionsRoute(
-                        project: routeParams.project,
-                        user: routeParams.user,
-                        page: page + 1,
-                      ),
-                    );
-                  }
+            tooltip: MaterialLocalizations.of(context).nextPageTooltip,
+            onPressed: enabled && page < availablePages
+                ? () => _navigateTo(context, page + 1)
                 : null,
             icon: Icon(Icons.navigate_next),
           ),
@@ -1290,6 +1370,60 @@ class SubmissionsPageControl extends StatelessWidget {
       );
     },
   );
+
+  Widget _pageButton(
+    BuildContext context,
+    int targetPage,
+    ColorScheme colorScheme,
+  ) {
+    final isCurrent = targetPage == page;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1),
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: isCurrent
+            ? FilledButton.tonal(
+                onPressed: () {},
+                style: FilledButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  "$targetPage",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              )
+            : TextButton(
+                onPressed: enabled
+                    ? () => _navigateTo(context, targetPage)
+                    : null,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text("$targetPage"),
+              ),
+      ),
+    );
+  }
+
+  Widget _ellipsis(ColorScheme colorScheme) {
+    return SizedBox(
+      width: 28,
+      height: 36,
+      child: Center(
+        child: Text(
+          "…",
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+        ),
+      ),
+    );
+  }
 }
 
 @RoutePage()
@@ -1483,13 +1617,23 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
         ),
         Flexible(
           child: Padding(
-            padding: EdgeInsets.all(4),
+            padding: isColumn
+                ? EdgeInsets.only(top: 4, left: 8, right: 8)
+                : EdgeInsets.all(4),
             child: SizedBox(
               height: double.infinity,
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (context.router.canPop()) ...[
+                      FilledButton.tonalIcon(
+                        onPressed: () => context.pop(),
+                        icon: Icon(Icons.navigate_before),
+                        label: Text("Go back"),
+                      ),
+                      SizedBox(height: 8),
+                    ],
                     SubmissionWidget(
                       data: data!,
                       includeImage: false,
@@ -1519,6 +1663,7 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
                             )
                           : SizedBox.shrink(),
                     ),
+                    if (!isColumn) SizedBox(height: 8),
                   ],
                 ),
               ),
@@ -1526,6 +1671,33 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class DoubledSizeTransition extends AnimatedWidget {
+  const DoubledSizeTransition({
+    super.key,
+    required CurvedAnimation sizeFactor,
+    this.minSizeFactor = 0.0,
+    this.child,
+  }) : super(listenable: sizeFactor);
+
+  CurvedAnimation get sizeFactor => listenable as CurvedAnimation;
+  final double minSizeFactor;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = math.max(sizeFactor.value, 0.0);
+    final valueWidth = minSizeFactor + (1 - minSizeFactor) * value;
+    return ClipRect(
+      child: Align(
+        alignment: AlignmentDirectional(-1, -1),
+        heightFactor: value,
+        widthFactor: valueWidth,
+        child: child,
+      ),
     );
   }
 }

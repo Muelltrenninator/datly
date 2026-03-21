@@ -14,6 +14,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get adminOnly => 'This feature is NOT public – do NOT share content!';
+
+  @override
   String get retry => 'Retry';
 
   @override
@@ -249,7 +252,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidPage => 'Invalid page number.';
 
   @override
-  String get validatePleaseSelect => 'Please select:';
+  String get validationPleaseSelect => 'Please select:';
+
+  @override
+  String get validationAllDone => 'All done!';
+
+  @override
+  String get validationAllDoneDescription =>
+      'At the moment, there are no more submissions for you to validate.\nPlease check back later to work on new submissions.';
+
+  @override
+  String get validationReportDialogTitle => 'Report submission?';
+
+  @override
+  String get validationReportDialogMessage =>
+      'If you believe that this submission violates the guidelines, you can report it. Please note that mass reporting without valid reason can lead to suspension of your account.';
+
+  @override
+  String get validationReported => 'Submission reported.';
+
+  @override
+  String get validationSubmissionFailed => 'Failed to submit.';
 
   @override
   String get submissionStatusPending => 'Pending';
@@ -261,7 +284,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submissionStatusRejected => 'Rejected';
 
   @override
-  String get submissionStatusCensored => 'Censored';
+  String get submissionStatusReported => 'Reported';
+
+  @override
+  String get submissionStatusCensored => 'Limited';
 
   @override
   String submissionModerationReasonAutomated(String categories) {
@@ -283,6 +309,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get submissionDeleteMessage =>
       'Deleting a submission will remove the image from the next export and revoke consent. This action cannot be undone.';
+
+  @override
+  String get listCategory => 'Category';
+
+  @override
+  String get listCategoryPreOrganic => 'Organic Waste';
+
+  @override
+  String get listCategoryPreHazardous => 'Hazardous Waste';
+
+  @override
+  String get listCategoryPrePlastic => 'Plastic Waste';
+
+  @override
+  String get listCategoryPrePaper => 'Paper Waste';
+
+  @override
+  String get listCategoryPreResidual => 'Residual Waste';
 
   @override
   String get accountOverview => 'Account overview';

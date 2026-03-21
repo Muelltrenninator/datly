@@ -10,6 +10,11 @@
             }
         }
     },
+    "adminOnly": "This feature is NOT public – do NOT share content!",
+    "@adminOnly": {
+        "description": "Warning message indicating that a feature is for admin use only and should not be shared.",
+        "context": "global"
+    },
     "retry": "Retry",
     "@retry": {
         "description": "Button text to retry accessing the camera.",
@@ -384,9 +389,39 @@
         "description": "Shown when the user tries to access a page number that is out of range.",
         "context": "submissions"
     },
-    "validatePleaseSelect": "Please select:",
-    "@validatePleaseSelect": {
+    "validationPleaseSelect": "Please select:",
+    "@validationPleaseSelect": {
         "description": "Text shown above the target title. To be read as 'Please select [something]'.",
+        "context": "validate"
+    },
+    "validationAllDone": "All done!",
+    "@validationAllDone": {
+        "description": "Shown when there are no more items to validate.",
+        "context": "validate"
+    },
+    "validationAllDoneDescription": "At the moment, there are no more submissions for you to validate.\nPlease check back later to work on new submissions.",
+    "@validationAllDoneDescription": {
+        "description": "Additional information shown when there are no more items to validate.",
+        "context": "validate"
+    },
+    "validationReportDialogTitle": "Report submission?",
+    "@validationReportDialogTitle": {
+        "description": "Title for the dialog to confirm reporting of a submission during validation.",
+        "context": "validate:report"
+    },
+    "validationReportDialogMessage": "If you believe that this submission violates the guidelines, you can report it. Please note that mass reporting without valid reason can lead to suspension of your account.",
+    "@validationReportDialogMessage": {
+        "description": "Message asking the user to confirm reporting of a submission during validation.",
+        "context": "validate:report"
+    },
+    "validationReported": "Submission reported.",
+    "@validationReported": {
+        "description": "Message shown after a submission has been reported during validation.",
+        "context": "validate:report"
+    },
+    "validationSubmissionFailed": "Failed to submit.",
+    "@validationSubmissionFailed": {
+        "description": "Error message shown when the validation result could not be submitted.",
         "context": "validate"
     },
     "submissionStatusPending": "Pending",
@@ -404,7 +439,12 @@
         "description": "The status 'Rejected' for a submission. This string is formatted in MLA title case.",
         "context": "submissions:status"
     },
-    "submissionStatusCensored": "Censored",
+    "submissionStatusReported": "Reported",
+    "@submissionStatusReported": {
+        "description": "The status 'Reported' for a submission. This string is formatted in MLA title case.",
+        "context": "submissions:status"
+    },
+    "submissionStatusCensored": "Limited",
     "@submissionStatusCensored": {
         "description": "The status 'Censored' for a submission. This string is formatted in MLA title case.",
         "context": "submissions:status"
@@ -444,6 +484,36 @@
     "@submissionDeleteMessage": {
         "description": "Message asking the user to confirm deletion of a submission.",
         "context": "submissions:delete"
+    },
+    "listCategory": "Category",
+    "@listCategory": {
+        "description": "Label for the category selection.",
+        "context": "upload"
+    },
+    "listCategoryPreOrganic": "Organic Waste",
+    "@listCategoryPreOrganic": {
+        "description": "Category for organic waste in the list of categories.",
+        "context": "list:categories"
+    },
+    "listCategoryPreHazardous": "Hazardous Waste",
+    "@listCategoryPreHazardous": {
+        "description": "Category for hazardous waste in the list of categories.",
+        "context": "list:categories"
+    },
+    "listCategoryPrePlastic": "Plastic Waste",
+    "@listCategoryPrePlastic": {
+        "description": "Category for plastic waste in the list of categories.",
+        "context": "list:categories"
+    },
+    "listCategoryPrePaper": "Paper Waste",
+    "@listCategoryPrePaper": {
+        "description": "Category for paper waste in the list of categories.",
+        "context": "list:categories"
+    },
+    "listCategoryPreResidual": "Residual Waste",
+    "@listCategoryPreResidual": {
+        "description": "Category for residual waste in the list of categories.",
+        "context": "list:categories"
     },
     "accountOverview": "Account overview",
     "@accountOverview": {

@@ -1,6 +1,6 @@
 # Datly — Terms of Service (ToS)
 
-**Effective date:** 2026-03-06
+**Effective date:** 2026-03-21
 **Maintainer / Provider:** JHubi1
 **Contact:** <me@jhubi1.com>
 **Location:** Germany
@@ -11,7 +11,7 @@ By creating an account on Datly or otherwise using the service, you agree to the
 
 ## 2. Service description
 
-Datly is a free service that allows registered users to capture and upload photos. Uploaded photos are used to train, evaluate, and improve AI/ML models. The service includes image collection, consent management, and related model-development activities. There are no other features beyond this scope.
+Datly is a free service that allows registered users to capture and upload photos. Uploaded photos are used to train, evaluate, and improve AI/ML models. The service includes image collection, consent management, **community validation** (peer review of submissions by other authenticated users), and related model-development activities.
 
 ## 3. Registration & accounts
 
@@ -35,6 +35,7 @@ Datly is a free service that allows registered users to capture and upload photo
 - You retain ownership of images you upload.
 - By uploading and signing the consent form, you grant Datly the licence described in our Privacy Policy (Section 4) to use the images for training and related research/development.
 - Each image submission requires signing a **consent form**. The consent signature, together with metadata (IP address, user-agent, account snapshot, submission snapshot), is stored as legal evidence and retained even after account or submission deletion.
+- By uploading images, you acknowledge that your submissions may be shown to other authenticated users during **community validation** (peer review). During validation, your identity (username, email, or other account information) is **not revealed** to validators.
 - You represent that uploaded content does not infringe third-party rights, is not illegal, and does not contain prohibited content (child sexual abuse material, hate speech, non-consensual intimate imagery, etc.). We reserve the right to remove content that violates these Terms and to censor or delete offending submissions. Uploading illegal or prohibited content may result in the **immediate disabling or permanent deletion** of your account without prior notice.
 
 ## 6. Image processing
@@ -57,8 +58,10 @@ You must not:
 - Attempt to circumvent security measures, rate limits, or access controls.
 - Use automated tools to submit content without authorisation.
 - Impersonate another user or provide false registration information.
+- Deliberately manipulate the validation system (e.g. systematically voting incorrectly, colluding with other users to influence validation outcomes).
+- Abuse the reporting feature to flag content that does not genuinely violate these Terms.
 
-We may **disable or terminate** accounts that violate these Terms without prior notice. Disabling may occur manually by an administrator or automatically through our content-moderation systems. A reason will be provided where applicable.
+We may **disable or terminate** accounts that violate these Terms without prior notice. Disabling may occur manually by an administrator or automatically through our content-moderation systems (including community validation and reporting). A reason will be provided where applicable.
 
 ## 8. Disabling, deletion & account closure
 

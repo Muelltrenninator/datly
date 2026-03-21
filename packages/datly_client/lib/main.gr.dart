@@ -18,7 +18,7 @@ import 'package:datly_client/screens/login.dart' as _i3;
 import 'package:datly_client/screens/submissions.dart' as _i6;
 import 'package:datly_client/screens/terms.dart' as _i5;
 import 'package:datly_client/screens/upload.dart' as _i7;
-import 'package:datly_client/screens/validate.dart' as _i8;
+import 'package:datly_client/screens/validation.dart' as _i8;
 import 'package:flutter/foundation.dart' as _i10;
 
 /// generated route for
@@ -416,17 +416,17 @@ class UploadValidateParentRoute extends _i9.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i8.ValidatePage]
-class ValidateRoute extends _i9.PageRouteInfo<void> {
-  const ValidateRoute({List<_i9.PageRouteInfo>? children})
-    : super(ValidateRoute.name, initialChildren: children);
+/// [_i8.ValidationPage]
+class ValidationRoute extends _i9.PageRouteInfo<void> {
+  const ValidationRoute({List<_i9.PageRouteInfo>? children})
+    : super(ValidationRoute.name, initialChildren: children);
 
-  static const String name = 'ValidateRoute';
+  static const String name = 'ValidationRoute';
 
   static _i9.PageInfo page = _i9.PageInfo(
     name,
     builder: (data) {
-      return const _i8.ValidatePage();
+      return const _i8.ValidationPage();
     },
   );
 }

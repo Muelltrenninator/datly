@@ -58,6 +58,9 @@ class RadioDialog<T extends Object> extends StatefulWidget {
   /// A function that generates the icon for each item.
   final RadioDialogObjectGenerator<T, Widget?>? iconGenerator;
 
+  /// A function that generates whether each item is enabled.
+  final RadioDialogObjectGenerator<T, bool?>? enabledGenerator;
+
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
@@ -110,6 +113,7 @@ class RadioDialog<T extends Object> extends StatefulWidget {
     this.titleGenerator,
     this.subtitleGenerator,
     this.iconGenerator,
+    this.enabledGenerator,
     this.semanticLabel,
     this.alignment,
     this.toggleable = false,
@@ -212,6 +216,8 @@ class _RadioDialogState<T extends Object> extends State<RadioDialog<T>> {
                           radioDialogDefaultTitleGenerator(item);
                       final subtitle = widget.subtitleGenerator?.call(item);
                       final icon = widget.iconGenerator?.call(item);
+                      final enabled =
+                          widget.enabledGenerator?.call(item) ?? true;
                       return ListTile(
                         leading: IgnorePointer(
                           child: ExcludeFocus(
@@ -220,6 +226,7 @@ class _RadioDialogState<T extends Object> extends State<RadioDialog<T>> {
                               child: Radio<T>(
                                 value: item,
                                 toggleable: widget.toggleable,
+                                enabled: enabled,
                               ),
                             ),
                           ),
@@ -230,6 +237,7 @@ class _RadioDialogState<T extends Object> extends State<RadioDialog<T>> {
                         selected: item == _value,
                         minTileHeight: 48,
                         contentPadding: EdgeInsets.symmetric(horizontal: 24),
+                        enabled: enabled,
                         onTap: () {
                           if (widget.toggleable && item == _value) {
                             setState(() => _value = null);
@@ -283,6 +291,7 @@ Future<T?> showRadioDialog<T extends Object>({
   RadioDialogObjectGenerator<T, String?>? titleGenerator,
   RadioDialogObjectGenerator<T, String?>? subtitleGenerator,
   RadioDialogObjectGenerator<T, Widget?>? iconGenerator,
+  RadioDialogObjectGenerator<T, bool?>? enabledGenerator,
   String? semanticLabel,
   AlignmentGeometry? alignment,
   bool toggleable = false,
@@ -301,6 +310,7 @@ Future<T?> showRadioDialog<T extends Object>({
       titleGenerator: titleGenerator,
       subtitleGenerator: subtitleGenerator,
       iconGenerator: iconGenerator,
+      enabledGenerator: enabledGenerator,
       semanticLabel: semanticLabel,
       alignment: alignment,
       toggleable: toggleable,

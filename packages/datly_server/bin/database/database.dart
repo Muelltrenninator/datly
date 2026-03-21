@@ -20,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 10;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -144,16 +144,16 @@ class AppDatabase extends _$AppDatabase {
           ),
         );
       }
-      if (from < 6) {
-        for (final user in await select(users).get()) {
-          queueEmail(
-            EmailMessagesTemplates.legalChangedTerms(
-              user: user,
-              effectiveDate: DateTime(2026, 3, 6),
-            ).stylized(),
-          );
-        }
-      }
+      // if (from < 6) { // disabled in favor of 10
+      //   for (final user in await select(users).get()) {
+      //     queueEmail(
+      //       EmailMessagesTemplates.legalChangedTerms(
+      //         user: user,
+      //         effectiveDate: DateTime(2026, 3, 6),
+      //       ).stylized(),
+      //     );
+      //   }
+      // }
       if (from < 7) {
         await m.alterTable(
           TableMigration(submissions, newColumns: [submissions.moderated]),
@@ -167,6 +167,32 @@ class AppDatabase extends _$AppDatabase {
           ),
         );
       }
+      if (from < 9) {
+        await m.alterTable(
+          TableMigration(
+            submissions,
+            newColumns: [submissions.validationReports],
+          ),
+        );
+        await (db.update(db.submissions)..where(
+              (s) =>
+                  s.category.isNull() &
+                  s.status.equals(SubmissionStatus.accepted.name),
+            ))
+            .write(
+              SubmissionsCompanion(status: Value(SubmissionStatus.pending)),
+            );
+      }
+      if (from < 10) {
+        for (final user in await select(users).get()) {
+          queueEmail(
+            EmailMessagesTemplates.legalChangedAll(
+              user: user,
+              effectiveDate: DateTime(2026, 3, 21),
+            ).stylized(),
+          );
+        }
+      }
 
       t.info("Database migration completed");
     },
@@ -175,7 +201,7 @@ class AppDatabase extends _$AppDatabase {
 
 enum UserRole { external, user, admin }
 
-enum SubmissionStatus { pending, accepted, rejected, censored }
+enum SubmissionStatus { pending, accepted, rejected, reported, censored }
 
 enum ScoreType { unknown, knownPositive, knownNegative }
 

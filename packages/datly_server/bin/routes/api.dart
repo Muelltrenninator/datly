@@ -14,6 +14,10 @@ import 'api_assets.dart' as api_assets;
 import 'api_categories.dart' as api_categories;
 import 'api_projects.dart' as api_projects;
 import 'api_users.dart' as api_user;
+import 'api_validation.dart' as api_validation;
+
+final jwtAudienceAuth = Audience.one("auth");
+final jwtAudienceValidation = Audience.one("validation");
 
 final apiRouter = Router(
   notFoundHandler: (request) => Response.notFound(
@@ -69,6 +73,7 @@ void defineApiRouter() {
   api_categories.define(apiRouter);
   api_projects.define(apiRouter);
   api_user.define(apiRouter);
+  api_validation.define(apiRouter);
 }
 
 // MARK: Authentication
@@ -93,7 +98,7 @@ Future<Object?> _apiAuthInternal(
       token,
       jwtPublicKey,
       issuer: jwtIssuer(req),
-      audience: Audience.one("auth"),
+      audience: jwtAudienceAuth,
     );
     if (jwt.subject == null) throw JWTException("");
   } on JWTExpiredException catch (_) {

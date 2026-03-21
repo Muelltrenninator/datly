@@ -51,7 +51,7 @@ void define(Router router) {
                   .get()))
               .map(
                 (row) => MapEntry(
-                  row.read(db.submissions.user)!,
+                  row.read(db.submissions.user),
                   row.read(count) ?? 0,
                 ),
               ),
@@ -126,7 +126,7 @@ void define(Router router) {
                   JWT(
                     {},
                     issuer: jwtIssuer(req),
-                    audience: Audience.one("auth"),
+                    audience: jwtAudienceAuth,
                     subject: user.username,
                   ).sign(
                     jwtPrivateKey,
@@ -333,7 +333,7 @@ void define(Router router) {
           return Response(201);
         } else {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid user data"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -450,7 +450,7 @@ void define(Router router) {
           return Response.ok(null);
         } else {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid user data"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -615,6 +615,17 @@ void define(Router router) {
     ..get(
       "/user/<username>/submissions", // MARK: [GET] /user/<username>/submissions
       apiAuthWall((req, auth) async {
+        int? page;
+        if (req.url.queryParameters["page"] != null) {
+          page = int.tryParse(req.url.queryParameters["page"]!);
+          if (page == null || page < 1) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Invalid page parameter"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+        }
+
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
@@ -634,14 +645,14 @@ void define(Router router) {
           );
         }
 
-        final submissions =
-            await (db.select(db.submissions)
-                  ..where((s) => s.user.equals(user.username))
-                  ..orderBy([
-                    (s) => OrderingTerm.desc(s.submittedAt),
-                    (s) => OrderingTerm.desc(s.id),
-                  ]))
-                .get();
+        final query = db.select(db.submissions)
+          ..where((s) => s.user.equals(user.username))
+          ..orderBy([
+            (s) => OrderingTerm.desc(s.submittedAt),
+            (s) => OrderingTerm.desc(s.id),
+          ]);
+        if (page != null) query.limit(96, offset: (page - 1) * 96);
+        final submissions = await query.get();
 
         return Response.ok(
           jsonEncode(submissions.map((s) => s.toJson()).toList()),
@@ -652,6 +663,17 @@ void define(Router router) {
     ..get(
       "/user/<username>/submissions/live", // MARK: [GET] /user/<username>/submissions/live
       apiAuthWall((req, auth) async {
+        int? page;
+        if (req.url.queryParameters["page"] != null) {
+          page = int.tryParse(req.url.queryParameters["page"]!);
+          if (page == null || page < 1) {
+            return Response.badRequest(
+              body: jsonEncode({"error": "Invalid page parameter"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          }
+        }
+
         final user =
             await (db.select(db.users)
                   ..where((u) => u.username.equals(req.params["username"]!)))
@@ -671,14 +693,14 @@ void define(Router router) {
           );
         }
 
-        final submissions =
-            (db.select(db.submissions)
-                  ..where((s) => s.user.equals(user.username))
-                  ..orderBy([
-                    (s) => OrderingTerm.desc(s.submittedAt),
-                    (s) => OrderingTerm.desc(s.id),
-                  ]))
-                .watch();
+        final query = db.select(db.submissions)
+          ..where((s) => s.user.equals(user.username))
+          ..orderBy([
+            (s) => OrderingTerm.desc(s.submittedAt),
+            (s) => OrderingTerm.desc(s.id),
+          ]);
+        if (page != null) query.limit(96, offset: (page - 1) * 96);
+        final submissions = query.watch();
 
         return Response.ok(
           submissions.map(

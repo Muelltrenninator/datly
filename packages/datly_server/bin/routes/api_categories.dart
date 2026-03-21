@@ -14,8 +14,32 @@ void define(Router router) {
       "/categories/list", // MARK: [GET] /categories/list
       apiAuthWall((req, auth) async {
         final categories = await db.select(db.categories).get();
+
+        final count = db.submissions.id.count();
+        final submissionCounts = Map.fromEntries(
+          (await ((db.selectOnly(db.submissions)
+                    ..addColumns([db.submissions.category, count])
+                    ..groupBy([db.submissions.category]))
+                  .get()))
+              .map(
+                (row) => MapEntry(
+                  row.read(db.submissions.category),
+                  row.read(count) ?? 0,
+                ),
+              ),
+        );
+
         return Response.ok(
-          jsonEncode(categories.map((u) => u.toJson()).toList()),
+          jsonEncode(
+            categories
+                .map(
+                  (c) => c.toJson()
+                    ..addAll({
+                      "submissionCount": submissionCounts[c.name] ?? 0,
+                    }),
+                )
+                .toList(),
+          ),
           headers: {"Content-Type": "application/json"},
         );
       }),
@@ -31,8 +55,20 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Category not found"}));
         }
 
+        final count = db.submissions.id.count();
+        final submissionCount =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([count])
+                      ..where(db.submissions.category.equals(category.name)))
+                    .get())
+                .first
+                .read(count) ??
+            0;
+
         return Response.ok(
-          category.toJsonString(),
+          jsonEncode(
+            category.toJson()..addAll({"submissionCount": submissionCount}),
+          ),
           headers: {"Content-Type": "application/json"},
         );
       }),
@@ -61,7 +97,7 @@ void define(Router router) {
           return Response.ok(null);
         } else {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid category data"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -93,7 +129,7 @@ void define(Router router) {
           return Response(201);
         } else {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid category data"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }

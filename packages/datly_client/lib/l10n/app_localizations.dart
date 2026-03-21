@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'“{content}”'**
   String quote(String content);
 
+  /// Warning message indicating that a feature is for admin use only and should not be shared.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is NOT public – do NOT share content!'**
+  String get adminOnly;
+
   /// Button text to retry accessing the camera.
   ///
   /// In en, this message translates to:
@@ -516,7 +522,43 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Please select:'**
-  String get validatePleaseSelect;
+  String get validationPleaseSelect;
+
+  /// Shown when there are no more items to validate.
+  ///
+  /// In en, this message translates to:
+  /// **'All done!'**
+  String get validationAllDone;
+
+  /// Additional information shown when there are no more items to validate.
+  ///
+  /// In en, this message translates to:
+  /// **'At the moment, there are no more submissions for you to validate.\nPlease check back later to work on new submissions.'**
+  String get validationAllDoneDescription;
+
+  /// Title for the dialog to confirm reporting of a submission during validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submission?'**
+  String get validationReportDialogTitle;
+
+  /// Message asking the user to confirm reporting of a submission during validation.
+  ///
+  /// In en, this message translates to:
+  /// **'If you believe that this submission violates the guidelines, you can report it. Please note that mass reporting without valid reason can lead to suspension of your account.'**
+  String get validationReportDialogMessage;
+
+  /// Message shown after a submission has been reported during validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission reported.'**
+  String get validationReported;
+
+  /// Error message shown when the validation result could not be submitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to submit.'**
+  String get validationSubmissionFailed;
 
   /// The status 'Pending' for a submission. This string is formatted in MLA title case.
   ///
@@ -536,10 +578,16 @@ abstract class AppLocalizations {
   /// **'Rejected'**
   String get submissionStatusRejected;
 
+  /// The status 'Reported' for a submission. This string is formatted in MLA title case.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported'**
+  String get submissionStatusReported;
+
   /// The status 'Censored' for a submission. This string is formatted in MLA title case.
   ///
   /// In en, this message translates to:
-  /// **'Censored'**
+  /// **'Limited'**
   String get submissionStatusCensored;
 
   /// Stand in text for the reason that a submission was automatically moderated due to flagged categories.
@@ -577,6 +625,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deleting a submission will remove the image from the next export and revoke consent. This action cannot be undone.'**
   String get submissionDeleteMessage;
+
+  /// Label for the category selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get listCategory;
+
+  /// Category for organic waste in the list of categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Organic Waste'**
+  String get listCategoryPreOrganic;
+
+  /// Category for hazardous waste in the list of categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Hazardous Waste'**
+  String get listCategoryPreHazardous;
+
+  /// Category for plastic waste in the list of categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastic Waste'**
+  String get listCategoryPrePlastic;
+
+  /// Category for paper waste in the list of categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper Waste'**
+  String get listCategoryPrePaper;
+
+  /// Category for residual waste in the list of categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Residual Waste'**
+  String get listCategoryPreResidual;
 
   /// Accessibility label for the account overview section.
   ///

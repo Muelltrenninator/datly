@@ -35,7 +35,7 @@ void define(Router router) {
                   .get()))
               .map(
                 (row) => MapEntry(
-                  row.read(db.submissions.projectId)!,
+                  row.read(db.submissions.projectId),
                   row.read(count) ?? 0,
                 ),
               ),
@@ -45,8 +45,8 @@ void define(Router router) {
           jsonEncode(
             projects
                 .map(
-                  (u) => u.toJson()
-                    ..addAll({"submissionCount": submissionCounts[u.id] ?? 0}),
+                  (p) => p.toJson()
+                    ..addAll({"submissionCount": submissionCounts[p.id] ?? 0}),
                 )
                 .toList(),
           ),
@@ -111,7 +111,7 @@ void define(Router router) {
           return Response.ok(null);
         } else {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid project data"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -133,7 +133,7 @@ void define(Router router) {
           return Response(201);
         } else {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid project data"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -262,12 +262,6 @@ void define(Router router) {
               }),
             ),
           )
-          // ..addFile(
-          //   ArchiveFile.string(
-          //     "data.csv",
-          //     "images,labels\n${submissions.map((s) => "${s.assetId != null && s.assetMimeType != null ? assetFile(s.assetId!, s.assetMimeType!).path.split("/").last : ""},").join("\n")}",
-          //   ),
-          // )
           ..addFile(ArchiveFile.directory("images/"));
         for (var submission in submissions) {
           if (submission.assetId != null && submission.assetMimeType != null) {
@@ -278,7 +272,7 @@ void define(Router router) {
             if (await asset.exists()) {
               archive.addFile(
                 ArchiveFile.bytes(
-                  "images/${asset.path.split("/").last}",
+                  "images/${submission.category}/${asset.path.split("/").last}",
                   await asset.readAsBytes(),
                 ),
               );
@@ -530,7 +524,7 @@ void define(Router router) {
           mime = part.headers["content-type"] ?? "application/octet-stream";
         } catch (e) {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid multipart data: $e"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }
@@ -676,11 +670,20 @@ void define(Router router) {
           "status": String? status,
           "moderationReason": String? moderationReason,
           "category": String? category,
+          "validationReports": List<dynamic>? validationReports,
         }) {
           if (status != null &&
               !SubmissionStatus.values.asNameMap().keys.contains(status)) {
             return Response.badRequest(
               body: jsonEncode({"error": "Invalid submission status"}),
+              headers: {"Content-Type": "application/json"},
+            );
+          } else if (status == SubmissionStatus.accepted.name &&
+              submission.category == null) {
+            return Response.badRequest(
+              body: jsonEncode({
+                "error": "Category must be set when accepting a submission",
+              }),
               headers: {"Content-Type": "application/json"},
             );
           }
@@ -699,14 +702,36 @@ void define(Router router) {
             }
           }
 
+          List<String>? effectiveValidationReports;
+          if (validationReports != null) {
+            try {
+              effectiveValidationReports = validationReports
+                  .map((e) => e as String)
+                  .toList();
+              effectiveValidationReports = effectiveValidationReports
+                  .where((r) => r.trim().isNotEmpty)
+                  .take(3)
+                  .toList();
+            } catch (_) {
+              return Response.badRequest(
+                body: jsonEncode({
+                  "error": "Invalid validation reports format",
+                }),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+          }
+
           await (db.update(
             db.submissions,
           )..where((s) => s.id.equals(submission.id))).write(
             SubmissionsCompanion(
-              status: status != null
-                  ? Value(SubmissionStatus.values.byName(status))
-                  : effectiveCategory.present
+              status:
+                  effectiveCategory.present &&
+                      submission.status == SubmissionStatus.accepted
                   ? Value(SubmissionStatus.pending)
+                  : status != null
+                  ? Value(SubmissionStatus.values.byName(status))
                   : Value.absent(),
               moderationReason: moderationReason.absentOrNullIfBlank,
               category: effectiveCategory,
@@ -718,6 +743,8 @@ void define(Router router) {
               validationWeightPositive: effectiveCategory.present
                   ? const Value(0)
                   : Value.absent(),
+
+              validationReports: Value.absentIfNull(effectiveValidationReports),
             ),
           );
 
@@ -749,7 +776,7 @@ void define(Router router) {
           return Response.ok(null);
         } else {
           return Response.badRequest(
-            body: jsonEncode({"error": "Invalid submission data"}),
+            body: jsonEncode({"error": "Invalid request data"}),
             headers: {"Content-Type": "application/json"},
           );
         }

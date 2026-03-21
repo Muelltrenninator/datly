@@ -1,6 +1,6 @@
 # Datly — Datenschutzerklärung
 
-**Gültig ab:** 01.03.2026
+**Gültig ab:** 21.03.2026
 **Betreiber / Verantwortlicher:** JHubi1
 **Kontakt:** <me@jhubi1.com>
 **Standort:** Deutschland
@@ -13,6 +13,8 @@
 - Alle hochgeladenen Bilder werden vor der Speicherung vollständig von eingebetteten Metadaten (EXIF) **befreit**, auf **224 × 224 Pixel zugeschnitten und skaliert** sowie neu kodiert (Datenminimierung).
 - Bei jeder Bildeinreichung unterzeichnen Sie ein Einwilligungsformular. Wir speichern dauerhaft die **IP-Adresse**, den **Browser-User-Agent** und einen **Snapshot des Einwilligungsformulars sowie Ihrer Kontodaten** zum Zeitpunkt der Unterzeichnung als Rechtsnachweis.
 - Ihre **bevorzugte Sprache** wird automatisch aus dem HTTP-Header `Accept-Language` erkannt und in Ihrem Konto gespeichert.
+- Hochgeladene Fotos können anderen authentifizierten Nutzern zur **gemeinschaftlichen Validierung** (Peer-Review) angezeigt werden. Während der Validierung werden **keine identifizierenden Informationen** über den Hochladenden an die Validatoren preisgegeben.
+- Wir erfassen **Validierungsgenauigkeitswerte** für Nutzer, die am Peer-Review teilnehmen.
 - Die Nutzung des Dienstes ist **kostenlos**.
 
 ---
@@ -40,6 +42,7 @@ Ein Datenschutzbeauftragter (DSB) wurde nicht formell bestellt. Für alle Fragen
 | **Rolle**                     | Eine von `external`, `user` oder `admin`; bestimmt die Zugriffsberechtigungen                                                                                         |
 | **Kontostatus**               | Ob Ihr Konto aktiviert, deaktiviert (mit Begründung) ist, und das Beitrittsdatum                                                                                      |
 | **Projektzuordnungen**        | Liste der Projekt-IDs, zu denen Sie beitragen dürfen                                                                                                                  |
+| **Validierungsgewichte**      | Zwei numerische Werte (`validationWeightPositive`, `validationWeightNegative`), die Ihre Genauigkeit als Peer-Review-Validator erfassen                               |
 
 ### 2.2 Von Ihnen hochgeladene Bilder
 
@@ -53,16 +56,18 @@ Ein Datenschutzbeauftragter (DSB) wurde nicht formell bestellt. Für alle Fragen
 
 ### 2.3 Einreichungsmetadaten
 
-| Datum                     | Details                                                                                            |
-| ------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Einreichungs-ID**       | Automatisch generierte Ganzzahl                                                                    |
-| **Projekt-ID**            | Das Projekt, zu dem das Bild eingereicht wurde                                                     |
-| **Einreichender Nutzer**  | Ihr Benutzername                                                                                   |
-| **Status**                | `pending` (ausstehend), `accepted` (akzeptiert), `rejected` (abgelehnt) oder `censored` (zensiert) |
-| **Einreichungszeitpunkt** | Datum und Uhrzeit des Uploads                                                                      |
-| **Asset-ID**              | Zufällige UUID, die auf die gespeicherte Bilddatei verweist                                        |
-| **Asset-MIME-Typ**        | `image/png` oder `image/jpeg`                                                                      |
-| **Asset-BlurHash**        | Perzeptueller Hash für UI-Platzhalter                                                              |
+| Datum                     | Details                                                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Einreichungs-ID**       | Automatisch generierte Ganzzahl                                                                                           |
+| **Projekt-ID**            | Das Projekt, zu dem das Bild eingereicht wurde                                                                            |
+| **Einreichender Nutzer**  | Ihr Benutzername                                                                                                          |
+| **Status**                | `pending` (ausstehend), `accepted` (akzeptiert), `rejected` (abgelehnt), `reported` (gemeldet) oder `censored` (zensiert) |
+| **Einreichungszeitpunkt** | Datum und Uhrzeit des Uploads                                                                                             |
+| **Asset-ID**              | Zufällige UUID, die auf die gespeicherte Bilddatei verweist                                                               |
+| **Asset-MIME-Typ**        | `image/png` oder `image/jpeg`                                                                                             |
+| **Asset-BlurHash**        | Perzeptueller Hash für UI-Platzhalter                                                                                     |
+| **Validierungsgewichte**  | Zwei numerische Werte, die den gemeinschaftlichen Validierungskonsens für die Einreichung erfassen                        |
+| **Validierungsmeldungen** | Liste der Benutzernamen von Nutzern, die die Einreichung während des Peer-Reviews gemeldet haben                          |
 
 ### 2.4 Einwilligungsunterschriften
 
@@ -124,8 +129,8 @@ Mit dem Hochladen eines Bildes und der Unterzeichnung des Einwilligungsformulars
 
 | Datenkategorie                                    | Aufbewahrungsdauer                                                                                                                                                                                                                     |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hochgeladene Bilder**                           | Bis Sie eine Löschung beantragen, die Einreichung gelöscht oder zensiert wird — je nachdem, was zuerst eintritt. Kein automatischer Ablauf.                                                                                            |
-| **Einreichungsdatensätze**                        | Werden gelöscht, wenn die Einreichung oder das Nutzerkonto gelöscht wird (Kaskadenlöschung). Bei zensierten Einreichungen bleibt der Datensatz erhalten, die Bilddatei wird jedoch gelöscht.                                           |
+| **Hochgeladene Bilder**                           | Bis Sie eine Löschung beantragen, die Einreichung gelöscht, zensiert oder gemeldet wird — je nachdem, was zuerst eintritt. Kein automatischer Ablauf.                                                                                  |
+| **Einreichungsdatensätze**                        | Werden gelöscht, wenn die Einreichung oder das Nutzerkonto gelöscht wird (Kaskadenlöschung). Bei zensierten oder gemeldeten Einreichungen bleibt der Datensatz erhalten, die Bilddatei wird jedoch gelöscht.                           |
 | **Kontodaten**                                    | Aufbewahrt bis das Konto auf Ihren Wunsch hin von einem Administrator gelöscht wird.                                                                                                                                                   |
 | **Einwilligungsunterschriften**                   | Werden **unbefristet** aufbewahrt, auch nach Konto- oder Einreichungslöschung. Unterschriften werden als widerrufen markiert (mit Zeitstempel und Begründung), aber nicht gelöscht, da sie als Rechtsnachweis der Einwilligung dienen. |
 | **IP-Adressen & User-Agents** (in Unterschriften) | Werden **unbefristet** als Teil des Einwilligungs-Unterschriftsdatensatzes aufbewahrt (siehe oben).                                                                                                                                    |
@@ -203,7 +208,12 @@ Kein System ist absolut sicher. Im Falle einer Verletzung des Schutzes personenb
 
 ## 10. Automatisierte Entscheidungsfindung
 
-Wir verwenden **keine** automatisierte Entscheidungsfindung oder Profiling, die rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt (Art. 22 DSGVO). Die Bildmoderation (Annahme/Ablehnung/Zensur) erfolgt manuell durch Administratoren.
+Wir verwenden **keine** automatisierte Entscheidungsfindung oder Profiling, die rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt (Art. 22 DSGVO). Neben der manuellen Moderation durch Administratoren werden folgende automatisierte Verfahren zur Bildmoderation eingesetzt:
+
+- **Gemeinschaftliche Validierung:** Eingereichte Bilder werden anderen authentifizierten Nutzern zur Peer-Review angezeigt. Basierend auf gewichteten Gemeinschaftsabstimmungen können Einreichungen **automatisch angenommen** (wenn der Validierungswert einen hohen Konfidenzschwellenwert überschreitet) oder **automatisch abgelehnt** werden (wenn der Wert einen niedrigen Konfidenzschwellenwert unterschreitet). Ein Mindestvalidierungsgewicht ist erforderlich, bevor eine automatisierte Entscheidung getroffen wird. Die Identität des Hochladenden wird den Validatoren nicht preisgegeben.
+- **Gemeinschaftliche Meldung:** Während der Validierung können Nutzer Einreichungen melden, die sie als unangemessen betrachten. Wenn eine Einreichung **3 oder mehr unabhängige Meldungen** erhält, wird sie automatisch auf den Status `reported` (gemeldet) gesetzt. Die zugehörige Bilddatei wird zur administrativen Überprüfung **aufbewahrt**.
+
+Diese automatisierten Entscheidungen betreffen ausschließlich den Status einzelner Einreichungen und entfalten keine rechtliche Wirkung und beeinträchtigen Sie nicht in ähnlicher Weise erheblich. Sie können uns kontaktieren, um eine Überprüfung jeder automatisierten Moderationsentscheidung zu beantragen.
 
 ## 11. Datenschutz-Folgenabschätzung (DSFA)
 

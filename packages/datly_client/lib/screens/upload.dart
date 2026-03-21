@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:camera/camera.dart';
@@ -198,11 +199,65 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 
     final completer = Completer<void>();
     http.Response? response;
+    bool categoryCanceled = false;
     showStatusModal(
       context: context,
       completer: completer,
-      failureDetailsGenerator: () => responseFailureDetailsGenerator(response),
+      failureDetailsGenerator: () =>
+          categoryCanceled ? null : responseFailureDetailsGenerator(response),
     );
+
+    // TODO: reenable when time is ripe
+    // final availableCategories = await () async {
+    //   final request = await AuthManager.instance.fetch(
+    //     http.Request("GET", Uri.parse("${ApiManager.baseUri}/categories/list")),
+    //   );
+    //   if (request == null || request.statusCode != 200) {
+    //     response = request;
+    //     return null;
+    //   }
+
+    //   var data = jsonDecode(request.body);
+    //   if (data is! List) return null;
+    //   data = data.whereType<Map>().toList();
+
+    //   final processed = List<Map<String, dynamic>>.from(data)
+    //       .map((c) {
+    //         try {
+    //           return CategoryData.fromJson(c);
+    //         } catch (_) {
+    //           return null;
+    //         }
+    //       })
+    //       .whereType<CategoryData>()
+    //       .toList();
+
+    //   CategoryRegistry.instance.addAll(
+    //     Map.fromEntries(processed.map((c) => MapEntry(c.name, c))),
+    //   );
+
+    //   return processed;
+    // }();
+    // if (availableCategories == null ||
+    //     availableCategories.isEmpty ||
+    //     !mounted) {
+    //   completer.completeError("Failed to load categories");
+    //   return;
+    // }
+
+    // final category = await showRadioDialog<CategoryData>(
+    //   context: context,
+    //   title: AppLocalizations.of(context).listCategory,
+    //   items: availableCategories,
+    //   titleGenerator: (item) =>
+    //       CategoryData.preName(context: context, name: item.name) ??
+    //       item.resolveDisplayName(),
+    // );
+    // if (category == null) {
+    //   categoryCanceled = true;
+    //   completer.completeError("");
+    //   return;
+    // }
 
     final project = await ProjectRegistry.instance.get(projects[projectIndex!]);
     if (project == null) {
@@ -222,6 +277,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                 "signatureParental": signature.signatureParental!,
               "signatureSnapshot": signature.signatureSnapshot,
               "consentVersion": signature.consentVersion.toString(),
+              // "category": category.name,
             },
           ),
         )
@@ -235,7 +291,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     );
 
     await controller!.resumePreview();
-    response != null && response.statusCode == 201
+    response != null && response!.statusCode == 201
         ? completer.complete()
         : completer.completeError("Upload failed");
   }
@@ -265,6 +321,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
             textAlign: TextAlign.center,
             style: TextTheme.of(context).headlineSmall!.copyWith(height: 1),
           ),
+          SizedBox(height: 2),
           Text(
             camerasPermissionDenied
                 ? AppLocalizations.of(context).cameraErrorPermission

@@ -1,6 +1,6 @@
 # Datly — Privacy Policy
 
-**Effective date:** 2026-03-01
+**Effective date:** 2026-03-21
 **Maintainer / Controller:** JHubi1
 **Contact:** <me@jhubi1.com>
 **Location:** Germany
@@ -13,6 +13,8 @@
 - All uploaded images have embedded metadata (EXIF) **fully removed**, are **centre-cropped and resized to 224 × 224 pixels**, and re-encoded before storage (data minimisation).
 - When you submit an image, you sign a consent form. We permanently store the submitting client's **IP address**, **browser user-agent**, and a **snapshot of the consent form and your account data** at the time of signing as legal evidence.
 - Your **preferred language** is automatically detected from the `Accept-Language` HTTP header and stored in your account.
+- Uploaded photos may be shown to other authenticated users for **community validation** (peer review). During validation, **no identifying information** about the uploader is revealed to validators.
+- We track **validation accuracy scores** for users who participate in peer review.
 - Access to the service is **free**.
 
 ---
@@ -40,6 +42,7 @@ No Data Protection Officer (DPO) has been formally appointed. For all questions,
 | **Role**                         | One of `external`, `user`, or `admin`; determines access permissions                                                                                             |
 | **Account status**               | Whether your account is activated, disabled (with reason), and the date you joined                                                                               |
 | **Project assignments**          | List of project IDs you are authorised to contribute to                                                                                                          |
+| **Validation weights**           | Two numeric scores (`validationWeightPositive`, `validationWeightNegative`) tracking your accuracy as a peer-review validator                                    |
 
 ### 2.2 Images you upload
 
@@ -53,16 +56,18 @@ No Data Protection Officer (DPO) has been formally appointed. For all questions,
 
 ### 2.3 Submission metadata
 
-| Data                     | Details                                          |
-| ------------------------ | ------------------------------------------------ |
-| **Submission ID**        | Auto-generated integer                           |
-| **Project ID**           | The project the image was submitted to           |
-| **Submitting user**      | Your username                                    |
-| **Status**               | `pending`, `accepted`, `rejected`, or `censored` |
-| **Submission timestamp** | Date and time of upload                          |
-| **Asset ID**             | Random UUID referencing the stored image file    |
-| **Asset MIME type**      | `image/png` or `image/jpeg`                      |
-| **Asset BlurHash**       | Perceptual hash for UI placeholders              |
+| Data                     | Details                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| **Submission ID**        | Auto-generated integer                                                        |
+| **Project ID**           | The project the image was submitted to                                        |
+| **Submitting user**      | Your username                                                                 |
+| **Status**               | `pending`, `accepted`, `rejected`, `reported`, or `censored`                  |
+| **Submission timestamp** | Date and time of upload                                                       |
+| **Asset ID**             | Random UUID referencing the stored image file                                 |
+| **Asset MIME type**      | `image/png` or `image/jpeg`                                                   |
+| **Asset BlurHash**       | Perceptual hash for UI placeholders                                           |
+| **Validation weights**   | Two numeric scores tracking community validation consensus for the submission |
+| **Validation reports**   | List of usernames of users who reported the submission during peer review     |
 
 ### 2.4 Consent signatures
 
@@ -98,13 +103,14 @@ We do not collect: contact lists, device identifiers, address books, payment dat
 
 ## 3. Purposes and legal bases for processing
 
-| Purpose                                                                                                                                    | Data involved                                                                                         | Legal basis (Art. 6 GDPR)                                                                                                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **AI/ML model training** — storing and processing images for training, evaluation, improvement, and benchmarking of AI/ML models           | Uploaded images, submission metadata                                                                  | **Consent (Art. 6(1)(a))** — explicit informed consent given at each upload via the consent signature                                                                          |
-| **Account management** — creating, authenticating, and managing your account; sending transactional emails                                 | Username, email, hashed password, role, locale, account status                                        | **Contract performance (Art. 6(1)(b))** — necessary to provide the service you registered for                                                                                  |
-| **Security & abuse prevention** — rate limiting, CAPTCHA verification, password breach checking, access control                            | IP address, user-agent, hashed password prefix (5 chars of SHA-1)                                     | **Legitimate interests (Art. 6(1)(f))** — our interest in protecting the service, its users, and data integrity                                                                |
-| **Legal evidence of consent** — retaining proof that valid consent was given for image use, including after account or submission deletion | Consent signatures (IP, user-agent, user snapshot, submission snapshot, signature text, consent form) | **Legal obligation (Art. 6(1)(c))** and **Legitimate interests (Art. 6(1)(f))** — to demonstrate compliance with consent requirements (Art. 7(1) GDPR) and project obligations |
-| **Transactional communications** — welcome emails, password resets, account status notifications                                           | Email address, username, locale                                                                       | **Contract performance (Art. 6(1)(b))**                                                                                                                                        |
+| Purpose                                                                                                                                                                                                                                       | Data involved                                                                                                                 | Legal basis (Art. 6 GDPR)                                                                                                                                                      |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **AI/ML model training** — storing and processing images for training, evaluation, improvement, and benchmarking of AI/ML models                                                                                                              | Uploaded images, submission metadata                                                                                          | **Consent (Art. 6(1)(a))** — explicit informed consent given at each upload via the consent signature                                                                          |
+| **Account management** — creating, authenticating, and managing your account; sending transactional emails                                                                                                                                    | Username, email, hashed password, role, locale, account status                                                                | **Contract performance (Art. 6(1)(b))** — necessary to provide the service you registered for                                                                                  |
+| **Security & abuse prevention** — rate limiting, CAPTCHA verification, password breach checking, access control                                                                                                                               | IP address, user-agent, hashed password prefix (5 chars of SHA-1)                                                             | **Legitimate interests (Art. 6(1)(f))** — our interest in protecting the service, its users, and data integrity                                                                |
+| **Legal evidence of consent** — retaining proof that valid consent was given for image use, including after account or submission deletion                                                                                                    | Consent signatures (IP, user-agent, user snapshot, submission snapshot, signature text, consent form)                         | **Legal obligation (Art. 6(1)(c))** and **Legitimate interests (Art. 6(1)(f))** — to demonstrate compliance with consent requirements (Art. 7(1) GDPR) and project obligations |
+| **Transactional communications** — welcome emails, password resets, account status notifications                                                                                                                                              | Email address, username, locale                                                                                               | **Contract performance (Art. 6(1)(b))**                                                                                                                                        |
+| **Community validation** — peer review of submissions by authenticated users to assess image quality and category correctness; automated acceptance/rejection based on weighted community votes; community reporting of inappropriate content | Uploaded images (shown without uploader identity), user validation weights, submission validation weights, validation reports | **Legitimate interests (Art. 6(1)(f))** — ensuring data quality for AI/ML model training and preventing inappropriate content                                                  |
 
 Where we rely on **legitimate interests**, we have conducted a balancing test and determined that the processing is proportionate and does not override your rights. You may request details of this assessment.
 
@@ -124,8 +130,8 @@ By uploading an image and signing the consent form, you grant Datly a **non-excl
 
 | Data category                                  | Retention period                                                                                                                                                                               |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Uploaded images**                            | Until you request deletion, the submission is deleted, or the submission is censored — whichever comes first. No automated expiry.                                                             |
-| **Submission records**                         | Deleted when the submission is deleted or the user account is deleted (cascade). Censored submissions retain the record but the image file is deleted.                                         |
+| **Uploaded images**                            | Until you request deletion, the submission is deleted, or the submission is censored or reported — whichever comes first. No automated expiry.                                                 |
+| **Submission records**                         | Deleted when the submission is deleted or the user account is deleted (cascade). Censored or reported submissions retain the record but the image file is deleted.                             |
 | **Account data**                               | Retained until the account is deleted by an administrator at your request.                                                                                                                     |
 | **Consent signatures**                         | Retained **indefinitely**, even after account or submission deletion. Signatures are marked as revoked (with timestamp and reason) but not erased, as they serve as legal evidence of consent. |
 | **IP addresses & user-agents** (in signatures) | Retained **indefinitely** as part of the consent signature record (see above).                                                                                                                 |
@@ -203,7 +209,12 @@ No system is absolutely secure. In the event of a personal data breach, we will 
 
 ## 10. Automated decision-making
 
-We do **not** use automated decision-making or profiling that produces legal effects or similarly significantly affects you (Art. 22 GDPR). Image moderation (accept/reject/censor) is performed manually by administrators.
+We do **not** use automated decision-making or profiling that produces legal effects or similarly significantly affects you (Art. 22 GDPR). In addition to manual moderation by administrators, the following automated processes are used for image moderation:
+
+- **Community validation:** Submitted images are shown to other authenticated users for peer review. Based on weighted community votes, submissions may be **automatically accepted** (when the validation score exceeds a high-confidence threshold) or **automatically rejected** (when the score falls below a low-confidence threshold). A minimum total validation weight is required before any automated decision is made. The identity of the uploader is not revealed to validators.
+- **Community reporting:** During validation, users may report submissions they consider inappropriate. If a submission receives **3 or more independent reports**, it is automatically set to `reported` status. The associated image file is **retained** for administrative review.
+
+These automated decisions concern only the status of individual submissions and do not produce legal effects or similarly significantly affect you. You may contact us to request a review of any automated moderation decision.
 
 ## 11. Data Protection Impact Assessment (DPIA)
 

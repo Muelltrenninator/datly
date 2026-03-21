@@ -299,63 +299,65 @@ class _ListScreenState extends State<ListScreen> {
       ],
       ListType.category => [
         MenuItemButton(
-          onPressed: () async {
-            var inputRaw = await showMultiPromptDialog(
-              context: context,
-              title: "Create category",
-              description:
-                  "Creates a new category with the specified information.",
-              prompts: {
-                "name": MultiPromptPrompt(
-                  label: "Name",
-                  placeholder: "residual",
-                  validator: (v) => v.trim().isEmpty
-                      ? "Name cannot be empty."
-                      : !RegExp(r"^[a-z0-9]+(?:-[a-z0-9]+)*$").hasMatch(v)
-                      ? "Name must only contain lowercase letters, numbers and hyphens, cannot start or end with a hyphen and cannot contain consecutive hyphens."
-                      : null,
-                  capitalization: TextCapitalization.none,
-                ),
-                "displayName": MultiPromptPrompt(
-                  label: "Display name",
-                  placeholder: "Residual Waste",
-                ),
-              },
-            );
-            if (inputRaw == null || !context.mounted) return;
-            final input = Map<String, dynamic>.from(inputRaw);
+          onPressed: null,
+          // disabled to make categories readonly, aligned with deletion
+          //   () async {
+          //     var inputRaw = await showMultiPromptDialog(
+          //       context: context,
+          //       title: "Create category",
+          //       description:
+          //           "Creates a new category with the specified information.",
+          //       prompts: {
+          //         "name": MultiPromptPrompt(
+          //           label: "Name",
+          //           placeholder: "residual",
+          //           validator: (v) => v.trim().isEmpty
+          //               ? "Name cannot be empty."
+          //               : !RegExp(r"^[a-z0-9]+(?:-[a-z0-9]+)*$").hasMatch(v)
+          //               ? "Name must only contain lowercase letters, numbers and hyphens, cannot start or end with a hyphen and cannot contain consecutive hyphens."
+          //               : null,
+          //           capitalization: TextCapitalization.none,
+          //         ),
+          //         "displayName": MultiPromptPrompt(
+          //           label: "Display name",
+          //           placeholder: "Residual Waste",
+          //         ),
+          //       },
+          //     );
+          //     if (inputRaw == null || !context.mounted) return;
+          //     final input = Map<String, dynamic>.from(inputRaw);
 
-            input["name"] = (input["name"]! as String).trim();
+          //     input["name"] = (input["name"]! as String).trim();
 
-            input["displayName"] = (input["displayName"]! as String).trim();
-            if (input["displayName"]!.isEmpty) {
-              input["displayName"] = null;
-            }
+          //     input["displayName"] = (input["displayName"]! as String).trim();
+          //     if (input["displayName"]!.isEmpty) {
+          //       input["displayName"] = null;
+          //     }
 
-            final completer = Completer<void>();
-            http.Response? response;
-            showStatusModal(
-              context: context,
-              completer: completer,
-              failureDetailsGenerator: () =>
-                  responseFailureDetailsGenerator(response),
-            );
+          //     final completer = Completer<void>();
+          //     http.Response? response;
+          //     showStatusModal(
+          //       context: context,
+          //       completer: completer,
+          //       failureDetailsGenerator: () =>
+          //           responseFailureDetailsGenerator(response),
+          //     );
 
-            response = await AuthManager.instance.fetch(
-              http.Request(
-                  "POST",
-                  Uri.parse("${ApiManager.baseUri}/categories"),
-                )
-                ..headers["Content-Type"] = "application/json"
-                ..body = jsonEncode(input),
-            );
-            if (response?.statusCode == 201) {
-              fetch();
-              completer.complete();
-              return;
-            }
-            completer.completeError("");
-          },
+          //     response = await AuthManager.instance.fetch(
+          //       http.Request(
+          //           "POST",
+          //           Uri.parse("${ApiManager.baseUri}/categories"),
+          //         )
+          //         ..headers["Content-Type"] = "application/json"
+          //         ..body = jsonEncode(input),
+          //     );
+          //     if (response?.statusCode == 201) {
+          //       fetch();
+          //       completer.complete();
+          //       return;
+          //     }
+          //     completer.completeError("");
+          //   },
           leadingIcon: Icon(Icons.add),
           child: Text("Create category"),
         ),
@@ -504,6 +506,7 @@ class ListWidget extends StatefulWidget {
 class _ListWidgetState extends State<ListWidget> {
   ProjectData? project;
   UserData? user;
+  CategoryData? category;
 
   final List<ProjectData> userAssignedProjects = [];
   final List<int> allProjectIds = [];
@@ -545,6 +548,8 @@ class _ListWidgetState extends State<ListWidget> {
           if (mounted) setState(() {});
         }.call();
       }
+    } else if (widget.type == ListType.category) {
+      category = CategoryData.fromJson(widget.data);
     }
   }
 
@@ -571,9 +576,19 @@ class _ListWidgetState extends State<ListWidget> {
     final showSubmissionsButton =
         context.router.current.route.name != submissionRoute.routeName ||
         context.router.current.queryParams != submissionRoute.queryParams;
-    final showDeleteButton = widget.type != ListType.user
+    final showDeleteButton = widget.type == ListType.category
+        ? false // better safe than sorry
+        : widget.type != ListType.user
         ? true
         : AuthManager.instance.authenticatedUser?.username != user?.username;
+
+    late final String? categoryPreName;
+    if (widget.type == ListType.category) {
+      categoryPreName = CategoryData.preName(
+        context: context,
+        name: category!.name,
+      );
+    }
 
     void delete() async {
       if (!await showConfirmationDialog(
@@ -876,11 +891,11 @@ class _ListWidgetState extends State<ListWidget> {
       final newDisplayName = await showPromptDialog(
         context: context,
         title: "Set display name",
-        content: widget.data["displayName"],
+        content: category?.displayName,
         placeholder: "Residual Waste",
       );
       if (newDisplayName != null &&
-          newDisplayName != widget.data["displayName"] &&
+          newDisplayName != category?.displayName &&
           context.mounted) {
         final completer = Completer<void>();
         http.Response? response;
@@ -907,7 +922,7 @@ class _ListWidgetState extends State<ListWidget> {
           return;
         }
 
-        widget.data["displayName"] = newDisplayName.trim().isEmpty
+        category?.displayName = newDisplayName.trim().isEmpty
             ? null
             : newDisplayName.trim();
         if (mounted) setState(() {});
@@ -988,7 +1003,7 @@ class _ListWidgetState extends State<ListWidget> {
         ),
         Chip(
           avatar: Icon(Icons.list_alt_outlined),
-          label: Text("${user?.submissionCount}"),
+          label: Text(user?.submissionCount.toString() ?? "–"),
         ),
       ],
       ListType.project => [
@@ -1017,21 +1032,30 @@ class _ListWidgetState extends State<ListWidget> {
         ),
         Chip(
           avatar: Icon(Icons.list_alt_outlined),
-          label: Text("${project?.submissionCount}"),
+          label: Text(project?.submissionCount.toString() ?? "–"),
         ),
       ],
       ListType.category => [
         Chip(
           avatar: Icon(Icons.title_outlined),
-          label: Text(widget.data["name"] ?? "–"),
+          label: Text(category?.name ?? "–"),
         ),
         Chip(
           avatar: Icon(Icons.campaign_outlined),
-          label: Text(widget.data["displayName"] ?? "–"),
+          label: Text(category?.displayName ?? "–"),
           deleteIcon: Icon(Icons.edit),
           onDeleted: AuthManager.instance.authenticatedUserIsAdmin
               ? categorySetDisplayName
               : null,
+        ),
+        if (categoryPreName != null)
+          Chip(
+            avatar: Icon(Icons.auto_fix_high_outlined),
+            label: Text(categoryPreName),
+          ),
+        Chip(
+          avatar: Icon(Icons.list_alt_outlined),
+          label: Text(category?.submissionCount.toString() ?? "–"),
         ),
       ],
     };
@@ -1065,8 +1089,8 @@ class _ListWidgetState extends State<ListWidget> {
                         label: Text(
                           NumberFormat.decimalPatternDigits(
                             locale: AppLocalizations.of(context).localeName,
-                            decimalDigits: 3,
-                          ).format(widget.data["validationWeightPositive"]),
+                            decimalDigits: 0,
+                          ).format(user?.validationWeightPositive ?? 0),
                         ),
                       ),
                       Chip(
@@ -1074,8 +1098,8 @@ class _ListWidgetState extends State<ListWidget> {
                         label: Text(
                           NumberFormat.decimalPatternDigits(
                             locale: AppLocalizations.of(context).localeName,
-                            decimalDigits: 3,
-                          ).format(widget.data["validationWeightNegative"]),
+                            decimalDigits: 0,
+                          ).format(user?.validationWeightNegative ?? 0),
                         ),
                       ),
                     ],
@@ -1097,10 +1121,10 @@ class _ListWidgetState extends State<ListWidget> {
                             locale: AppLocalizations.of(context).localeName,
                             decimalDigits: 3,
                           ).format(
-                            (1 + widget.data["validationWeightPositive"]) /
+                            (1 + (user?.validationWeightPositive ?? 0)) /
                                 (2 +
-                                    widget.data["validationWeightPositive"] +
-                                    widget.data["validationWeightNegative"]),
+                                    (user?.validationWeightPositive ?? 0) +
+                                    (user?.validationWeightNegative ?? 0)),
                           ),
                         ),
                       ),
@@ -1315,7 +1339,7 @@ class _ListWidgetState extends State<ListWidget> {
     "${ApiManager.baseUri}/${switch (widget.type) {
       ListType.user => "user/${user!.username}",
       ListType.project => "projects/${project!.id}",
-      ListType.category => "categories/${widget.data["name"]}",
+      ListType.category => "categories/${category!.name}",
     }}",
   );
 }

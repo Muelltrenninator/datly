@@ -40,6 +40,7 @@ class _StatusModalState extends State<StatusModal> {
   }
 
   bool _isSuccess = false;
+  bool _cancelled = false;
   String? _failureDetails;
   void _onComplete(bool success) async {
     if (!mounted) return;
@@ -60,6 +61,7 @@ class _StatusModalState extends State<StatusModal> {
         setState(() {});
       });
     } else {
+      if (tmpDetails == null) _cancelled = true;
       Future.delayed(Durations.long4, () {
         if (mounted) Navigator.of(context).pop();
       });
@@ -114,17 +116,23 @@ class _StatusModalState extends State<StatusModal> {
                       ),
                       child: !widget.completer.isCompleted
                           ? CircularProgressIndicator(padding: EdgeInsets.zero)
-                          : _isSuccess
-                          ? Icon(
-                              Icons.check_circle_outline_outlined,
-                              size: 48,
-                              color: Colors.green,
-                            )
-                          : Icon(
-                              Icons.error_outline,
-                              size: 48,
-                              color: ColorScheme.of(context).error,
-                            ),
+                          : (_isSuccess
+                                ? Icon(
+                                    Icons.check_circle_outline_outlined,
+                                    size: 48,
+                                    color: Colors.green,
+                                  )
+                                : (_cancelled
+                                      ? Icon(
+                                          Icons.cancel_outlined,
+                                          size: 48,
+                                          color: Colors.amber[700]!,
+                                        )
+                                      : Icon(
+                                          Icons.error_outline,
+                                          size: 48,
+                                          color: ColorScheme.of(context).error,
+                                        ))),
                     ),
                   ),
                 ],

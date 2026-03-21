@@ -58,6 +58,8 @@ class Submissions extends Table {
       real().withDefault(const Constant(0.0))();
   RealColumn get validationWeightNegative =>
       real().withDefault(const Constant(0.0))();
+  TextColumn get validationReports =>
+      text().map(ListConverter<String>()).withDefault(const Constant("[]"))();
 }
 
 class Signatures extends Table {

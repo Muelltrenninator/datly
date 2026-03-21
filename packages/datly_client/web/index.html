@@ -19,6 +19,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="robots" content="noindex">
 
+  <meta property="og:type" content="website">
   <meta property="og:title" content="Datly">
   <meta property="og:image" content="/assets/assets/banner.png">
   <meta property="og:url" content="{{CANONICAL}}">
@@ -93,7 +94,7 @@
   </style>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script src='flutter_bootstrap.js?v={{flutter_service_worker_version}}' async></script>
   <div id="loaderContainer"><div id="loader"></div></div>
 </body>
 </html>

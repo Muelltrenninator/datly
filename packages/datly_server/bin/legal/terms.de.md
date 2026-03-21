@@ -1,6 +1,6 @@
 # Datly — Nutzungsbedingungen (AGB)
 
-**Gültig ab:** 06.03.2026
+**Gültig ab:** 21.03.2026
 **Betreiber / Anbieter:** JHubi1
 **Kontakt:** <me@jhubi1.com>
 **Standort:** Deutschland
@@ -11,7 +11,7 @@ Mit der Erstellung eines Kontos bei Datly oder der anderweitigen Nutzung des Die
 
 ## 2. Dienstbeschreibung
 
-Datly ist ein kostenloser Dienst, der registrierten Nutzern ermöglicht, Fotos aufzunehmen und hochzuladen. Hochgeladene Fotos werden zum Trainieren, Evaluieren und Verbessern von KI/ML-Modellen verwendet. Der Dienst umfasst Bildsammlung, Einwilligungsverwaltung und damit verbundene Modellentwicklungsaktivitäten. Es gibt keine weiteren Funktionen über diesen Umfang hinaus.
+Datly ist ein kostenloser Dienst, der registrierten Nutzern ermöglicht, Fotos aufzunehmen und hochzuladen. Hochgeladene Fotos werden zum Trainieren, Evaluieren und Verbessern von KI/ML-Modellen verwendet. Der Dienst umfasst Bildsammlung, Einwilligungsverwaltung, **gemeinschaftliche Validierung** (Peer-Review von Einreichungen durch andere authentifizierte Nutzer) und damit verbundene Modellentwicklungsaktivitäten.
 
 ## 3. Registrierung & Konten
 
@@ -35,6 +35,7 @@ Datly ist ein kostenloser Dienst, der registrierten Nutzern ermöglicht, Fotos a
 - Sie behalten das Eigentum an von Ihnen hochgeladenen Bildern.
 - Mit dem Upload und der Unterzeichnung des Einwilligungsformulars räumen Sie Datly die in unserer Datenschutzerklärung (Abschnitt 4) beschriebene Lizenz ein, die Bilder für Training und zugehörige Forschung/Entwicklung zu nutzen.
 - Jede Bildeinreichung erfordert die Unterzeichnung eines **Einwilligungsformulars**. Die Einwilligungsunterschrift wird zusammen mit Metadaten (IP-Adresse, User-Agent, Konto-Snapshot, Einreichungs-Snapshot) als Rechtsnachweis gespeichert und auch nach Konto- oder Einreichungslöschung aufbewahrt.
+- Mit dem Hochladen von Bildern erkennen Sie an, dass Ihre Einreichungen anderen authentifizierten Nutzern während der **gemeinschaftlichen Validierung** (Peer-Review) angezeigt werden können. Während der Validierung wird Ihre Identität (Benutzername, E-Mail oder andere Kontoinformationen) den Validatoren **nicht offengelegt**.
 - Sie erklären, dass hochgeladene Inhalte keine Rechte Dritter verletzen, nicht rechtswidrig sind und keine verbotenen Inhalte enthalten (Material über sexuellen Missbrauch von Kindern, Hassrede, nicht-einvernehmliche intime Darstellungen etc.). Wir behalten uns das Recht vor, Inhalte, die gegen diese Bedingungen verstoßen, zu entfernen und betroffene Einreichungen zu zensieren oder zu löschen. Das Hochladen rechtswidriger oder verbotener Inhalte kann zur **sofortigen Deaktivierung oder dauerhaften Löschung** Ihres Kontos ohne Vorankündigung führen.
 
 ## 6. Bildverarbeitung
@@ -57,8 +58,10 @@ Sie dürfen nicht:
 - Versuchen, Sicherheitsmaßnahmen, Ratenbegrenzungen oder Zugriffskontrollen zu umgehen.
 - Automatisierte Werkzeuge verwenden, um ohne Genehmigung Inhalte einzureichen.
 - Sich als ein anderer Nutzer ausgeben oder falsche Registrierungsinformationen angeben.
+- Das Validierungssystem bewusst manipulieren (z. B. systematisch falsch abstimmen, mit anderen Nutzern kolludieren, um Validierungsergebnisse zu beeinflussen).
+- Die Meldefunktion missbrauchen, um Inhalte zu kennzeichnen, die nicht tatsächlich gegen diese Bedingungen verstoßen.
 
-Wir können Konten, die gegen diese Bedingungen verstoßen, ohne Vorankündigung **deaktivieren oder kündigen**. Die Deaktivierung kann manuell durch einen Administrator oder automatisch durch unsere Inhaltsmoderierungssysteme (einschließlich KI-basierter Moderation) erfolgen. Ein Grund wird, soweit zutreffend, angegeben.
+Wir können Konten, die gegen diese Bedingungen verstoßen, ohne Vorankündigung **deaktivieren oder kündigen**. Die Deaktivierung kann manuell durch einen Administrator oder automatisch durch unsere Inhaltsmoderierungssysteme (einschließlich gemeinschaftlicher Validierung und Meldung) erfolgen. Ein Grund wird, soweit zutreffend, angegeben.
 
 ## 8. Deaktivierung, Löschung & Kontoschließung
 

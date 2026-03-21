@@ -2,10 +2,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:datly/generated/gitbaker.g.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:web/web.dart' as web;
 
 import '../api.dart';
 import '../l10n/app_localizations.dart';
-import '../main.gr.dart';
+import '../main.dart';
 import 'password_change_dialog.dart';
 
 class TitleBarTitle extends StatelessWidget {
@@ -46,8 +47,7 @@ class TitleBarTitle extends StatelessWidget {
 
 class TitleBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
-  final bool? scrollUnserElevation;
-  const TitleBar({super.key, this.backgroundColor, this.scrollUnserElevation});
+  const TitleBar({super.key, this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +56,8 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       title: TitleBarTitle(onTap: () => context.navigateTo(MainRoute())),
-      backgroundColor: backgroundColor,
-      scrolledUnderElevation: scrollUnserElevation == false ? 0 : null,
+      backgroundColor: backgroundColor ?? ColorScheme.of(context).surface,
+      scrolledUnderElevation: 0,
       actions: [
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -140,6 +140,36 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
                 leading: Icon(Icons.gavel_outlined),
                 title: Text(AppLocalizations.of(context).imprint),
               ),
+              if (AuthManager.instance.authenticatedUserIsAdmin) ...[
+                SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    "Admin settings",
+                    style: TextTheme.of(context).labelLarge,
+                  ),
+                ),
+                ListTile(
+                  onTap: () {
+                    prefs.setBool(
+                      "enableValidationScreen",
+                      !(prefs.getBool("enableValidationScreen") ?? false),
+                    );
+                    web.window.location.reload();
+                  },
+                  leading: Badge(
+                    backgroundColor:
+                        (prefs.getBool("enableValidationScreen") ?? false)
+                        ? Colors.green
+                        : Colors.red,
+                    child: Icon(Icons.science_outlined),
+                  ),
+                  title: Text(
+                    "${(prefs.getBool("enableValidationScreen") ?? false) ? "Turn off" : "Turn on"} validation screen",
+                  ),
+                  dense: true,
+                ),
+              ],
             ],
           ),
           icon: Icon(Icons.info_outline),
@@ -170,7 +200,7 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
                     ? controller.close
                     : controller.open,
                 icon: Icon(Icons.admin_panel_settings_outlined),
-                tooltip: "Admin Menu",
+                tooltip: "Admin menu",
               );
             },
           ),

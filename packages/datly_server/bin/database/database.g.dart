@@ -1388,6 +1388,16 @@ class $SubmissionsTable extends Submissions
         defaultValue: const Constant(0.0),
       );
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+  validationReports = GeneratedColumn<String>(
+    'validation_reports',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant("[]"),
+  ).withConverter<List<String>>($SubmissionsTable.$convertervalidationReports);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     projectId,
@@ -1402,6 +1412,7 @@ class $SubmissionsTable extends Submissions
     category,
     validationWeightPositive,
     validationWeightNegative,
+    validationReports,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1571,6 +1582,12 @@ class $SubmissionsTable extends Submissions
         DriftSqlType.double,
         data['${effectivePrefix}validation_weight_negative'],
       )!,
+      validationReports: $SubmissionsTable.$convertervalidationReports.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}validation_reports'],
+        )!,
+      ),
     );
   }
 
@@ -1581,6 +1598,8 @@ class $SubmissionsTable extends Submissions
 
   static JsonTypeConverter2<SubmissionStatus, String, String> $converterstatus =
       const EnumNameConverter<SubmissionStatus>(SubmissionStatus.values);
+  static TypeConverter<List<String>, String> $convertervalidationReports =
+      ListConverter<String>();
 }
 
 class Submission extends DataClass implements Insertable<Submission> {
@@ -1597,6 +1616,7 @@ class Submission extends DataClass implements Insertable<Submission> {
   final String? category;
   final double validationWeightPositive;
   final double validationWeightNegative;
+  final List<String> validationReports;
   const Submission({
     required this.id,
     required this.projectId,
@@ -1611,6 +1631,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     this.category,
     required this.validationWeightPositive,
     required this.validationWeightNegative,
+    required this.validationReports,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1644,6 +1665,11 @@ class Submission extends DataClass implements Insertable<Submission> {
     map['validation_weight_negative'] = Variable<double>(
       validationWeightNegative,
     );
+    {
+      map['validation_reports'] = Variable<String>(
+        $SubmissionsTable.$convertervalidationReports.toSql(validationReports),
+      );
+    }
     return map;
   }
 
@@ -1670,6 +1696,7 @@ class Submission extends DataClass implements Insertable<Submission> {
           : Value(category),
       validationWeightPositive: Value(validationWeightPositive),
       validationWeightNegative: Value(validationWeightNegative),
+      validationReports: Value(validationReports),
     );
   }
 
@@ -1698,6 +1725,9 @@ class Submission extends DataClass implements Insertable<Submission> {
       validationWeightNegative: serializer.fromJson<double>(
         json['validationWeightNegative'],
       ),
+      validationReports: serializer.fromJson<List<String>>(
+        json['validationReports'],
+      ),
     );
   }
   @override
@@ -1723,6 +1753,7 @@ class Submission extends DataClass implements Insertable<Submission> {
       'validationWeightNegative': serializer.toJson<double>(
         validationWeightNegative,
       ),
+      'validationReports': serializer.toJson<List<String>>(validationReports),
     };
   }
 
@@ -1740,6 +1771,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     Value<String?> category = const Value.absent(),
     double? validationWeightPositive,
     double? validationWeightNegative,
+    List<String>? validationReports,
   }) => Submission(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -1760,6 +1792,7 @@ class Submission extends DataClass implements Insertable<Submission> {
         validationWeightPositive ?? this.validationWeightPositive,
     validationWeightNegative:
         validationWeightNegative ?? this.validationWeightNegative,
+    validationReports: validationReports ?? this.validationReports,
   );
   Submission copyWithCompanion(SubmissionsCompanion data) {
     return Submission(
@@ -1788,6 +1821,9 @@ class Submission extends DataClass implements Insertable<Submission> {
       validationWeightNegative: data.validationWeightNegative.present
           ? data.validationWeightNegative.value
           : this.validationWeightNegative,
+      validationReports: data.validationReports.present
+          ? data.validationReports.value
+          : this.validationReports,
     );
   }
 
@@ -1806,7 +1842,8 @@ class Submission extends DataClass implements Insertable<Submission> {
           ..write('assetBlurHash: $assetBlurHash, ')
           ..write('category: $category, ')
           ..write('validationWeightPositive: $validationWeightPositive, ')
-          ..write('validationWeightNegative: $validationWeightNegative')
+          ..write('validationWeightNegative: $validationWeightNegative, ')
+          ..write('validationReports: $validationReports')
           ..write(')'))
         .toString();
   }
@@ -1826,6 +1863,7 @@ class Submission extends DataClass implements Insertable<Submission> {
     category,
     validationWeightPositive,
     validationWeightNegative,
+    validationReports,
   );
   @override
   bool operator ==(Object other) =>
@@ -1843,7 +1881,8 @@ class Submission extends DataClass implements Insertable<Submission> {
           other.assetBlurHash == this.assetBlurHash &&
           other.category == this.category &&
           other.validationWeightPositive == this.validationWeightPositive &&
-          other.validationWeightNegative == this.validationWeightNegative);
+          other.validationWeightNegative == this.validationWeightNegative &&
+          other.validationReports == this.validationReports);
 }
 
 class SubmissionsCompanion extends UpdateCompanion<Submission> {
@@ -1860,6 +1899,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
   final Value<String?> category;
   final Value<double> validationWeightPositive;
   final Value<double> validationWeightNegative;
+  final Value<List<String>> validationReports;
   const SubmissionsCompanion({
     this.id = const Value.absent(),
     this.projectId = const Value.absent(),
@@ -1874,6 +1914,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.category = const Value.absent(),
     this.validationWeightPositive = const Value.absent(),
     this.validationWeightNegative = const Value.absent(),
+    this.validationReports = const Value.absent(),
   });
   SubmissionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1889,6 +1930,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     this.category = const Value.absent(),
     this.validationWeightPositive = const Value.absent(),
     this.validationWeightNegative = const Value.absent(),
+    this.validationReports = const Value.absent(),
   }) : projectId = Value(projectId),
        user = Value(user),
        assetBlurHash = Value(assetBlurHash);
@@ -1906,6 +1948,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Expression<String>? category,
     Expression<double>? validationWeightPositive,
     Expression<double>? validationWeightNegative,
+    Expression<String>? validationReports,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1923,6 +1966,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
         'validation_weight_positive': validationWeightPositive,
       if (validationWeightNegative != null)
         'validation_weight_negative': validationWeightNegative,
+      if (validationReports != null) 'validation_reports': validationReports,
     });
   }
 
@@ -1940,6 +1984,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
     Value<String?>? category,
     Value<double>? validationWeightPositive,
     Value<double>? validationWeightNegative,
+    Value<List<String>>? validationReports,
   }) {
     return SubmissionsCompanion(
       id: id ?? this.id,
@@ -1957,6 +2002,7 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
           validationWeightPositive ?? this.validationWeightPositive,
       validationWeightNegative:
           validationWeightNegative ?? this.validationWeightNegative,
+      validationReports: validationReports ?? this.validationReports,
     );
   }
 
@@ -2008,6 +2054,13 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
         validationWeightNegative.value,
       );
     }
+    if (validationReports.present) {
+      map['validation_reports'] = Variable<String>(
+        $SubmissionsTable.$convertervalidationReports.toSql(
+          validationReports.value,
+        ),
+      );
+    }
     return map;
   }
 
@@ -2026,7 +2079,8 @@ class SubmissionsCompanion extends UpdateCompanion<Submission> {
           ..write('assetBlurHash: $assetBlurHash, ')
           ..write('category: $category, ')
           ..write('validationWeightPositive: $validationWeightPositive, ')
-          ..write('validationWeightNegative: $validationWeightNegative')
+          ..write('validationWeightNegative: $validationWeightNegative, ')
+          ..write('validationReports: $validationReports')
           ..write(')'))
         .toString();
   }
@@ -3866,6 +3920,7 @@ typedef $$SubmissionsTableCreateCompanionBuilder =
       Value<String?> category,
       Value<double> validationWeightPositive,
       Value<double> validationWeightNegative,
+      Value<List<String>> validationReports,
     });
 typedef $$SubmissionsTableUpdateCompanionBuilder =
     SubmissionsCompanion Function({
@@ -3882,6 +3937,7 @@ typedef $$SubmissionsTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<double> validationWeightPositive,
       Value<double> validationWeightNegative,
+      Value<List<String>> validationReports,
     });
 
 final class $$SubmissionsTableReferences
@@ -4003,6 +4059,12 @@ class $$SubmissionsTableFilterComposer
   ColumnFilters<double> get validationWeightNegative => $composableBuilder(
     column: $table.validationWeightNegative,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get validationReports => $composableBuilder(
+    column: $table.validationReports,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   $$ProjectsTableFilterComposer get projectId {
@@ -4134,6 +4196,11 @@ class $$SubmissionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get validationReports => $composableBuilder(
+    column: $table.validationReports,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ProjectsTableOrderingComposer get projectId {
     final $$ProjectsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4255,6 +4322,12 @@ class $$SubmissionsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumnWithTypeConverter<List<String>, String>
+  get validationReports => $composableBuilder(
+    column: $table.validationReports,
+    builder: (column) => column,
+  );
+
   $$ProjectsTableAnnotationComposer get projectId {
     final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -4366,6 +4439,7 @@ class $$SubmissionsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double> validationWeightPositive = const Value.absent(),
                 Value<double> validationWeightNegative = const Value.absent(),
+                Value<List<String>> validationReports = const Value.absent(),
               }) => SubmissionsCompanion(
                 id: id,
                 projectId: projectId,
@@ -4380,6 +4454,7 @@ class $$SubmissionsTableTableManager
                 category: category,
                 validationWeightPositive: validationWeightPositive,
                 validationWeightNegative: validationWeightNegative,
+                validationReports: validationReports,
               ),
           createCompanionCallback:
               ({
@@ -4396,6 +4471,7 @@ class $$SubmissionsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double> validationWeightPositive = const Value.absent(),
                 Value<double> validationWeightNegative = const Value.absent(),
+                Value<List<String>> validationReports = const Value.absent(),
               }) => SubmissionsCompanion.insert(
                 id: id,
                 projectId: projectId,
@@ -4410,6 +4486,7 @@ class $$SubmissionsTableTableManager
                 category: category,
                 validationWeightPositive: validationWeightPositive,
                 validationWeightNegative: validationWeightNegative,
+                validationReports: validationReports,
               ),
           withReferenceMapper: (p0) => p0
               .map(

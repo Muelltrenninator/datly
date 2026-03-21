@@ -14,6 +14,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get adminOnly =>
+      'Dieses Feature ist NICHT öffentlich – Inhalte NICHT teilen!';
+
+  @override
   String get retry => 'Erneut versuchen';
 
   @override
@@ -251,7 +255,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String get invalidPage => 'Ungültige Seitenzahl.';
 
   @override
-  String get validatePleaseSelect => 'Bitte auswählen:';
+  String get validationPleaseSelect => 'Bitte auswählen:';
+
+  @override
+  String get validationAllDone => 'Alles erledigt!';
+
+  @override
+  String get validationAllDoneDescription =>
+      'Im Moment gibt es keine Einsendungen mehr für dich zu validieren.\nSchau später wieder vorbei, um an neuen Einsendungen zu arbeiten.';
+
+  @override
+  String get validationReportDialogTitle => 'Einsendung melden?';
+
+  @override
+  String get validationReportDialogMessage =>
+      'Wenn du glaubst, dass diese Eisendung gegen die Richtlinien verstößt, kannst du sie melden. Bitte beachte, dass das Missbrauchen der Meldefunktion zu einer Sperrung deines Accounts führen kann.';
+
+  @override
+  String get validationReported => 'Einsendung gemeldet.';
+
+  @override
+  String get validationSubmissionFailed => 'Fehler beim Absenden.';
 
   @override
   String get submissionStatusPending => 'Ausstehend';
@@ -263,7 +287,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get submissionStatusRejected => 'Abgelehnt';
 
   @override
-  String get submissionStatusCensored => 'Zensiert';
+  String get submissionStatusReported => 'Gemeldet';
+
+  @override
+  String get submissionStatusCensored => 'Eingeschränkt';
 
   @override
   String submissionModerationReasonAutomated(String categories) {
@@ -285,6 +312,24 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get submissionDeleteMessage =>
       'Das Löschen einer Einsendung wird dessen Bild vom nächsten Export entfernen und die Einwilligung zurückziehen. Diese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get listCategory => 'Kategorie';
+
+  @override
+  String get listCategoryPreOrganic => 'Biomüll';
+
+  @override
+  String get listCategoryPreHazardous => 'Sondermüll';
+
+  @override
+  String get listCategoryPrePlastic => 'Plastikmüll';
+
+  @override
+  String get listCategoryPrePaper => 'Papiermüll';
+
+  @override
+  String get listCategoryPreResidual => 'Restmüll';
 
   @override
   String get accountOverview => 'Account‑Übersicht';

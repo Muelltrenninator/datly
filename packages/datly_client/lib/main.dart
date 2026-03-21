@@ -36,15 +36,17 @@ class AppRouter extends RootStackRouter {
       path: "/",
       guards: [AuthenticationGuard()],
       children: [
-        AutoRoute(page: UploadRoute.page, path: ""),
-        // AutoRoute(
-        //   page: UploadValidateParentRoute.page,
-        //   path: "",
-        //   children: [
-        //     AutoRoute(page: UploadRoute.page, path: ""),
-        //     AutoRoute(page: ValidateRoute.page, path: "validate"),
-        //   ],
-        // ),
+        AuthManager.instance.authenticatedUserIsAdmin &&
+                prefs.getBool("enableValidationScreen") == true
+            ? AutoRoute(
+                page: UploadValidateParentRoute.page,
+                path: "",
+                children: [
+                  AutoRoute(page: UploadRoute.page, path: ""),
+                  AutoRoute(page: ValidationRoute.page, path: "validation"),
+                ],
+              )
+            : AutoRoute(page: UploadRoute.page, path: ""),
         AutoRoute(page: SubmissionsRoute.page, path: "submissions"),
         AutoRoute(page: SubmissionDetailsRoute.page, path: "submissions/:id"),
         AutoRoute(page: ListUsersRoute.page, path: "users"),
@@ -166,7 +168,6 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: "Datly",
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(colorScheme: colorSchemeLight).modified(),
       darkTheme: ThemeData(colorScheme: colorSchemeDark).modified(),
       themeMode: ThemeMode.system,
@@ -240,9 +241,6 @@ class _MainScreenState extends State<MainScreen> {
         child: Scaffold(
           appBar: TitleBar(
             backgroundColor: immersiveMode ? Colors.transparent : null,
-            scrollUnserElevation:
-                context.router.currentUrl != "/" &&
-                context.router.currentUrl != "/validate",
           ),
           extendBodyBehindAppBar: immersiveMode,
           body: AutoRouter(),
@@ -294,8 +292,10 @@ class _UploadValidateParentPageState extends State<UploadValidateParentPage> {
     final mobile = WindowSizeClass.of(context) <= WindowSizeClass.medium;
     final narrowHeight = MediaQuery.sizeOf(context).height <= 800;
     return AutoTabsRouter.pageView(
-      routes: [UploadRoute(), ValidateRoute()],
+      routes: [UploadRoute(), ValidationRoute()],
       physics: NeverScrollableScrollPhysics(),
+      curve: Curves.easeInOut,
+      scrollDirection: mobile ? Axis.horizontal : Axis.vertical,
       builder: (context, child, pageController) {
         final tabsRouter = AutoTabsRouter.of(context);
         final immersiveMode = ImmersiveModeAction.enabledNotifier.value;
@@ -314,12 +314,14 @@ class _UploadValidateParentPageState extends State<UploadValidateParentPage> {
                       destinations: [
                         NavigationRailDestination(
                           icon: Icon(Icons.upload_file),
+                          selectedIcon: Icon(Icons.upload_file_rounded),
                           label: Text(
                             AppLocalizations.of(context).navigationUpload,
                           ),
                         ),
                         NavigationRailDestination(
-                          icon: Icon(Icons.check),
+                          icon: Icon(Icons.approval_outlined),
+                          selectedIcon: Icon(Icons.approval_sharp),
                           label: Text(
                             AppLocalizations.of(context).navigationValidate,
                           ),
@@ -328,6 +330,7 @@ class _UploadValidateParentPageState extends State<UploadValidateParentPage> {
                     ),
                     Expanded(
                       child: Card.outlined(
+                        clipBehavior: Clip.antiAlias,
                         margin: EdgeInsets.only(bottom: 4, right: 4),
                         child: child,
                       ),
@@ -345,10 +348,12 @@ class _UploadValidateParentPageState extends State<UploadValidateParentPage> {
                   destinations: [
                     NavigationDestination(
                       icon: Icon(Icons.upload_file),
+                      selectedIcon: Icon(Icons.upload_file_rounded),
                       label: AppLocalizations.of(context).navigationUpload,
                     ),
                     NavigationDestination(
-                      icon: Icon(Icons.approval),
+                      icon: Icon(Icons.approval_outlined),
+                      selectedIcon: Icon(Icons.approval_sharp),
                       label: AppLocalizations.of(context).navigationValidate,
                     ),
                   ],
