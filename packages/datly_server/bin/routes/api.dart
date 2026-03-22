@@ -47,6 +47,7 @@ Handler get apiPipeline => Pipeline()
           },
         ),
       );
+      // ignore: unused_local_variable
       final generalLimiter = shelfLimiter(
         RateLimiterOptions(
           maxRequests: 60,
@@ -78,10 +79,11 @@ Handler get apiPipeline => Pipeline()
           );
         }
 
-        final generalResult = await generalLimiter
-            .call((_) async => Response(200))
-            .call(request);
-        if (generalResult.statusCode == 429) return generalResult;
+        // TODO: rework
+        // final generalResult = await generalLimiter
+        //     .call((_) async => Response(200))
+        //     .call(request);
+        // if (generalResult.statusCode == 429) return generalResult;
 
         final response = await innerHandler(request);
         if (response.statusCode == 401) {
