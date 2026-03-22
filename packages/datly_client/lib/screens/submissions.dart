@@ -30,6 +30,8 @@ Uint8List _decodeBlurHash(String blurHash) {
 }
 
 CategoryData? _lastSelectedCategory;
+Completer<void>? _availableCategoriesCompleter;
+List<CategoryData> _availableCategories = [];
 
 @RoutePage()
 class SubmissionsPage extends StatefulWidget {
@@ -230,12 +232,15 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+
     final submissionCount =
         effectiveProjectData?.submissionCount ??
         effectiveUserData?.submissionCount;
     final availablePages = submissionCount != null
         ? (submissionCount / 96).ceil()
         : null;
+
     return Stack(
       children: [
         !error
@@ -266,10 +271,8 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                                 widget.page < 1 ||
                                         ((availablePages ?? 0) != 0 &&
                                             widget.page > availablePages!)
-                                    ? AppLocalizations.of(context).invalidPage
-                                    : AppLocalizations.of(
-                                        context,
-                                      ).noSubmissions,
+                                    ? appLocalizations.invalidPage
+                                    : appLocalizations.noSubmissions,
                                 style: DefaultTextStyle.of(context).style
                                     .copyWith(
                                       color: Theme.of(context).disabledColor,
@@ -381,14 +384,13 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   CategoryData? category;
   Uint8List? blurHashImage;
 
-  List<CategoryData> availableCategories = [];
-
   @override
   void initState() {
     super.initState();
-    _preloadCategories();
     _loadBlurHash();
     _loadMetadata();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _preloadCategories());
   }
 
   @override
@@ -437,14 +439,26 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   }
 
   Future<void> _preloadCategories() async {
-    final categories = await _listAvailableCategories() ?? [];
-    availableCategories
-      ..clear()
-      ..addAll(categories)
-      ..sort((a, b) => a.name.compareTo(b.name));
+    if (_availableCategoriesCompleter == null) {
+      _availableCategoriesCompleter = Completer();
+      List<CategoryData>? categories;
+      for (var i = 0; i < 3; i++) {
+        categories = (await _listAvailableCategories())
+          ?..sort((a, b) => a.name.compareTo(b.name));
+        if (categories != null) break;
+        await Future.delayed(Duration(seconds: math.pow(2, i) as int));
+      }
+      _availableCategories
+        ..clear()
+        ..addAll(categories ?? []);
+      _availableCategoriesCompleter!.complete();
+    } else {
+      await _availableCategoriesCompleter!.future;
+    }
+
     if (widget.data.category != null &&
-        availableCategories.any((c) => c.name == widget.data.category)) {
-      category = availableCategories.firstWhere(
+        _availableCategories.any((c) => c.name == widget.data.category)) {
+      category = _availableCategories.firstWhere(
         (c) => c.name == widget.data.category,
       );
     }
@@ -455,7 +469,14 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
     final request = await AuthManager.instance.fetch(
       http.Request("GET", Uri.parse("${ApiManager.baseUri}/categories/list")),
     );
-    if (request == null || request.statusCode != 200) return null;
+    if (request == null || request.statusCode != 200) {
+      if (kDebugMode) {
+        print(
+          "Failed to fetch categories: [${request?.statusCode}] ${request?.body}",
+        );
+      }
+      return null;
+    }
 
     var data = jsonDecode(request.body);
     if (data is! List) return null;
@@ -483,6 +504,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final appLocalizations = AppLocalizations.of(context);
     final windowSizeClass = WindowSizeClass.of(context);
 
     void setModerationReason() async {
@@ -643,7 +665,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
         title: "Set category",
         description:
             "This will be used to sort and validate the submission in the 3×3 crowd sourcing validation grid.",
-        items: availableCategories,
+        items: _availableCategories,
         initialValue: category,
         titleGenerator: (item) =>
             CategoryData.preName(context: context, name: item.name) ??
@@ -699,13 +721,18 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
     }
 
     void deleteSubmission() async {
-      final selection = await showConfirmationDialog(
-        context: context,
-        title: AppLocalizations.of(context).submissionDeleteTitle,
-        description: AppLocalizations.of(context).submissionDeleteMessage,
-      );
+      bool? selection;
+      if (HardwareKeyboard.instance.isControlPressed) {
+        selection ??= true;
+      }
 
-      if (!context.mounted) return;
+      selection ??= await showConfirmationDialog(
+        context: context,
+        title: appLocalizations.submissionDeleteTitle,
+        description: appLocalizations.submissionDeleteMessage,
+      );
+      if (!selection || !context.mounted) return;
+
       final completer = Completer<void>();
       http.Response? response;
       showStatusModal(
@@ -715,7 +742,6 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
             responseFailureDetailsGenerator(response),
       );
 
-      if (!selection) return;
       response = await AuthManager.instance.fetch(http.Request("DELETE", uri));
       if (response != null && response.statusCode == 200) {
         widget.onDelete?.call();
@@ -826,8 +852,8 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                 context: context,
                 name: widget.data.category ?? "",
               ) ??
-              (availableCategories.any((c) => c.name == widget.data.category)
-                  ? availableCategories
+              (_availableCategories.any((c) => c.name == widget.data.category)
+                  ? _availableCategories
                             .firstWhere((c) => c.name == widget.data.category)
                             .displayName ??
                         widget.data.category!
@@ -890,7 +916,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                       label: Text(
                         GetTimeAgo.parse(
                           widget.data.submittedAt,
-                          locale: AppLocalizations.of(context).localeName,
+                          locale: appLocalizations.localeName,
                           pattern: dateFormat(context).pattern,
                         ),
                       ),
@@ -980,6 +1006,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                             maxLines: 8,
                           ),
                           deleteIcon: Icon(Icons.edit),
+                          deleteButtonTooltipMessage: appLocalizations.edit,
                           onDeleted: !widget.includeImage
                               ? setModerationReason
                               : null,
@@ -1003,7 +1030,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           avatar: Icon(Icons.keyboard_arrow_up),
                           label: Text(
                             NumberFormat.decimalPatternDigits(
-                              locale: AppLocalizations.of(context).localeName,
+                              locale: appLocalizations.localeName,
                               decimalDigits: 3,
                             ).format(widget.data.validationWeightPositive),
                           ),
@@ -1012,7 +1039,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           avatar: Icon(Icons.keyboard_arrow_down),
                           label: Text(
                             NumberFormat.decimalPatternDigits(
-                              locale: AppLocalizations.of(context).localeName,
+                              locale: appLocalizations.localeName,
                               decimalDigits: 3,
                             ).format(widget.data.validationWeightNegative),
                           ),
@@ -1034,7 +1061,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           avatar: Icon(Icons.credit_score),
                           label: Text(
                             NumberFormat.decimalPatternDigits(
-                              locale: AppLocalizations.of(context).localeName,
+                              locale: appLocalizations.localeName,
                               decimalDigits: 3,
                             ).format(
                               (1 + widget.data.validationWeightPositive) /
@@ -1048,7 +1075,8 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                         avatar: Icon(Icons.topic_outlined),
                         label: Text(categoryName),
                         deleteIcon: Icon(Icons.edit),
-                        onDeleted: availableCategories.isNotEmpty
+                        deleteButtonTooltipMessage: appLocalizations.edit,
+                        onDeleted: _availableCategories.isNotEmpty
                             ? setCategory
                             : null,
                       ),
@@ -1090,6 +1118,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                         Icons.edit,
                         color: widget.data.statusColor().onColor(),
                       ),
+                      deleteButtonTooltipMessage: appLocalizations.edit,
                       onDeleted:
                           AuthManager.instance.authenticatedUserIsAdmin &&
                               widget.data.status != "censored"
@@ -1104,7 +1133,7 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                       ),
                       label: Builder(
                         builder: (context) => Text(
-                          AppLocalizations.of(context).delete,
+                          appLocalizations.delete,
                           style: DefaultTextStyle.of(
                             context,
                           ).style.copyWith(color: colorScheme.onError),
@@ -1172,6 +1201,8 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
 
   @override
   Widget build(BuildContext context) {
+    final windowSizeClass = WindowSizeClass.of(context);
+    final size = MediaQuery.sizeOf(context);
     final animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOutCubicEmphasized,
@@ -1224,7 +1255,11 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
                 color: ColorScheme.of(context).surfaceContainerHighest,
                 child: DoubledSizeTransition(
                   sizeFactor: animation,
-                  minSizeFactor: 150.2 / 224,
+                  minSizeFactor:
+                      150.2 /
+                      (windowSizeClass > WindowSizeClass.compact
+                          ? 224
+                          : size.width),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

@@ -38,9 +38,9 @@ void define(Router router) {
                               db.submissions.status.equals(
                                 SubmissionStatus.pending.name,
                               ) &
-                              db.submissions.user.isNotValue(
-                                auth!.user.username,
-                              ) &
+                              // db.submissions.user.isNotValue(
+                              //   auth!.user.username,
+                              // ) &
                               db.users.disabled.isNull(),
                         )
                         ..groupBy(
@@ -79,9 +79,9 @@ void define(Router router) {
                               ) &
                               db.submissions.category.isNull().not() &
                               db.submissions.category.equals(category.name) &
-                              db.submissions.user.isNotValue(
-                                auth.user.username,
-                              ) &
+                              // db.submissions.user.isNotValue(
+                              //   auth!.user.username,
+                              // ) &
                               db.users.disabled.isNull(),
                         )
                         ..orderBy([OrderingTerm.random()])
@@ -103,9 +103,9 @@ void define(Router router) {
                                 SubmissionStatus.accepted.name,
                               ) &
                               db.submissions.category.equals(category.name) &
-                              db.submissions.user.isNotValue(
-                                auth.user.username,
-                              ) &
+                              // db.submissions.user.isNotValue(
+                              //   auth.user.username,
+                              // ) &
                               db.users.disabled.isNull(),
                         )
                         ..orderBy([OrderingTerm.random()])
@@ -129,9 +129,9 @@ void define(Router router) {
                               db.submissions.category
                                   .equals(category.name)
                                   .not() &
-                              db.submissions.user.isNotValue(
-                                auth.user.username,
-                              ) &
+                              // db.submissions.user.isNotValue(
+                              //   auth.user.username,
+                              // ) &
                               db.users.disabled.isNull(),
                         )
                         ..orderBy([OrderingTerm.random()])
@@ -175,7 +175,7 @@ void define(Router router) {
                     },
                     issuer: jwtIssuer(req),
                     audience: jwtAudienceValidation,
-                    subject: auth.user.username,
+                    subject: auth!.user.username,
                   ).sign(
                     jwtPrivateKey,
                     algorithm: JWTAlgorithm.RS256,
@@ -238,7 +238,7 @@ void define(Router router) {
                       Constant(existingItems.length < 36))) &
               db.submissions.category.isNotNull() &
               db.submissions.assetId.isNotIn(existingAssetIds) &
-              db.submissions.user.isNotValue(auth!.user.username) &
+              // db.submissions.user.isNotValue(auth!.user.username) &
               db.users.disabled.isNull();
           final newRow =
               await (db.select(db.submissions).join([
@@ -288,7 +288,7 @@ void define(Router router) {
                     },
                     issuer: jwtIssuer(req),
                     audience: jwtAudienceValidation,
-                    subject: auth.user.username,
+                    subject: auth!.user.username,
                   ).sign(
                     jwtPrivateKey,
                     algorithm: JWTAlgorithm.RS256,

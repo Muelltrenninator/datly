@@ -20,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -192,6 +192,14 @@ class AppDatabase extends _$AppDatabase {
             ).stylized(),
           );
         }
+      }
+      if (from < 11) {
+        // forgot a single dot in `api_projects.dart` which lead to only the
+        // passwords being stored as user snapshot instead of them being
+        // removed. no one's gonna know
+        await (db.update(db.signatures)
+              ..where((s) => s.userSnapshot.contains(r"$argon2id$")))
+            .write(SignaturesCompanion(userSnapshot: Value("<<REDACTED>>")));
       }
 
       t.info("Database migration completed");

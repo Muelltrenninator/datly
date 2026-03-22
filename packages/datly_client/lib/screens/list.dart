@@ -567,7 +567,9 @@ class _ListWidgetState extends State<ListWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final appLocalizations = AppLocalizations.of(context);
     final windowSizeClass = WindowSizeClass.of(context);
+
     final submissionRoute = SubmissionsRoute(
       user: widget.type == ListType.user ? user!.username : null,
       project: widget.type == ListType.project ? project!.id.toString() : null,
@@ -954,6 +956,7 @@ class _ListWidgetState extends State<ListWidget> {
                   ),
           ),
           deleteIcon: Icon(Icons.edit),
+          deleteButtonTooltipMessage: appLocalizations.edit,
           onDeleted: AuthManager.instance.authenticatedUserIsAdmin
               ? userSetEmail
               : null,
@@ -997,6 +1000,7 @@ class _ListWidgetState extends State<ListWidget> {
                 : null,
           ),
           deleteIcon: Icon(Icons.edit),
+          deleteButtonTooltipMessage: appLocalizations.edit,
           onDeleted: AuthManager.instance.authenticatedUserIsAdmin
               ? userSetProjects
               : null,
@@ -1018,6 +1022,7 @@ class _ListWidgetState extends State<ListWidget> {
             maxLines: 5,
           ),
           deleteIcon: Icon(Icons.edit),
+          deleteButtonTooltipMessage: appLocalizations.edit,
           onDeleted: AuthManager.instance.authenticatedUserIsAdmin
               ? projectSetDescription
               : null,
@@ -1044,6 +1049,7 @@ class _ListWidgetState extends State<ListWidget> {
           avatar: Icon(Icons.campaign_outlined),
           label: Text(category?.displayName ?? "–"),
           deleteIcon: Icon(Icons.edit),
+          deleteButtonTooltipMessage: appLocalizations.edit,
           onDeleted: AuthManager.instance.authenticatedUserIsAdmin
               ? categorySetDisplayName
               : null,
@@ -1088,7 +1094,7 @@ class _ListWidgetState extends State<ListWidget> {
                         avatar: Icon(Icons.keyboard_arrow_up),
                         label: Text(
                           NumberFormat.decimalPatternDigits(
-                            locale: AppLocalizations.of(context).localeName,
+                            locale: appLocalizations.localeName,
                             decimalDigits: 0,
                           ).format(user?.validationWeightPositive ?? 0),
                         ),
@@ -1097,7 +1103,7 @@ class _ListWidgetState extends State<ListWidget> {
                         avatar: Icon(Icons.keyboard_arrow_down),
                         label: Text(
                           NumberFormat.decimalPatternDigits(
-                            locale: AppLocalizations.of(context).localeName,
+                            locale: appLocalizations.localeName,
                             decimalDigits: 0,
                           ).format(user?.validationWeightNegative ?? 0),
                         ),
@@ -1118,7 +1124,7 @@ class _ListWidgetState extends State<ListWidget> {
                         avatar: Icon(Icons.credit_score),
                         label: Text(
                           NumberFormat.decimalPatternDigits(
-                            locale: AppLocalizations.of(context).localeName,
+                            locale: appLocalizations.localeName,
                             decimalDigits: 3,
                           ).format(
                             (1 + (user?.validationWeightPositive ?? 0)) /

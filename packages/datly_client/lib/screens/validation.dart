@@ -6,6 +6,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:http/http.dart' as http;
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -299,6 +300,13 @@ class _ValidationPageState extends State<ValidationPage>
           "clicked": payload.clicked,
         }),
     );
+
+    if (mounted) {
+      Confetti.launch(
+        context,
+        options: ConfettiOptions(x: 1, y: 1, angle: 115),
+      );
+    }
 
     if (response?.statusCode != 200) {
       if (!mounted) return;

@@ -595,7 +595,7 @@ void define(Router router) {
                 submissionId: Value(newSubmission.id),
                 submissionSnapshot: newSubmission.toJsonString(),
                 user: auth.user.username,
-                userSnapshot: jsonEncode(auth.user.toJson().remove("password")),
+                userSnapshot: jsonEncode(auth.user.toJson()..remove("password")),
                 ipAddress: identifierFromRequest(req)!,
                 userAgent: req.headers["user-agent"].absentOrNullIfBlank,
                 signature: signature,

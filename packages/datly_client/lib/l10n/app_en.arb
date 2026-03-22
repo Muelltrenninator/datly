@@ -25,6 +25,11 @@
         "description": "Button text to delete an item.",
         "context": "global"
     },
+    "edit": "Edit",
+    "@edit": {
+        "description": "Button text to edit an item.",
+        "context": "global"
+    },
     "failedToLoadDocument": "Failed to load document.",
     "@failedToLoadDocument": {
         "description": "Error message shown when a legal document fails to load.",
@@ -500,7 +505,7 @@
         "description": "Category for hazardous waste in the list of categories.",
         "context": "list:categories"
     },
-    "listCategoryPrePlastic": "Plastic Waste",
+    "listCategoryPrePlastic": "Packaging Waste",
     "@listCategoryPrePlastic": {
         "description": "Category for plastic waste in the list of categories.",
         "context": "list:categories"

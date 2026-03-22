@@ -24,6 +24,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get delete => 'Löschen';
 
   @override
+  String get edit => 'Bearbeiten';
+
+  @override
   String get failedToLoadDocument => 'Fehler beim Laden des Dokuments.';
 
   @override
@@ -323,7 +326,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get listCategoryPreHazardous => 'Sondermüll';
 
   @override
-  String get listCategoryPrePlastic => 'Plastikmüll';
+  String get listCategoryPrePlastic => 'Gelber Sack';
 
   @override
   String get listCategoryPrePaper => 'Papiermüll';

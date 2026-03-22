@@ -6,6 +6,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
@@ -207,57 +208,56 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
           categoryCanceled ? null : responseFailureDetailsGenerator(response),
     );
 
-    // TODO: reenable when time is ripe
-    // final availableCategories = await () async {
-    //   final request = await AuthManager.instance.fetch(
-    //     http.Request("GET", Uri.parse("${ApiManager.baseUri}/categories/list")),
-    //   );
-    //   if (request == null || request.statusCode != 200) {
-    //     response = request;
-    //     return null;
-    //   }
+    final availableCategories = await () async {
+      final request = await AuthManager.instance.fetch(
+        http.Request("GET", Uri.parse("${ApiManager.baseUri}/categories/list")),
+      );
+      if (request == null || request.statusCode != 200) {
+        response = request;
+        return null;
+      }
 
-    //   var data = jsonDecode(request.body);
-    //   if (data is! List) return null;
-    //   data = data.whereType<Map>().toList();
+      var data = jsonDecode(request.body);
+      if (data is! List) return null;
+      data = data.whereType<Map>().toList();
 
-    //   final processed = List<Map<String, dynamic>>.from(data)
-    //       .map((c) {
-    //         try {
-    //           return CategoryData.fromJson(c);
-    //         } catch (_) {
-    //           return null;
-    //         }
-    //       })
-    //       .whereType<CategoryData>()
-    //       .toList();
+      final processed = List<Map<String, dynamic>>.from(data)
+          .map((c) {
+            try {
+              return CategoryData.fromJson(c);
+            } catch (_) {
+              return null;
+            }
+          })
+          .whereType<CategoryData>()
+          .toList();
 
-    //   CategoryRegistry.instance.addAll(
-    //     Map.fromEntries(processed.map((c) => MapEntry(c.name, c))),
-    //   );
+      CategoryRegistry.instance.addAll(
+        Map.fromEntries(processed.map((c) => MapEntry(c.name, c))),
+      );
 
-    //   return processed;
-    // }();
-    // if (availableCategories == null ||
-    //     availableCategories.isEmpty ||
-    //     !mounted) {
-    //   completer.completeError("Failed to load categories");
-    //   return;
-    // }
+      return processed;
+    }();
+    if (availableCategories == null ||
+        availableCategories.isEmpty ||
+        !mounted) {
+      completer.completeError("Failed to load categories");
+      return;
+    }
 
-    // final category = await showRadioDialog<CategoryData>(
-    //   context: context,
-    //   title: AppLocalizations.of(context).listCategory,
-    //   items: availableCategories,
-    //   titleGenerator: (item) =>
-    //       CategoryData.preName(context: context, name: item.name) ??
-    //       item.resolveDisplayName(),
-    // );
-    // if (category == null) {
-    //   categoryCanceled = true;
-    //   completer.completeError("");
-    //   return;
-    // }
+    final category = await showRadioDialog<CategoryData>(
+      context: context,
+      title: AppLocalizations.of(context).listCategory,
+      items: availableCategories,
+      titleGenerator: (item) =>
+          CategoryData.preName(context: context, name: item.name) ??
+          item.resolveDisplayName(),
+    );
+    if (category == null) {
+      categoryCanceled = true;
+      completer.completeError("");
+      return;
+    }
 
     final project = await ProjectRegistry.instance.get(projects[projectIndex!]);
     if (project == null) {
@@ -294,6 +294,16 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     response != null && response!.statusCode == 201
         ? completer.complete()
         : completer.completeError("Upload failed");
+
+    if (response != null && response!.statusCode == 201) {
+      Future.delayed(Durations.extralong1).then((_) {
+        if (!mounted) return;
+        Confetti.launch(
+          context,
+          options: ConfettiOptions(x: 1, y: 1, angle: 115),
+        );
+      });
+    }
   }
 
   @override

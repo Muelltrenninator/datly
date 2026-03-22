@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
+  /// Button text to edit an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
   /// Error message shown when a legal document fails to load.
   ///
   /// In en, this message translates to:
@@ -647,7 +653,7 @@ abstract class AppLocalizations {
   /// Category for plastic waste in the list of categories.
   ///
   /// In en, this message translates to:
-  /// **'Plastic Waste'**
+  /// **'Packaging Waste'**
   String get listCategoryPrePlastic;
 
   /// Category for paper waste in the list of categories.
