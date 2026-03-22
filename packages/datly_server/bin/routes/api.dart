@@ -27,7 +27,7 @@ final apiRouter = Router(
 );
 Handler get apiPipeline => Pipeline()
     .addMiddleware((innerHandler) {
-      final limiter = shelfLimiter(
+      final authLimiter = shelfLimiter(
         RateLimiterOptions(
           maxRequests: 5,
           windowSize: Duration(seconds: 10),
@@ -35,7 +35,27 @@ Handler get apiPipeline => Pipeline()
               identifierFromRequest(request)!,
           onRateLimitExceeded: (request) {
             t.warn(
-              "Rate limit exceeded for: ${identifierFromRequest(request)} (unauthenticated)",
+              "Auth rate limit exceeded for: ${identifierFromRequest(request)}",
+            );
+            return Response(
+              429,
+              body: jsonEncode({
+                "error": "Too many requests, please try again later",
+              }),
+              headers: {"Content-Type": "application/json"},
+            );
+          },
+        ),
+      );
+      final generalLimiter = shelfLimiter(
+        RateLimiterOptions(
+          maxRequests: 60,
+          windowSize: Duration(seconds: 60),
+          clientIdentifierExtractor: (request) =>
+              identifierFromRequest(request)!,
+          onRateLimitExceeded: (request) {
+            t.warn(
+              "Rate limit exceeded for: ${identifierFromRequest(request)}",
             );
             return Response(
               429,
@@ -58,12 +78,16 @@ Handler get apiPipeline => Pipeline()
           );
         }
 
+        final generalResult = await generalLimiter
+            .call((_) async => Response(200))
+            .call(request);
+        if (generalResult.statusCode == 429) return generalResult;
+
         final response = await innerHandler(request);
         if (response.statusCode == 401) {
-          return limiter.call((_) => response).call(request);
-        } else {
-          return response;
+          return authLimiter.call((_) => response).call(request);
         }
+        return response;
       };
     })
     .addHandler(apiRouter.call);

@@ -11,7 +11,7 @@ void define(Router router) {
     ..create(recursive: true);
   router.mount("/assets", (req) async {
     // MARK: [GET|HEAD] /assets/<asset>
-    final path = req.url.path.replaceAll("..", "");
+    final path = p.normalize(req.url.path);
     if (!RegExp(r"[0-9a-zA-Z]{32}\.(?:jpg|png)").hasMatch(path)) {
       return Response.badRequest(
         body: "Invalid asset path",

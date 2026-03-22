@@ -4,6 +4,7 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:datly/generated/gitbaker.g.dart';
 import 'package:dotenv/dotenv.dart';
 import 'package:mime/mime.dart';
+import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -14,6 +15,8 @@ import 'email/email.dart';
 import 'helpers.dart';
 import 'moderation.dart';
 import 'routes/api.dart';
+
+final p = path.Context(style: path.Style.url);
 
 late final Directory dataDirectory;
 late final Directory assetsDirectory;
@@ -48,7 +51,7 @@ late final RSAPublicKey jwtPublicKey;
 Future<Response> fileHandler(Request req) async {
   final path = req.url.path == ""
       ? "index.html"
-      : req.url.path.replaceAll("..", "");
+      : p.normalize(req.url.path);
 
   var file = File("public/$path");
   if (!(await file.exists())) file = File("public/index.html");
@@ -77,7 +80,7 @@ Future<Response> fileHandler(Request req) async {
 
 Future<Response> legalHandler(Request req) async {
   final locale = localeFromRequest(req);
-  final path = req.url.path.replaceAll("..", "").split("/").last;
+  final path = p.normalize(req.url.path).split("/").last;
   var file = locale != "en" && await (File("legal/$path.$locale.md").exists())
       ? File("legal/$path.$locale.md")
       : File("legal/$path.md");

@@ -232,7 +232,7 @@ void define(Router router) {
               body: jsonEncode({"error": "Captcha response required"}),
               headers: {"Content-Type": "application/json"},
             );
-          } else if (!(await verifyCaptcha(captcha!, req))) {
+          } else if (!(await verifyCaptcha(captcha!, req)) && !isAdmin) {
             return Response.badRequest(
               body: jsonEncode({"error": "Invalid captcha response"}),
               headers: {"Content-Type": "application/json"},
@@ -369,6 +369,14 @@ void define(Router router) {
                   "error": "Insecure password",
                   "code": passwordCheck.code,
                   "message": passwordCheck.message,
+                }),
+                headers: {"Content-Type": "application/json"},
+              );
+            }
+            if (!isAdmin && auth.user.username != user.username) {
+              return Response.forbidden(
+                jsonEncode({
+                  "error": "Insufficient permissions to change password",
                 }),
                 headers: {"Content-Type": "application/json"},
               );
