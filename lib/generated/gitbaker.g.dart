@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-03-22T15:32:27
+/// Last generated: 2026-03-22T17:27:24
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 55,
+      revision: 56,
       ahead: 0,
       behind: 0,
       commits: [
@@ -482,6 +482,7 @@ final class GitBaker {
         "104921a5c3d164fcbd7b94968c023627fcf12420",
         "8f72cdce3c3d27d04b33bd422e0e14ab34b3fe59",
         "dc5466f587c1d14b9d03dfdf4da0ab36d8e3e02e",
+        "34bb7b597ce13cf7e70c2224bdd1451cfead2de3",
       ],
     ),
   ];
@@ -996,6 +997,15 @@ final class GitBaker {
       hashAbbreviated: "dc5466f",
       message: "Enabled category selector, confetti, other changes",
       date: DateTime.parse("2026-03-22T14:31:30.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "34bb7b597ce13cf7e70c2224bdd1451cfead2de3",
+      hashAbbreviated: "34bb7b5",
+      message: "Improved rate limiting, path normalizing",
+      date: DateTime.parse("2026-03-22T16:26:45.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",

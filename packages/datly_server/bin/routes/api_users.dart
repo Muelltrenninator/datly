@@ -232,7 +232,7 @@ void define(Router router) {
               body: jsonEncode({"error": "Captcha response required"}),
               headers: {"Content-Type": "application/json"},
             );
-          } else if (!(await verifyCaptcha(captcha!, req)) && !isAdmin) {
+          } else if (!isAdmin && !(await verifyCaptcha(captcha!, req))) {
             return Response.badRequest(
               body: jsonEncode({"error": "Invalid captcha response"}),
               headers: {"Content-Type": "application/json"},
