@@ -785,7 +785,7 @@ class _ListWidgetState extends State<ListWidget> {
           description:
               "Provide a reason for disabling this user. This will be shown to the user.\nThe user will be notified via email. This should only be used for banning users that have violated the terms of service.",
           placeholder: "Violated Par. 4 of the ToS",
-          maxLines: 3,
+          maxLines: 4,
         );
         if (reason == null || !context.mounted) return;
 
@@ -1019,7 +1019,8 @@ class _ListWidgetState extends State<ListWidget> {
           label: Text(
             project?.description ?? "–",
             overflow: TextOverflow.ellipsis,
-            maxLines: 5,
+            softWrap: true,
+            maxLines: 2,
           ),
           deleteIcon: Icon(Icons.edit),
           deleteButtonTooltipMessage: appLocalizations.edit,

@@ -36,10 +36,11 @@ class AppRouter extends RootStackRouter {
       path: "/",
       guards: [AuthenticationGuard()],
       children: [
+        // TODO: remove on validation production push
         AuthManager.instance.authenticatedUserIsAdmin &&
                 prefs.getBool("enableValidationScreen") == true
             ? AutoRoute(
-                page: UploadValidateParentRoute.page,
+                page: UploadValidationParentRoute.page,
                 path: "",
                 children: [
                   AutoRoute(page: UploadRoute.page, path: ""),
@@ -262,15 +263,16 @@ class ImmersiveModeAction extends Action<ImmersiveModeIntent> {
 }
 
 @RoutePage()
-class UploadValidateParentPage extends StatefulWidget {
-  const UploadValidateParentPage({super.key});
+class UploadValidationParentPage extends StatefulWidget {
+  const UploadValidationParentPage({super.key});
 
   @override
-  State<UploadValidateParentPage> createState() =>
-      _UploadValidateParentPageState();
+  State<UploadValidationParentPage> createState() =>
+      _UploadValidationParentPageState();
 }
 
-class _UploadValidateParentPageState extends State<UploadValidateParentPage> {
+class _UploadValidationParentPageState
+    extends State<UploadValidationParentPage> {
   @override
   void initState() {
     super.initState();

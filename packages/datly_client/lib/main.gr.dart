@@ -400,17 +400,17 @@ class UploadRoute extends _i9.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i4.UploadValidateParentPage]
-class UploadValidateParentRoute extends _i9.PageRouteInfo<void> {
-  const UploadValidateParentRoute({List<_i9.PageRouteInfo>? children})
-    : super(UploadValidateParentRoute.name, initialChildren: children);
+/// [_i4.UploadValidationParentPage]
+class UploadValidationParentRoute extends _i9.PageRouteInfo<void> {
+  const UploadValidationParentRoute({List<_i9.PageRouteInfo>? children})
+    : super(UploadValidationParentRoute.name, initialChildren: children);
 
-  static const String name = 'UploadValidateParentRoute';
+  static const String name = 'UploadValidationParentRoute';
 
   static _i9.PageInfo page = _i9.PageInfo(
     name,
     builder: (data) {
-      return const _i4.UploadValidateParentPage();
+      return const _i4.UploadValidationParentPage();
     },
   );
 }

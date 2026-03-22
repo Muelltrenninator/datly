@@ -1003,7 +1003,8 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           label: Text(
                             widget.data.moderationReasonDisplay(context) ?? "–",
                             overflow: TextOverflow.ellipsis,
-                            maxLines: 8,
+                            softWrap: true,
+                            maxLines: 4,
                           ),
                           deleteIcon: Icon(Icons.edit),
                           deleteButtonTooltipMessage: appLocalizations.edit,
@@ -1086,7 +1087,8 @@ class _SubmissionWidgetState extends State<SubmissionWidget> {
                           label: Text(
                             "“${widget.data.validationReports.join("”, “")}”",
                             overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
+                            softWrap: true,
+                            maxLines: 2,
                           ),
                           onDeleted: clearReports,
                         ),
@@ -1654,52 +1656,55 @@ class _SubmissionDetailsPageState extends State<SubmissionDetailsPage> {
           child: Padding(
             padding: isColumn
                 ? EdgeInsets.only(top: 4, left: 8, right: 8)
-                : EdgeInsets.all(4),
+                : EdgeInsets.only(top: 4, left: 4, right: 4),
             child: SizedBox(
               height: double.infinity,
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (context.router.canPop()) ...[
-                      FilledButton.tonalIcon(
-                        onPressed: () => context.pop(),
-                        icon: Icon(Icons.navigate_before),
-                        label: Text("Go back"),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (context.router.canPop()) ...[
+                        FilledButton.tonalIcon(
+                          onPressed: () => context.pop(),
+                          icon: Icon(Icons.navigate_before),
+                          label: Text("Go back"),
+                        ),
+                        SizedBox(height: 8),
+                      ],
+                      SubmissionWidget(
+                        data: data!,
+                        includeImage: false,
+                        onUpdate: _loadData,
+                        onDelete: () => onDelete(toUser: true),
+                      ),
+                      SizedBox(height: 8),
+                      AnimatedSize(
+                        duration: Durations.medium1,
+                        curve: Curves.easeInOutCubicEmphasized,
+                        child: user != null && project != null
+                            ? Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  ListWidget(
+                                    data: user!.toJson(),
+                                    type: ListType.user,
+                                    onDelete: onDelete,
+                                  ),
+                                  ListWidget(
+                                    data: project!.toJson(),
+                                    type: ListType.project,
+                                    onDelete: onDelete,
+                                  ),
+                                ],
+                              )
+                            : SizedBox.shrink(),
                       ),
                       SizedBox(height: 8),
                     ],
-                    SubmissionWidget(
-                      data: data!,
-                      includeImage: false,
-                      onUpdate: _loadData,
-                      onDelete: () => onDelete(toUser: true),
-                    ),
-                    SizedBox(height: 8),
-                    AnimatedSize(
-                      duration: Durations.medium1,
-                      curve: Curves.easeInOutCubicEmphasized,
-                      child: user != null && project != null
-                          ? Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                ListWidget(
-                                  data: user!.toJson(),
-                                  type: ListType.user,
-                                  onDelete: onDelete,
-                                ),
-                                ListWidget(
-                                  data: project!.toJson(),
-                                  type: ListType.project,
-                                  onDelete: onDelete,
-                                ),
-                              ],
-                            )
-                          : SizedBox.shrink(),
-                    ),
-                    if (!isColumn) SizedBox(height: 8),
-                  ],
+                  ),
                 ),
               ),
             ),

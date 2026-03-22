@@ -413,14 +413,14 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                       Text(
                         projectIndexCache!.title,
                         style: TextTheme.of(context).titleMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                       if (projectIndexCache!.description?.isNotEmpty ?? false)
                         Text(
                           projectIndexCache!.description!,
                           style: TextTheme.of(context).bodySmall,
-                          maxLines: 3,
+                          maxLines: 2,
+                          softWrap: true,
                           overflow: TextOverflow.ellipsis,
                         ),
                     ],
