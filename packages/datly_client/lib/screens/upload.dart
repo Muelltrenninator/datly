@@ -133,18 +133,34 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
       title: AppLocalizations.of(context).selectCamera,
       initialValue: availableCameras[cameraIndex],
       items: availableCameras,
-      titleGenerator: (item) => item.name,
-      subtitleGenerator: (item) =>
-          "${switch (item.lensDirection) {
-            CameraLensDirection.back => AppLocalizations.of(context).selectCameraDescriptionBack,
-            CameraLensDirection.front => AppLocalizations.of(context).selectCameraDescriptionFront,
-            CameraLensDirection.external => AppLocalizations.of(context).selectCameraDescriptionExternal,
-          }} (${item.sensorOrientation}°)",
+      titleGenerator: (item) => switch (item.lensDirection) {
+        CameraLensDirection.back => AppLocalizations.of(
+          context,
+        ).selectCameraDescriptionBack,
+        CameraLensDirection.front => AppLocalizations.of(
+          context,
+        ).selectCameraDescriptionFront,
+        CameraLensDirection.external => AppLocalizations.of(
+          context,
+        ).selectCameraDescriptionExternal,
+      },
+      subtitleGenerator: (item) => item.name,
       iconGenerator: (item) => Icon(switch (item.lensDirection) {
         CameraLensDirection.back => Icons.camera_rear,
         CameraLensDirection.front => Icons.camera_front,
         CameraLensDirection.external => Icons.outbond_outlined,
       }),
+      extraButtonLabel: AppLocalizations.of(context).selectCameraMissing,
+      onExtraButtonPressed: () async {
+        await showMarkdownDialog(
+          context: context,
+          source: MarkdownDialogStringSource(
+            AppLocalizations.of(context).cameraErrorUnavailableDescription,
+          ),
+        );
+        await Future.delayed(Durations.short1);
+        switchCamera();
+      },
     );
     if (selection == null) return;
 
@@ -737,13 +753,10 @@ ${!checkAge ? """
                         decoration: TextDecoration.underline,
                       ),
                       recognizer: TapGestureRecognizer()
-                        ..onTap = () => showMarkdownDialog(
-                          context: context,
-                          source: MarkdownDialogHttpSource(
-                            Uri.parse(
-                              "${ApiManager.baseUri.replace(path: "")}/legal/${isPrivacy ? "privacy" : "terms"}",
-                            ),
-                          ),
+                        ..onTap = () => context.pushRoute(
+                          isPrivacy
+                              ? MarkdownDialogPrivacyPolicyRoute()
+                              : MarkdownDialogTermsOfServiceRoute(),
                         ),
                     ),
                   );

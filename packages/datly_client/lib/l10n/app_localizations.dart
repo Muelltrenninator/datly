@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// Additional explanation for the camera unavailable error, providing possible causes and troubleshooting steps.
   ///
   /// In en, this message translates to:
-  /// **'# “No camera available on this device” Troubleshoot\n\nDatly right now is unable to access your camera. This can have a variety of causes. The most commons are listed below.\n\n- Another application is using the camera\n\n  - Please close all other applications that might be using the camera and try again.\n\n  - Sometimes other browser tabs can also block the camera, so please also try closing other tabs that might be using the camera.\n\n- Hardware issue or temporary glitch\n\n  - Please check your camera settings to ensure it is properly configured and recognized by your device.\n  - Try restarting your device, as this can often resolve temporary hardware glitches.\n  - If the problem persists, please consult your device documentation or support for further troubleshooting steps.'**
+  /// **'# Camera Troubleshoot\n\nDatly right now is unable to access your camera. This can have a variety of causes. The most commons are listed below.\n\n- Another application is using the camera\n\n  - Please close all other applications that might be using the camera and try again.\n\n  - Sometimes other browser tabs can also block the camera, so please also try closing other tabs that might be using the camera.\n\n- Hardware issue or temporary glitch\n\n  - Please check your camera settings to ensure it is properly configured and recognized by your device.\n  - Try restarting your device, as this can often resolve temporary hardware glitches.\n  - If the problem persists, please consult your device documentation or support for further troubleshooting steps.'**
   String get cameraErrorUnavailableDescription;
 
   /// Button text to open the troubleshooting information for camera errors.
@@ -325,6 +325,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'External camera'**
   String get selectCameraDescriptionExternal;
+
+  /// Text shown when the expected camera is not listed in the camera selection dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'One missing?'**
+  String get selectCameraMissing;
 
   /// Title for the project selection dialog.
   ///
@@ -539,7 +545,7 @@ abstract class AppLocalizations {
   /// Additional information shown when there are no more items to validate.
   ///
   /// In en, this message translates to:
-  /// **'At the moment, there are no more submissions for you to validate.\nPlease check back later to work on new submissions.'**
+  /// **'No submissions to review right now — check back soon.'**
   String get validationAllDoneDescription;
 
   /// Title for the dialog to confirm reporting of a submission during validation.

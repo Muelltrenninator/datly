@@ -101,7 +101,7 @@ class _ValidationPageState extends State<ValidationPage>
 
       if (!mounted) return;
       for (var s in data.payloadData.items) {
-        precacheImage(_img(context, s), context);
+        await precacheImage(_img(context, s), context);
       }
 
       final selected = [];
@@ -641,12 +641,15 @@ class _ValidationPageState extends State<ValidationPage>
             child: Container(
               width: double.infinity,
               color: Colors.red.withValues(alpha: 0.7),
-              child: Text(
-                AppLocalizations.of(context).adminOnly,
-                textAlign: TextAlign.center,
-                style: TextTheme.of(context).titleMedium!.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              child: Transform.scale(
+                scaleX: 0.9,
+                child: Text(
+                  AppLocalizations.of(context).adminOnly,
+                  textAlign: TextAlign.center,
+                  style: TextTheme.of(context).titleMedium!.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

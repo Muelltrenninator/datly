@@ -5,6 +5,7 @@ import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 import '../api.dart';
@@ -143,7 +144,12 @@ class _LoginScreenState extends State<LoginScreen>
     await Future.delayed(Durations.medium3);
 
     await AuthManager.instance.fetchAuthenticatedUser(user: authUser);
-    if (!mounted || AuthManager.instance.authenticatedUser != null) return;
+    if (!mounted || AuthManager.instance.authenticatedUser != null) {
+      if (AuthManager.instance.authenticatedUser != null) {
+        TextInput.finishAutofillContext();
+      }
+      return;
+    }
 
     submitLoading = false;
     submitErrorText = AuthManager.instance.wasLastFetchNetworkError
@@ -172,6 +178,7 @@ class _LoginScreenState extends State<LoginScreen>
       controller: emailController,
       focusNode: emailFocusNode,
       autofillHints: [AutofillHints.email],
+      keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: appLocalizations.loginEmailLabel,
@@ -187,6 +194,7 @@ class _LoginScreenState extends State<LoginScreen>
       controller: passwordController,
       focusNode: passwordFocusNode,
       autofillHints: [AutofillHints.password],
+      keyboardType: TextInputType.visiblePassword,
       obscureText: passwordObscured,
       maxLength: 128,
       decoration: InputDecoration(
@@ -209,46 +217,49 @@ class _LoginScreenState extends State<LoginScreen>
       ),
     );
 
-    return Column(
-      key: _childHeightKey,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(height: 4),
-        textFieldEmail,
-        SizedBox(height: 8),
-        textFieldPassword,
-        SizedBox(
-          width: double.infinity,
-          child: AnimatedSize(
-            duration: Durations.medium1,
-            curve: Curves.easeInOutCubicEmphasized,
-            child: submitErrorText != null
-                ? Padding(
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      bottom: 8,
-                      left: 16,
-                      right: 16,
-                    ),
-                    child: Text(
-                      submitErrorText!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+    return AutofillGroup(
+      onDisposeAction: AutofillContextAction.cancel,
+      child: Column(
+        key: _childHeightKey,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: 4),
+          textFieldEmail,
+          SizedBox(height: 8),
+          textFieldPassword,
+          SizedBox(
+            width: double.infinity,
+            child: AnimatedSize(
+              duration: Durations.medium1,
+              curve: Curves.easeInOutCubicEmphasized,
+              child: submitErrorText != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                        bottom: 8,
+                        left: 16,
+                        right: 16,
                       ),
-                    ),
-                  )
-                : SizedBox(height: 8),
+                      child: Text(
+                        submitErrorText!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    )
+                  : SizedBox(height: 8),
+            ),
           ),
-        ),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: submitLoading ? null : submit,
-            icon: Icon(Icons.login),
-            label: Text(appLocalizations.loginSubmit),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: submitLoading ? null : submit,
+              icon: Icon(Icons.login),
+              label: Text(appLocalizations.loginSubmit),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -413,6 +424,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         submitLoading = false;
         submitSuccess = true;
         setState(() {});
+        TextInput.finishAutofillContext();
         return;
       } else if (response.statusCode == 400) {
         if (response.body.toLowerCase().contains("username")) {
@@ -450,6 +462,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       controller: usernameController,
       focusNode: usernameFocusNode,
       autofillHints: [AutofillHints.newUsername],
+      keyboardType: TextInputType.text,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: appLocalizations.registerUsernameLabel,
@@ -464,6 +477,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       controller: emailController,
       focusNode: emailFocusNode,
       autofillHints: [AutofillHints.email],
+      keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: appLocalizations.registerEmailLabel,
@@ -533,46 +547,49 @@ class _RegisterScreenState extends State<RegisterScreen>
       ),
     );
 
-    final form = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(height: 4),
-        textFieldUsername,
-        SizedBox(height: 8),
-        textFieldEmail,
-        SizedBox(height: 4),
-        termsCheckbox,
-        SizedBox(
-          width: double.infinity,
-          child: AnimatedSize(
-            duration: Durations.medium1,
-            curve: Curves.easeInOutCubicEmphasized,
-            child: submitErrorText != null
-                ? Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 12,
-                      left: 16,
-                      right: 16,
-                    ),
-                    child: Text(
-                      submitErrorText!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+    final form = AutofillGroup(
+      onDisposeAction: AutofillContextAction.cancel,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: 4),
+          textFieldUsername,
+          SizedBox(height: 8),
+          textFieldEmail,
+          SizedBox(height: 4),
+          termsCheckbox,
+          SizedBox(
+            width: double.infinity,
+            child: AnimatedSize(
+              duration: Durations.medium1,
+              curve: Curves.easeInOutCubicEmphasized,
+              child: submitErrorText != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 12,
+                        left: 16,
+                        right: 16,
                       ),
-                    ),
-                  )
-                : SizedBox(height: 4),
+                      child: Text(
+                        submitErrorText!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    )
+                  : SizedBox(height: 4),
+            ),
           ),
-        ),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: submitLoading || !termsAcceptedState ? null : submit,
-            icon: Icon(Icons.send),
-            label: Text(appLocalizations.registerSubmit),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: submitLoading || !termsAcceptedState ? null : submit,
+              icon: Icon(Icons.send),
+              label: Text(appLocalizations.registerSubmit),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
     final success = Padding(
       padding: EdgeInsetsGeometry.all(24),

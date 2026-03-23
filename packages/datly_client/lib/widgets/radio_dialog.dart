@@ -102,6 +102,21 @@ class RadioDialog<T extends Object> extends StatefulWidget {
   /// The selected value is returned via [Navigator.pop].
   final ValueChanged<T?>? onSubmit;
 
+  /// Optional label for the extra button shown.
+  ///
+  /// For more details, see [onExtraButtonPressed].
+  final String? extraButtonLabel;
+
+  /// Optional callback for an extra button shown next to the submit and cancel
+  /// button.
+  ///
+  /// If this is provided, an extra button with the label [extraButtonLabel]
+  /// will be shown to the left of the cancel and submit buttons.
+  ///
+  /// The current dialog will not be closed when this button is pressed. To do
+  /// so, call `pop()` in the callback.
+  final VoidCallback? onExtraButtonPressed;
+
   RadioDialog({
     super.key,
     this.icon,
@@ -119,6 +134,8 @@ class RadioDialog<T extends Object> extends StatefulWidget {
     this.toggleable = false,
     this.allowEmptySelection = false,
     this.onSubmit,
+    this.extraButtonLabel,
+    this.onExtraButtonPressed,
   }) : assert(
          items.length == items.toSet().length,
          "The items must be unique.",
@@ -260,20 +277,36 @@ class _RadioDialogState<T extends Object> extends State<RadioDialog<T>> {
           ],
         ),
       ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-        ),
-        TextButton(
-          autofocus: true,
-          onPressed: widget.allowEmptySelection || _value != null
-              ? () {
-                  widget.onSubmit?.call(_value);
-                  Navigator.of(context).pop(_value);
-                }
-              : null,
-          child: Text(MaterialLocalizations.of(context).okButtonLabel),
+        if (widget.onExtraButtonPressed != null)
+          TextButton(
+            onPressed: () async{
+              Navigator.of(context).pop();
+              await Future.delayed(Durations.short1);
+              widget.onExtraButtonPressed?.call();
+            },
+            child: Text(widget.extraButtonLabel ?? "Extra"),
+          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+            ),
+            SizedBox(width: 8),
+            TextButton(
+              autofocus: true,
+              onPressed: widget.allowEmptySelection || _value != null
+                  ? () {
+                      widget.onSubmit?.call(_value);
+                      Navigator.of(context).pop(_value);
+                    }
+                  : null,
+              child: Text(MaterialLocalizations.of(context).okButtonLabel),
+            ),
+          ],
         ),
       ],
     );
@@ -297,6 +330,8 @@ Future<T?> showRadioDialog<T extends Object>({
   bool toggleable = false,
   bool allowEmptySelection = false,
   ValueChanged<T?>? onSubmit,
+  String? extraButtonLabel,
+  VoidCallback? onExtraButtonPressed,
 }) async {
   return await showDialog<T>(
     context: context,
@@ -316,6 +351,8 @@ Future<T?> showRadioDialog<T extends Object>({
       toggleable: toggleable,
       allowEmptySelection: allowEmptySelection,
       onSubmit: onSubmit,
+      extraButtonLabel: extraButtonLabel,
+      onExtraButtonPressed: onExtraButtonPressed,
     ),
   );
 }

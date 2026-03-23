@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-03-22T17:27:24
+/// Last generated: 2026-03-22T22:04:32
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 56,
+      revision: 59,
       ahead: 0,
       behind: 0,
       commits: [
@@ -483,6 +483,9 @@ final class GitBaker {
         "8f72cdce3c3d27d04b33bd422e0e14ab34b3fe59",
         "dc5466f587c1d14b9d03dfdf4da0ab36d8e3e02e",
         "34bb7b597ce13cf7e70c2224bdd1451cfead2de3",
+        "27c494b770c1be1d2ec9876ac8a9aa9c789e28ab",
+        "6b8ce299e4184dfc9c3fdb60d3acb29a9537251a",
+        "17acb023e3f7de4310c8ec6d9de3a191de7ada06",
       ],
     ),
   ];
@@ -1006,6 +1009,33 @@ final class GitBaker {
       hashAbbreviated: "34bb7b5",
       message: "Improved rate limiting, path normalizing",
       date: DateTime.parse("2026-03-22T16:26:45.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "27c494b770c1be1d2ec9876ac8a9aa9c789e28ab",
+      hashAbbreviated: "27c494b",
+      message: "Fixed account creation",
+      date: DateTime.parse("2026-03-22T16:39:11.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "6b8ce299e4184dfc9c3fdb60d3acb29a9537251a",
+      hashAbbreviated: "6b8ce29",
+      message: "Disabled general ratelimiter",
+      date: DateTime.parse("2026-03-22T18:10:29.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "17acb023e3f7de4310c8ec6d9de3a191de7ada06",
+      hashAbbreviated: "17acb02",
+      message: "Adjustments",
+      date: DateTime.parse("2026-03-22T21:03:45.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",
