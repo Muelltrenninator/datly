@@ -29,6 +29,7 @@ class UploadPage extends StatefulWidget {
 class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
   int cameraIndex = 0;
   CameraController? controller;
+  final confettiController = ConfettiController();
 
   bool error = false;
   bool noCamera = false;
@@ -293,7 +294,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
                 "signatureParental": signature.signatureParental!,
               "signatureSnapshot": signature.signatureSnapshot,
               "consentVersion": signature.consentVersion.toString(),
-              // "category": category.name,
+              "category": category.name,
             },
           ),
         )
@@ -314,10 +315,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     if (response != null && response!.statusCode == 201) {
       Future.delayed(Durations.extralong1).then((_) {
         if (!mounted) return;
-        Confetti.launch(
-          context,
-          options: ConfettiOptions(x: 1, y: 1, angle: 115),
-        );
+        confettiController.launch();
       });
     }
   }
@@ -514,6 +512,14 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
             ),
           ),
         ),
+        IgnorePointer(
+          child: SizedBox.expand(
+            child: Confetti(
+              controller: confettiController,
+              options: ConfettiOptions(x: 1, y: 1, angle: 115),
+            ),
+          ),
+        ),
       ],
     );
     return Shortcuts(
@@ -654,6 +660,7 @@ ${!checkAge ? """
           title: TextField(
             controller: controller,
             autofillHints: [AutofillHints.name],
+            keyboardType: TextInputType.name,
             maxLength: 128,
             decoration: InputDecoration(
               border: OutlineInputBorder(),

@@ -51,6 +51,8 @@ class ValidationPage extends StatefulWidget {
 
 class _ValidationPageState extends State<ValidationPage>
     with TickerProviderStateMixin {
+  final confettiController = ConfettiController();
+
   bool error = false;
   bool allDone = false;
   bool disableRefresh = false;
@@ -60,6 +62,7 @@ class _ValidationPageState extends State<ValidationPage>
   ({int x, int y})? lastClickedCoordinate;
 
   final List<Payload> payloads = [];
+  final List<String> backlogIsLoadingFor = [];
 
   @override
   void initState() {
@@ -128,6 +131,7 @@ class _ValidationPageState extends State<ValidationPage>
       }
 
       selected.shuffle(_rng);
+      if (!mounted) return;
       payloads.singleWhere((p) => p.payload == payload).images
         ..[0] = [for (var i = 0; i < 3; i++) _img(context, selected[i])]
         ..[1] = [for (var i = 3; i < 6; i++) _img(context, selected[i])]
@@ -226,7 +230,12 @@ class _ValidationPageState extends State<ValidationPage>
         setState(() {});
         return;
       }
-      precacheImage(_img(context, newId), context);
+
+      backlogIsLoadingFor.add(newId);
+      precacheImage(_img(context, newId), context).then((_) {
+        backlogIsLoadingFor.remove(newId);
+        if (mounted) setState(() {});
+      });
 
       payloads.first = (
         payload: Completer()..complete(body["payload"]),
@@ -300,13 +309,7 @@ class _ValidationPageState extends State<ValidationPage>
           "clicked": payload.clicked,
         }),
     );
-
-    if (mounted) {
-      Confetti.launch(
-        context,
-        options: ConfettiOptions(x: 1, y: 1, angle: 115),
-      );
-    }
+    if (mounted) confettiController.launch();
 
     if (response?.statusCode != 200) {
       if (!mounted) return;
@@ -355,219 +358,210 @@ class _ValidationPageState extends State<ValidationPage>
       ),
     );
 
-    Widget child() => Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: windowSizeClass < WindowSizeClass.medium ? 0 : 32,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: height <= 800
-            ? MainAxisAlignment.start
-            : MainAxisAlignment.center,
-        children: [
-          Transform.translate(
-            offset: const Offset(0, 4),
-            child: Text(
-              appLocalizations.validationPleaseSelect,
-              style: theme.textTheme.titleMedium!.copyWith(
-                height: 1,
-                color: theme.colorScheme.outline,
-              ),
-            ),
+    Widget child() {
+      Widget itemBuilder(BuildContext context, ({int x, int y}) coordinate) {
+        final tmp = Skeleton.leaf(
+          child: Card(
+            clipBehavior: Clip.antiAlias,
+            margin: EdgeInsets.all(2),
+            child:
+                (payloads.firstOrNull?.payloadData.isCompleted ?? false) &&
+                    payloads.first.images[coordinate.x][coordinate.y] != null
+                ? Image(
+                    image: payloads.first.images[coordinate.x][coordinate.y]!,
+                    fit: BoxFit.cover,
+                    width: 128,
+                    height: 128,
+                  )
+                : SizedBox(width: 128, height: 128),
           ),
-          FutureBuilder(
-            future: payloads.firstOrNull?.payloadData.future,
-            builder: (context, snapshot) => Skeletonizer(
-              enabled:
-                  snapshot.data?.displayCategory == null ||
-                  !(payloads.firstOrNull?.payloadData.isCompleted ?? false),
-              enableSwitchAnimation: true,
-              switchAnimationConfig: SwitchAnimationConfig(
-                duration: Durations.medium1,
-                switchInCurve: Curves.easeInOutCubicEmphasized,
-                switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+        );
+
+        return Skeletonizer(
+          key: ValueKey(
+            (payloads.firstOrNull?.payloadData.isCompleted ?? false) &&
+                    payloads.first.images[coordinate.x][coordinate.y] != null
+                ? payloads.first.images[coordinate.x][coordinate.y]!.url
+                : "none",
+          ),
+          enabled:
+              !(payloads.firstOrNull?.payloadData.isCompleted ?? false) ||
+              backlogIsLoadingFor.contains(
+                payloads.firstOrNull?.images[coordinate.x][coordinate.y]?.url
+                    .split("/")
+                    .last,
               ),
-              effect: _skeletonEffect(context),
+          enableSwitchAnimation: true,
+          switchAnimationConfig: SwitchAnimationConfig(
+            duration: Durations.medium1,
+            switchInCurve: Curves.easeInOutCubicEmphasized,
+            switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+          ),
+          effect: _skeletonEffect(context),
+          child: tmp,
+        );
+      }
+
+      void onTap(({int x, int y}) value) async {
+        if (payloads.first.images[value.x][value.y] == null ||
+            (!clickBlocker.isCompleted && lastClickedCoordinate == value)) {
+          return;
+        }
+        lastClickedCoordinate = value;
+        final completer = Completer();
+        clickBlocker = completer;
+
+        final id = (payloads.first.images[value.x][value.y])!.url
+            .split("/")
+            .last;
+        if (payloads.first.clicked.contains(id)) return;
+        payloads.first.clicked.add(id);
+
+        if (payloads.first.shown.length ==
+            (await payloads.first.payloadData.future).items.length) {
+          // giving up on filling the backlog
+          payloads.first.images[value.x][value.y] = null;
+          clickBlocker.complete();
+          if (mounted) setState(() {});
+          return;
+        }
+
+        final items = (await payloads.first.payloadData.future).items;
+        String? newId;
+        while (newId == null || payloads.first.shown.contains(newId)) {
+          newId = items[_rng.nextInt(items.length)];
+        }
+
+        if (!context.mounted) return;
+        payloads.first.images[value.x][value.y] = _img(context, newId);
+        payloads.first.shown.add(newId);
+
+        _fillBacklog();
+        if (mounted) setState(() {});
+
+        await Future.delayed(Durations.medium3);
+        if (clickBlocker == completer) {
+          clickBlocker.complete();
+        }
+      }
+
+      return Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: windowSizeClass < WindowSizeClass.medium ? 0 : 32,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: height <= 800
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.center,
+          children: [
+            Transform.translate(
+              offset: const Offset(0, 4),
               child: Text(
-                snapshot.data?.displayCategory ?? "Stand In",
-                style: theme.textTheme.displayMedium!.copyWith(
-                  fontWeight: FontWeight.bold,
-                  height: 1.1,
+                appLocalizations.validationPleaseSelect,
+                style: theme.textTheme.titleMedium!.copyWith(
+                  height: 1,
+                  color: theme.colorScheme.outline,
                 ),
               ),
             ),
-          ),
-          SizedBox(height: windowSizeClass < WindowSizeClass.medium ? 8 : 24),
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 28 + 3 * 128),
-                child: Card.outlined(
-                  margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(color: theme.colorScheme.outlineVariant),
+            FutureBuilder(
+              future: payloads.firstOrNull?.payloadData.future,
+              builder: (context, snapshot) => Skeletonizer(
+                enabled:
+                    snapshot.data?.displayCategory == null ||
+                    !(payloads.firstOrNull?.payloadData.isCompleted ?? false),
+                enableSwitchAnimation: true,
+                switchAnimationConfig: SwitchAnimationConfig(
+                  duration: Durations.medium1,
+                  switchInCurve: Curves.easeInOutCubicEmphasized,
+                  switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+                ),
+                effect: _skeletonEffect(context),
+                child: Text(
+                  snapshot.data?.displayCategory ?? "Stand In",
+                  style: theme.textTheme.displayMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
+                    height: 1.1,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Skeletonizer(
-                          enabled:
-                              !(payloads.firstOrNull?.payloadData.isCompleted ??
-                                  false),
-                          enableSwitchAnimation: true,
-                          switchAnimationConfig: SwitchAnimationConfig(
-                            duration: Durations.medium1,
-                            switchInCurve: Curves.easeInOutCubicEmphasized,
-                            switchOutCurve:
-                                Curves.easeInOutCubicEmphasized.flipped,
-                          ),
-                          effect: _skeletonEffect(context),
-                          child: ValidationPageGrid(
-                            itemBuilder: (context, coordinate) => Card(
-                              key: ValueKey(
-                                (payloads
-                                                .firstOrNull
-                                                ?.payloadData
-                                                .isCompleted ??
-                                            false) &&
-                                        payloads.first.images[coordinate
-                                                .x][coordinate.y] !=
-                                            null
-                                    ? payloads
-                                          .first
-                                          .images[coordinate.x][coordinate.y]!
-                                          .url
-                                    : "none",
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              margin: EdgeInsets.all(2),
-                              child:
-                                  (payloads
-                                              .firstOrNull
-                                              ?.payloadData
-                                              .isCompleted ??
-                                          false) &&
-                                      payloads.first.images[coordinate
-                                              .x][coordinate.y] !=
-                                          null
-                                  ? Image(
-                                      image: payloads
-                                          .first
-                                          .images[coordinate.x][coordinate.y]!,
-                                      fit: BoxFit.cover,
-                                      width: 128,
-                                      height: 128,
-                                    )
-                                  : SizedBox(width: 128, height: 128),
-                            ),
-                            onTap: (value) async {
-                              if (payloads.first.images[value.x][value.y] ==
-                                      null ||
-                                  (!clickBlocker.isCompleted &&
-                                      lastClickedCoordinate == value)) {
-                                return;
-                              }
-                              lastClickedCoordinate = value;
-                              final completer = Completer();
-                              clickBlocker = completer;
-
-                              final id =
-                                  (payloads.first.images[value.x][value.y])!.url
-                                      .split("/")
-                                      .last;
-                              if (payloads.first.clicked.contains(id)) return;
-                              payloads.first.clicked.add(id);
-
-                              if (payloads.first.shown.length ==
-                                  (await payloads.first.payloadData.future)
-                                      .items
-                                      .length) {
-                                // giving up on filling the backlog
-                                payloads.first.images[value.x][value.y] = null;
-                                clickBlocker.complete();
-                                if (mounted) setState(() {});
-                                return;
-                              }
-
-                              final items =
-                                  (await payloads.first.payloadData.future)
-                                      .items;
-                              String? newId;
-                              while (newId == null ||
-                                  payloads.first.shown.contains(newId)) {
-                                newId = items[_rng.nextInt(items.length)];
-                              }
-
-                              if (!context.mounted) return;
-                              payloads.first.images[value.x][value.y] = _img(
-                                context,
-                                newId,
-                              );
-                              payloads.first.shown.add(newId);
-
-                              _fillBacklog();
-                              if (mounted) setState(() {});
-
-                              await Future.delayed(Durations.medium3);
-                              if (clickBlocker == completer) {
-                                clickBlocker.complete();
-                              }
-                            },
+                ),
+              ),
+            ),
+            SizedBox(height: windowSizeClass < WindowSizeClass.medium ? 8 : 24),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 28 + 3 * 128),
+                  child: Card.outlined(
+                    margin: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: theme.colorScheme.outlineVariant),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ValidationPageGrid(
+                            itemBuilder: itemBuilder,
+                            onTap: onTap,
                             onLongPress: _reportSubmission,
                           ),
-                        ),
-                        SizedBox(height: 6),
-                        DefaultTextStyle(
-                          style: theme.textTheme.labelMedium!.copyWith(
-                            color: theme.disabledColor,
-                          ),
-                          child: Builder(
-                            builder: (context) => Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: appLocalizations.privacyPolicy,
-                                    style: DefaultTextStyle.of(context).style
-                                        .copyWith(fontWeight: FontWeight.bold),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => context.pushRoute(
-                                        MarkdownDialogPrivacyPolicyRoute(),
-                                      ),
-                                  ),
-                                  TextSpan(text: " • "),
-                                  TextSpan(
-                                    text: appLocalizations.termsOfService,
-                                    style: DefaultTextStyle.of(context).style
-                                        .copyWith(fontWeight: FontWeight.bold),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => context.pushRoute(
-                                        MarkdownDialogTermsOfServiceRoute(),
-                                      ),
-                                  ),
-                                ],
+                          SizedBox(height: 6),
+                          DefaultTextStyle(
+                            style: theme.textTheme.labelMedium!.copyWith(
+                              color: theme.disabledColor,
+                            ),
+                            child: Builder(
+                              builder: (context) => Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: appLocalizations.privacyPolicy,
+                                      style: DefaultTextStyle.of(context).style
+                                          .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => context.pushRoute(
+                                          MarkdownDialogPrivacyPolicyRoute(),
+                                        ),
+                                    ),
+                                    TextSpan(text: " • "),
+                                    TextSpan(
+                                      text: appLocalizations.termsOfService,
+                                      style: DefaultTextStyle.of(context).style
+                                          .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => context.pushRoute(
+                                          MarkdownDialogTermsOfServiceRoute(),
+                                        ),
+                                    ),
+                                  ],
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          if (windowSizeClass <= WindowSizeClass.medium)
-            SizedBox(height: math.max((height - 800) / 2 + 36, 0)),
-        ],
-      ),
-    );
+            if (windowSizeClass <= WindowSizeClass.medium)
+              SizedBox(height: math.max((height - 800) / 2 + 36, 0)),
+          ],
+        ),
+      );
+    }
 
     return Stack(
       children: [
@@ -635,6 +629,14 @@ class _ValidationPageState extends State<ValidationPage>
             ),
           ),
         ),
+        IgnorePointer(
+          child: SizedBox.expand(
+            child: Confetti(
+              controller: confettiController,
+              options: ConfettiOptions(x: 1, y: 1, angle: 115),
+            ),
+          ),
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: IgnorePointer(
@@ -692,13 +694,11 @@ class ValidationPageGrid extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () => onTap?.call((x: x, y: y)),
                       onLongPress: () => onLongPress?.call((x: x, y: y)),
-                      child: Skeleton.leaf(
-                        child: AnimatedSwitcher(
-                          duration: Durations.long2,
-                          switchInCurve: Curves.easeInOutCubic.flipped,
-                          switchOutCurve: Curves.easeInOutCubic,
-                          child: itemBuilder(context, (x: x, y: y)),
-                        ),
+                      child: AnimatedSwitcher(
+                        duration: Durations.long2,
+                        switchInCurve: Curves.easeInOutCubic.flipped,
+                        switchOutCurve: Curves.easeInOutCubic,
+                        child: itemBuilder(context, (x: x, y: y)),
                       ),
                     ),
                   ),

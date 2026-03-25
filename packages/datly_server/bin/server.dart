@@ -49,9 +49,7 @@ late final RSAPrivateKey jwtPrivateKey;
 late final RSAPublicKey jwtPublicKey;
 
 Future<Response> fileHandler(Request req) async {
-  final path = req.url.path == ""
-      ? "index.html"
-      : p.normalize(req.url.path);
+  final path = req.url.path == "" ? "index.html" : p.normalize(req.url.path);
 
   var file = File("public/$path");
   if (!(await file.exists())) file = File("public/index.html");

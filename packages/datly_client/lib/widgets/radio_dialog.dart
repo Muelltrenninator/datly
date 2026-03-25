@@ -277,11 +277,13 @@ class _RadioDialogState<T extends Object> extends State<RadioDialog<T>> {
           ],
         ),
       ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actionsAlignment: widget.onExtraButtonPressed != null
+          ? MainAxisAlignment.spaceBetween
+          : null,
       actions: [
         if (widget.onExtraButtonPressed != null)
           TextButton(
-            onPressed: () async{
+            onPressed: () async {
               Navigator.of(context).pop();
               await Future.delayed(Durations.short1);
               widget.onExtraButtonPressed?.call();

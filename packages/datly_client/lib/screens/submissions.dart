@@ -1204,7 +1204,6 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
   @override
   Widget build(BuildContext context) {
     final windowSizeClass = WindowSizeClass.of(context);
-    final size = MediaQuery.sizeOf(context);
     final animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOutCubicEmphasized,
@@ -1257,11 +1256,9 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
                 color: ColorScheme.of(context).surfaceContainerHighest,
                 child: DoubledSizeTransition(
                   sizeFactor: animation,
-                  minSizeFactor:
-                      150.2 /
-                      (windowSizeClass > WindowSizeClass.compact
-                          ? 224
-                          : size.width),
+                  minSizeFactor: windowSizeClass > WindowSizeClass.compact
+                      ? 150.2 / 224
+                      : 0,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

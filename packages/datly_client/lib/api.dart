@@ -336,7 +336,8 @@ class SubmissionData {
     }
     return tags.isEmpty ? input : tags;
   }
-   String? statusDisplay(BuildContext context, [String? status]) {
+
+  String? statusDisplay(BuildContext context, [String? status]) {
     final appLocalizations = AppLocalizations.of(context);
     return switch (status ?? this.status) {
       "pending" => appLocalizations.submissionStatusPending,

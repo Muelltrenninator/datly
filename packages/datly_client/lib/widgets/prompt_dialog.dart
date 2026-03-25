@@ -45,10 +45,10 @@ class PromptDialog extends StatefulWidget {
   final String? description;
 
   /// An optional builder for a preview widget based on the input value.
-  /// 
+  ///
   /// This should exclusively be used for previewing the input value. The widget
   /// will be rebuilt whenever the input value changes.
-  /// 
+  ///
   /// The preview widget will be displayed below the description and above the
   /// input field itself.
   final ValueBuilder<String>? previewBuilder;
