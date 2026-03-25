@@ -366,6 +366,12 @@ class _ValidationPageState extends State<ValidationPage>
     Widget child() {
       Widget itemBuilder(BuildContext context, ({int x, int y}) coordinate) {
         Widget tmp = Skeleton.leaf(
+          key: ValueKey(
+            (payloads.firstOrNull?.payloadData.isCompleted ?? false) &&
+                    payloads.first.images[coordinate.x][coordinate.y] != null
+                ? payloads.first.images[coordinate.x][coordinate.y]!.url
+                : "none",
+          ),
           child: Card(
             clipBehavior: Clip.antiAlias,
             margin: EdgeInsets.all(2),
@@ -389,12 +395,6 @@ class _ValidationPageState extends State<ValidationPage>
           child: tmp,
         );
         return Skeletonizer(
-          key: ValueKey(
-            (payloads.firstOrNull?.payloadData.isCompleted ?? false) &&
-                    payloads.first.images[coordinate.x][coordinate.y] != null
-                ? payloads.first.images[coordinate.x][coordinate.y]!.url
-                : "none",
-          ),
           enabled:
               !(payloads.firstOrNull?.payloadData.isCompleted ?? false) ||
               backlogIsLoadingFor.contains(

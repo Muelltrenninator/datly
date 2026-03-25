@@ -8,7 +8,7 @@
 /// See <https://pub.dev/packages/gitbaker> for more information. To update or
 /// regenerate this file, run `dart run gitbaker` somewhere in this repository.
 ///
-/// Last generated: 2026-03-25T19:37:53
+/// Last generated: 2026-03-25T19:54:52
 library;
 
 enum RemoteType { fetch, push, unknown }
@@ -423,7 +423,7 @@ final class GitBaker {
   static const List<Branch> branches = [
     Branch._(
       name: "main",
-      revision: 61,
+      revision: 62,
       ahead: 0,
       behind: 0,
       commits: [
@@ -488,6 +488,7 @@ final class GitBaker {
         "17acb023e3f7de4310c8ec6d9de3a191de7ada06",
         "15b9b617578a4a12cb9290e125d2b7fad8591a38",
         "1ac512ae01755cee96f936037ed57ce5b670c4a8",
+        "965e3753bcb94bbf4b225fd2c6f96e25ae7a4e49",
       ],
     ),
   ];
@@ -1056,6 +1057,15 @@ final class GitBaker {
       hashAbbreviated: "1ac512a",
       message: "Fixed category selector, various other changes",
       date: DateTime.parse("2026-03-25T18:36:58.000Z"),
+      signed: true,
+      author: "me@jhubi1.com",
+      committer: "me@jhubi1.com",
+    ),
+    Commit._(
+      "965e3753bcb94bbf4b225fd2c6f96e25ae7a4e49",
+      hashAbbreviated: "965e375",
+      message: "Minor validation animation fix",
+      date: DateTime.parse("2026-03-25T18:54:21.000Z"),
       signed: true,
       author: "me@jhubi1.com",
       committer: "me@jhubi1.com",
