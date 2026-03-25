@@ -33,6 +33,11 @@ typedef Payload = ({
   List<List<NetworkImage?>> images,
 });
 
+final _skeletonOptions = SwitchAnimationConfig(
+  duration: Durations.medium1,
+  switchInCurve: Curves.easeInOutCubicEmphasized,
+  switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+);
 PaintingEffect _skeletonEffect(BuildContext context) {
   final colorScheme = ColorScheme.of(context);
   return ShimmerEffect(
@@ -360,7 +365,7 @@ class _ValidationPageState extends State<ValidationPage>
 
     Widget child() {
       Widget itemBuilder(BuildContext context, ({int x, int y}) coordinate) {
-        final tmp = Skeleton.leaf(
+        Widget tmp = Skeleton.leaf(
           child: Card(
             clipBehavior: Clip.antiAlias,
             margin: EdgeInsets.all(2),
@@ -377,6 +382,12 @@ class _ValidationPageState extends State<ValidationPage>
           ),
         );
 
+        tmp = AnimatedSwitcher(
+          duration: Durations.long2,
+          switchInCurve: Curves.easeInOutCubic.flipped,
+          switchOutCurve: Curves.easeInOutCubic,
+          child: tmp,
+        );
         return Skeletonizer(
           key: ValueKey(
             (payloads.firstOrNull?.payloadData.isCompleted ?? false) &&
@@ -392,11 +403,7 @@ class _ValidationPageState extends State<ValidationPage>
                     .last,
               ),
           enableSwitchAnimation: true,
-          switchAnimationConfig: SwitchAnimationConfig(
-            duration: Durations.medium1,
-            switchInCurve: Curves.easeInOutCubicEmphasized,
-            switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-          ),
+          switchAnimationConfig: _skeletonOptions,
           effect: _skeletonEffect(context),
           child: tmp,
         );
@@ -474,11 +481,7 @@ class _ValidationPageState extends State<ValidationPage>
                     snapshot.data?.displayCategory == null ||
                     !(payloads.firstOrNull?.payloadData.isCompleted ?? false),
                 enableSwitchAnimation: true,
-                switchAnimationConfig: SwitchAnimationConfig(
-                  duration: Durations.medium1,
-                  switchInCurve: Curves.easeInOutCubicEmphasized,
-                  switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-                ),
+                switchAnimationConfig: _skeletonOptions,
                 effect: _skeletonEffect(context),
                 child: Text(
                   snapshot.data?.displayCategory ?? "Stand In",
@@ -694,12 +697,7 @@ class ValidationPageGrid extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () => onTap?.call((x: x, y: y)),
                       onLongPress: () => onLongPress?.call((x: x, y: y)),
-                      child: AnimatedSwitcher(
-                        duration: Durations.long2,
-                        switchInCurve: Curves.easeInOutCubic.flipped,
-                        switchOutCurve: Curves.easeInOutCubic,
-                        child: itemBuilder(context, (x: x, y: y)),
-                      ),
+                      child: itemBuilder(context, (x: x, y: y)),
                     ),
                   ),
             ],
