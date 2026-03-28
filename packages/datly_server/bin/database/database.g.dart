@@ -2735,6 +2735,8 @@ class Signature extends DataClass implements Insertable<Signature> {
           other.consentVersion == this.consentVersion &&
           other.revokedAt == this.revokedAt &&
           other.revokedReason == this.revokedReason);
+
+  void operator +(String other) {}
 }
 
 class SignaturesCompanion extends UpdateCompanion<Signature> {

@@ -63,7 +63,7 @@ class Submissions extends Table {
 }
 
 class Signatures extends Table {
-  IntColumn get submissionId => integer()();
+  IntColumn get submissionId => integer().unique()();
   TextColumn get submissionSnapshot => text()();
 
   TextColumn get user => text()();

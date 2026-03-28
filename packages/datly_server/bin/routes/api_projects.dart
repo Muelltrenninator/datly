@@ -215,12 +215,17 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
+        final includePending =
+            req.url.queryParameters["includePending"] == "true";
         final submissions =
             await (db.select(db.submissions)
                   ..where(
                     (s) =>
                         s.projectId.equals(project.id) &
-                        s.status.equals(SubmissionStatus.accepted.name),
+                        s.status.isIn([
+                          SubmissionStatus.accepted.name,
+                          if (includePending) SubmissionStatus.pending.name,
+                        ]),
                   )
                   ..orderBy([
                     (s) => OrderingTerm.desc(s.submittedAt),
@@ -255,6 +260,7 @@ void define(Router router) {
               JsonEncoder.withIndent(" " * 4).convert({
                 "datly": GitBaker.currentBranch.commits.last.hash,
                 "generatedAt": DateTime.now().millisecondsSinceEpoch,
+                "type": includePending ? "premature" : "final",
                 "project": project.toJson(),
                 "submissions": submissions.map((s) {
                   return s.toJson()..["signature"] = signatures[s]!.toJson();

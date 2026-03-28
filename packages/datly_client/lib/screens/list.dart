@@ -5,6 +5,7 @@ import 'dart:js_interop';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:web/web.dart' as web;
@@ -1179,20 +1180,39 @@ class _ListWidgetState extends State<ListWidget> {
                           onPressed: () async {
                             final completer = Completer();
                             String? error;
+                            bool canceled = false;
                             http.Response? response;
                             showStatusModal(
                               context: context,
                               completer: completer,
-                              failureDetailsGenerator: () =>
-                                  error ??
-                                  responseFailureDetailsGenerator(response),
+                              failureDetailsGenerator: () => canceled
+                                  ? null
+                                  : error ??
+                                        responseFailureDetailsGenerator(
+                                          response,
+                                        ),
                             );
+
+                            final includePending =
+                                HardwareKeyboard.instance.isControlPressed;
+                            if (includePending &&
+                                !(await showConfirmationDialog(
+                                  context: context,
+                                  icon: Icon(Icons.warning_amber_outlined),
+                                  title: "Do premature export?",
+                                  description:
+                                      "The following export will include pending submissions that have not been validated yet. These should only be used for testing and debugging purposes, as they might contain invalid data. Are you sure you want to proceed?",
+                                ))) {
+                              canceled = true;
+                              completer.completeError("");
+                              return;
+                            }
 
                             response = await AuthManager.instance.fetch(
                               http.Request(
                                 "GET",
                                 Uri.parse(
-                                  "${ApiManager.baseUri}/projects/${project!.id}/submissions/dump",
+                                  "${ApiManager.baseUri}/projects/${project!.id}/submissions/dump${includePending ? "?includePending=true" : ""}",
                                 ),
                               ),
                             );
@@ -1204,6 +1224,8 @@ class _ListWidgetState extends State<ListWidget> {
 
                             // DOWNLOAD
 
+                            final name =
+                                "datly-project_${project!.id}-dump${includePending ? "-premature" : ""}.zip";
                             try {
                               if (kIsWeb) {
                                 final blob = web.Blob(
@@ -1216,8 +1238,7 @@ class _ListWidgetState extends State<ListWidget> {
                                 final anchor = web.HTMLAnchorElement()
                                   ..style.display = "none"
                                   ..href = url
-                                  ..download =
-                                      "datly-project_${project!.id}-dump.zip";
+                                  ..download = name;
                                 web.document.body?.append(anchor);
                                 anchor.dispatchEvent(web.MouseEvent("click"));
                                 anchor.remove();

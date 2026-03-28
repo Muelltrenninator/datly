@@ -20,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -209,6 +209,9 @@ class AppDatabase extends _$AppDatabase {
             ).stylized(),
           );
         }
+      }
+      if (from < 13) {
+        await m.alterTable(TableMigration(signatures));
       }
 
       t.info("Database migration completed");
