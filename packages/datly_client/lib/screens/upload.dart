@@ -339,7 +339,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.device_unknown, size: 48),
-          SizedBox(height: 8),
+          SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).cameraNotFound,
             textAlign: TextAlign.center,
@@ -447,13 +447,28 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 
     final widget = Stack(
       children: [
-        !error
-            ? controller != null && controller!.value.isInitialized
-                  ? Center(heightFactor: 1.2, child: previewWidget())
-                  : Center(child: CircularProgressIndicator())
-            : noCamera
-            ? Center(child: errorWidget())
-            : Center(child: Icon(Icons.error_outline, size: 48)),
+        AnimatedSwitcher(
+          duration: Durations.medium1,
+          switchInCurve: Curves.easeInOutCubicEmphasized,
+          switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+          child: !error
+              ? controller != null && controller!.value.isInitialized
+                    ? Center(
+                        key: ValueKey("preview"),
+                        heightFactor: 1.2,
+                        child: previewWidget(),
+                      )
+                    : Center(
+                        key: ValueKey("loading"),
+                        child: CircularProgressIndicator(),
+                      )
+              : noCamera
+              ? Center(key: ValueKey("errorCamera"), child: errorWidget())
+              : Center(
+                  key: ValueKey("errorUnspecified"),
+                  child: Icon(Icons.error_outline, size: 48),
+                ),
+        ),
         projectWidget(),
         Align(
           alignment: Alignment.bottomRight,

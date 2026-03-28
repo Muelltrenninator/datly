@@ -75,6 +75,7 @@
     "validationPleaseSelect": "Bitte auswählen:",
     "validationAllDone": "Alles erledigt!",
     "validationAllDoneDescription": "Aktuell gibt es nichts zu prüfen — schau gerne später vorbei.",
+    "validationAllDoneRecheck": "Erneut prüfen",
     "validationReportDialogTitle": "Einsendung melden?",
     "validationReportDialogMessage": "Wenn du glaubst, dass diese Eisendung gegen die Richtlinien verstößt, kannst du sie melden. Bitte beachte, dass das Missbrauchen der Meldefunktion zu einer Sperrung deines Accounts führen kann.",
     "validationReported": "Einsendung gemeldet.",

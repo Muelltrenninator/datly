@@ -268,6 +268,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'No submissions to review right now — check back soon.';
 
   @override
+  String get validationAllDoneRecheck => 'Recheck';
+
+  @override
   String get validationReportDialogTitle => 'Report submission?';
 
   @override

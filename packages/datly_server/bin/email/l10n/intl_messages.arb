@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "@@last_modified": "2026-03-08T15:18:26.252196",
+  "@@last_modified": "2026-03-28T09:54:42.718633",
   "emailWelcomeSubject": "Welcome to Datly",
   "@emailWelcomeSubject": {
     "type": "text",
@@ -390,6 +390,51 @@
   },
   "emailAccountDeletedPart5": " and let us know. We wish you all the best!",
   "@emailAccountDeletedPart5": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionSubject": "New Feature: Help validate waste images on Datly",
+  "@emailValidationIntroductionSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionSummary": "A new validation feature is now available on Datly.",
+  "@emailValidationIntroductionSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionPart1": "we're excited to introduce a new feature: image validation! You can now help improve the quality of our waste classification dataset by validating submitted photos.",
+  "@emailValidationIntroductionPart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionPart2": "Here's how it works: you'll be shown a waste category and a 3×3 grid of images. Your task is to tap all images that match the displayed category. Each tapped image is replaced by a new one. Once no more matching images are visible, hit the submit button to finish the session.",
+  "@emailValidationIntroductionPart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionPart3": "Every validation you submit helps ensure the accuracy of our dataset. The more accurately you validate, the more weight your future votes will carry — so precision matters!",
+  "@emailValidationIntroductionPart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionPart4": "Give it a try and help us build a better dataset. If you have any questions, feel free to ",
+  "@emailValidationIntroductionPart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionPart5": "contact our support team",
+  "@emailValidationIntroductionPart5": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionPart6": ".",
+  "@emailValidationIntroductionPart6": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailValidationIntroductionContentExtra1": "Start Validating",
+  "@emailValidationIntroductionContentExtra1": {
     "type": "text",
     "placeholders": {}
   },

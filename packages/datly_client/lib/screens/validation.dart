@@ -335,10 +335,6 @@ class _ValidationPageState extends State<ValidationPage>
     final height = MediaQuery.sizeOf(context).height;
     final windowSizeClass = WindowSizeClass.of(context);
 
-    if (!AuthManager.instance.authenticatedUserIsAdmin) {
-      throw Exception("Non-admin user tried to access validation page");
-    }
-
     Widget allDoneWidget() => ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: MediaQuery.sizeOf(context).width * 0.7,
@@ -347,7 +343,7 @@ class _ValidationPageState extends State<ValidationPage>
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.library_add_check, size: 48),
-          SizedBox(height: 8),
+          SizedBox(height: 16),
           Text(
             appLocalizations.validationAllDone,
             textAlign: TextAlign.center,
@@ -358,6 +354,16 @@ class _ValidationPageState extends State<ValidationPage>
             appLocalizations.validationAllDoneDescription,
             textAlign: TextAlign.center,
             maxLines: 3,
+          ),
+          SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () {
+              allDone = false;
+              if (mounted) setState(() {});
+              loadPayload(false);
+            },
+            label: Text(AppLocalizations.of(context).validationAllDoneRecheck),
+            icon: Icon(Icons.refresh),
           ),
         ],
       ),
@@ -637,26 +643,6 @@ class _ValidationPageState extends State<ValidationPage>
             child: Confetti(
               controller: confettiController,
               options: ConfettiOptions(x: 1, y: 1, angle: 115),
-            ),
-          ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: IgnorePointer(
-            child: Container(
-              width: double.infinity,
-              color: Colors.red.withValues(alpha: 0.7),
-              child: Transform.scale(
-                scaleX: 0.9,
-                child: Text(
-                  AppLocalizations.of(context).adminOnly,
-                  textAlign: TextAlign.center,
-                  style: TextTheme.of(context).titleMedium!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             ),
           ),
         ),

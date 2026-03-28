@@ -898,6 +898,70 @@ class EmailMessagesTemplates {
       ],
     );
   });
+
+  factory EmailMessagesTemplates.validationIntroduction({
+    required User user,
+  }) => Intl.withLocale(user.locale, () {
+    String emailValidationIntroductionSubject() => Intl.message(
+      "New Feature: Help validate waste images on Datly",
+      name: "emailValidationIntroductionSubject",
+    );
+    String emailValidationIntroductionSummary() => Intl.message(
+      "A new validation feature is now available on Datly.",
+      name: "emailValidationIntroductionSummary",
+    );
+
+    String emailValidationIntroductionPart1() => Intl.message(
+      "we're excited to introduce a new feature: image validation! You can now help improve the quality of our waste classification dataset by validating submitted photos.",
+      name: "emailValidationIntroductionPart1",
+    );
+    String emailValidationIntroductionPart2() => Intl.message(
+      "Here's how it works: you'll be shown a waste category and a 3\u00d73 grid of images. Your task is to tap all images that match the displayed category. Each tapped image is replaced by a new one. Once no more matching images are visible, hit the submit button to finish the session.",
+      name: "emailValidationIntroductionPart2",
+    );
+    String emailValidationIntroductionPart3() => Intl.message(
+      "Every validation you submit helps ensure the accuracy of our dataset. The more accurately you validate, the more weight your future votes will carry — so precision matters!",
+      name: "emailValidationIntroductionPart3",
+    );
+    String emailValidationIntroductionPart4() => Intl.message(
+      "Give it a try and help us build a better dataset. If you have any questions, feel free to ",
+      name: "emailValidationIntroductionPart4",
+    );
+    String emailValidationIntroductionPart5() => Intl.message(
+      "contact our support team",
+      name: "emailValidationIntroductionPart5",
+    );
+    String emailValidationIntroductionPart6() =>
+        Intl.message(".", name: "emailValidationIntroductionPart6");
+
+    String emailValidationIntroductionContentExtra1() => Intl.message(
+      "Start Validating",
+      name: "emailValidationIntroductionContentExtra1",
+    );
+
+    return EmailMessagesTemplates._(
+      user: user,
+      subject: emailValidationIntroductionSubject(),
+      summary: emailValidationIntroductionSummary(),
+      text:
+          "${emailValidationIntroductionPart1()}\n\n${emailValidationIntroductionPart2()}\n\n${emailValidationIntroductionPart3()}\n\n${emailValidationIntroductionPart4()}${emailValidationIntroductionPart5()} (support@con.bz)${emailValidationIntroductionPart6()}\n\n{{canonical}}/validation",
+      content: [
+        MessageContentParagraph([emailValidationIntroductionPart1()]),
+        MessageContentParagraph([emailValidationIntroductionPart2()]),
+        MessageContentParagraph([emailValidationIntroductionPart3()]),
+        MessageContentButton([
+          emailValidationIntroductionContentExtra1(),
+        ], href: "{{canonical}}/validation"),
+        MessageContentParagraph([
+          emailValidationIntroductionPart4(),
+          MessageContentLink([
+            emailValidationIntroductionPart5(),
+          ], href: "mailto:support@con.bz"),
+          emailValidationIntroductionPart6(),
+        ]),
+      ],
+    );
+  });
 }
 
 String emailHello(String username) =>

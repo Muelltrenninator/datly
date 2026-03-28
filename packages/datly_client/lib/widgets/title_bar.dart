@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:datly/generated/gitbaker.g.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:web/web.dart' as web;
 
 import '../api.dart';
 import '../l10n/app_localizations.dart';
@@ -140,36 +139,36 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
                 leading: Icon(Icons.gavel_outlined),
                 title: Text(AppLocalizations.of(context).imprint),
               ),
-              if (AuthManager.instance.authenticatedUserIsAdmin) ...[
-                SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Text(
-                    "Admin settings",
-                    style: TextTheme.of(context).labelLarge,
-                  ),
-                ),
-                ListTile(
-                  onTap: () {
-                    prefs.setBool(
-                      "enableValidationScreen",
-                      !(prefs.getBool("enableValidationScreen") ?? false),
-                    );
-                    web.window.location.reload();
-                  },
-                  leading: Badge(
-                    backgroundColor:
-                        (prefs.getBool("enableValidationScreen") ?? false)
-                        ? Colors.green
-                        : Colors.red,
-                    child: Icon(Icons.science_outlined),
-                  ),
-                  title: Text(
-                    "${(prefs.getBool("enableValidationScreen") ?? false) ? "Turn off" : "Turn on"} validation screen",
-                  ),
-                  dense: true,
-                ),
-              ],
+              // if (AuthManager.instance.authenticatedUserIsAdmin) ...[
+              //   SizedBox(height: 24),
+              //   Padding(
+              //     padding: const EdgeInsets.only(left: 16),
+              //     child: Text(
+              //       "Admin settings",
+              //       style: TextTheme.of(context).labelLarge,
+              //     ),
+              //   ),
+              //   ListTile(
+              //     onTap: () {
+              //       prefs.setBool(
+              //         "enableValidationScreen",
+              //         !(prefs.getBool("enableValidationScreen") ?? false),
+              //       );
+              //       web.window.location.reload();
+              //     },
+              //     leading: Badge(
+              //       backgroundColor:
+              //           (prefs.getBool("enableValidationScreen") ?? false)
+              //           ? Colors.green
+              //           : Colors.red,
+              //       child: Icon(Icons.science_outlined),
+              //     ),
+              //     title: Text(
+              //       "${(prefs.getBool("enableValidationScreen") ?? false) ? "Turn off" : "Turn on"} validation screen",
+              //     ),
+              //     dense: true,
+              //   ),
+              // ],
             ],
           ),
           icon: Icon(Icons.info_outline),

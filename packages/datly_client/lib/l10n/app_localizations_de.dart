@@ -271,6 +271,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Aktuell gibt es nichts zu prüfen — schau gerne später vorbei.';
 
   @override
+  String get validationAllDoneRecheck => 'Erneut prüfen';
+
+  @override
   String get validationReportDialogTitle => 'Einsendung melden?';
 
   @override

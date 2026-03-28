@@ -20,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -200,6 +200,15 @@ class AppDatabase extends _$AppDatabase {
         await (db.update(db.signatures)
               ..where((s) => s.userSnapshot.contains(r"$argon2id$")))
             .write(SignaturesCompanion(userSnapshot: Value("<<REDACTED>>")));
+      }
+      if (from < 12) {
+        for (final user in await select(users).get()) {
+          queueEmail(
+            EmailMessagesTemplates.validationIntroduction(
+              user: user,
+            ).stylized(),
+          );
+        }
       }
 
       t.info("Database migration completed");

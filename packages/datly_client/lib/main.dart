@@ -36,18 +36,14 @@ class AppRouter extends RootStackRouter {
       path: "/",
       guards: [AuthenticationGuard()],
       children: [
-        // TODO: remove on validation production push
-        AuthManager.instance.authenticatedUserIsAdmin &&
-                prefs.getBool("enableValidationScreen") == true
-            ? AutoRoute(
-                page: UploadValidationParentRoute.page,
-                path: "",
-                children: [
-                  AutoRoute(page: UploadRoute.page, path: ""),
-                  AutoRoute(page: ValidationRoute.page, path: "validation"),
-                ],
-              )
-            : AutoRoute(page: UploadRoute.page, path: ""),
+        AutoRoute(
+          page: UploadValidationParentRoute.page,
+          path: "",
+          children: [
+            AutoRoute(page: UploadRoute.page, path: ""),
+            AutoRoute(page: ValidationRoute.page, path: "validation"),
+          ],
+        ),
         AutoRoute(page: SubmissionsRoute.page, path: "submissions"),
         AutoRoute(page: SubmissionDetailsRoute.page, path: "submissions/:id"),
         AutoRoute(page: ListUsersRoute.page, path: "users"),
@@ -117,12 +113,12 @@ bool camerasPermissionDenied = false;
 Future<void> camerasInitialize() async {
   cameras = Completer();
   cameras.complete(
-    await availableCameras().onError((e, _) {
+    await availableCameras().onError((e, _) async {
       if (kDebugMode) print(e);
       switch (e) {
         case CameraException c when c.code == "CameraAccessDenied":
           camerasPermissionDenied = true;
-          break;
+          await Future.delayed(Durations.medium1);
       }
       return [];
     }),
@@ -215,10 +211,14 @@ class _MainScreenState extends State<MainScreen> {
 
   void onUpdate() {
     if (ImmersiveModeAction.enabledNotifier.value == true) {
-      if (kIsWeb) web.document.documentElement?.requestFullscreen();
+      try {
+        if (kIsWeb) web.document.documentElement?.requestFullscreen();
+      } catch (_) {}
       prefs.setBool("immersiveMode", true);
     } else {
-      if (kIsWeb) web.document.exitFullscreen();
+      try {
+        if (kIsWeb) web.document.exitFullscreen();
+      } catch (_) {}
       prefs.remove("immersiveMode");
     }
     if (mounted) setState(() {});

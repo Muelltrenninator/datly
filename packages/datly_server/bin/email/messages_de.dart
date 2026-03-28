@@ -41,7 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m9(email) => "wir haben kürzlich auf ein neues Anmeldesystem umgestellt. Die alten Logincodes funktionieren daher nicht mehr. Stattdessen kannst du dich jetzt mit deiner E-Mail-Adresse (${email}) und dem folgenden temporären Passwort anmelden.";
 
-  static m10(email) => "Für dich wurde ein Konto auf Datly erstellt. Bitte verwende das folgende temporäre Passwort zusammen mit deiner E-Mail-Adresse (${email}), um dich anzumelden, und ändere es anschließend.";
+  static m10(email) => "Für dich wurde ein Konto in Datly erstellt. Bitte verwende das folgende temporäre Passwort zusammen mit deiner E-Mail-Adresse (${email}), um dich anzumelden, und ändere es anschließend.";
 
   @override
   final Map<String, dynamic> messages = _notInlinedMessages(_notInlinedMessages);
@@ -117,6 +117,15 @@ class MessageLookup extends MessageLookupByLibrary {
     'emailPasswordResetWelcomePart2': m10,
     'emailPasswordResetWelcomeSubject': MessageLookupByLibrary.simpleMessage('Willkommen bei Datly'),
     'emailPasswordResetWelcomeSummary': MessageLookupByLibrary.simpleMessage('Bitte melde dich mit dem temporären Passwort an, das wir für dich erstellt haben.'),
+    'emailValidationIntroductionContentExtra1': MessageLookupByLibrary.simpleMessage('Jetzt validieren'),
+    'emailValidationIntroductionPart1': MessageLookupByLibrary.simpleMessage('wir freuen uns, ein neues Feature vorzustellen: Bildvalidierung! Du kannst jetzt dabei helfen, die Qualität unseres Müllklassifizierungsdatensatzes zu verbessern, indem du eingesendete Fotos validierst.'),
+    'emailValidationIntroductionPart2': MessageLookupByLibrary.simpleMessage('So funktioniert es: Dir wird eine Müllkategorie und ein 3×3-Raster mit Bildern angezeigt. Deine Aufgabe ist es, alle Bilder auszuwählen, die zur angezeigten Kategorie passen. Jedes angetippte Bild wird durch ein neues ersetzt. Sobald keine passenden Bilder mehr sichtbar sind, tippe auf den Einreichen-Button, um die Sitzung abzuschließen.'),
+    'emailValidationIntroductionPart3': MessageLookupByLibrary.simpleMessage('Jede Validierung, die du einreichst, trägt zur Genauigkeit unseres Datensatzes bei. Je genauer du validierst, desto mehr Gewicht erhalten deine zukünftigen Stimmen — Präzision zählt!'),
+    'emailValidationIntroductionPart4': MessageLookupByLibrary.simpleMessage('Probiere es aus und hilf uns, einen besseren Datensatz aufzubauen. Bei Fragen kannst du dich jederzeit '),
+    'emailValidationIntroductionPart5': MessageLookupByLibrary.simpleMessage('an unser Support-Team wenden'),
+    'emailValidationIntroductionPart6': MessageLookupByLibrary.simpleMessage('.'),
+    'emailValidationIntroductionSubject': MessageLookupByLibrary.simpleMessage('Neues Feature: Hilf mit, Müllbilder in Datly zu validieren'),
+    'emailValidationIntroductionSummary': MessageLookupByLibrary.simpleMessage('Eine neue Validierungsfunktion ist jetzt in Datly verfügbar.'),
     'emailWelcomeContentExtra1': MessageLookupByLibrary.simpleMessage('Jetzt anmelden'),
     'emailWelcomePart1': MessageLookupByLibrary.simpleMessage('wir freuen uns, dich bei Datly begrüßen zu dürfen! Dein Konto wurde erstellt und ist einsatzbereit. Bitte verwende das folgende temporäre Passwort für deine erste Anmeldung und ändere es anschließend.'),
     'emailWelcomePart2': MessageLookupByLibrary.simpleMessage('Du kannst jetzt dein erstes Foto aufnehmen und zu unseren Crowdsourcing-Bemühungen beitragen. Bei Fragen oder wenn du Hilfe brauchst, kannst du dich jederzeit '),

@@ -445,11 +445,13 @@ class CategoryData {
   String name;
   String? displayName;
   int submissionCount;
+  bool canValidate;
 
   CategoryData({
     required this.name,
     required this.displayName,
     required this.submissionCount,
+    required this.canValidate,
   });
 
   String resolveDisplayName() => displayName ?? name;
@@ -476,10 +478,12 @@ class CategoryData {
     name: json["name"]!,
     displayName: json["displayName"],
     submissionCount: json["submissionCount"]!,
+    canValidate: json["canValidate"]!,
   );
   Map<String, dynamic> toJson() => {
     "name": name,
     "displayName": displayName,
     "submissionCount": submissionCount,
+    "canValidate": canValidate,
   };
 }

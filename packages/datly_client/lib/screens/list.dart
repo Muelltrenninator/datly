@@ -1009,6 +1009,8 @@ class _ListWidgetState extends State<ListWidget> {
           avatar: Icon(Icons.list_alt_outlined),
           label: Text(user?.submissionCount.toString() ?? "–"),
         ),
+        if (!(user?.activated ?? true))
+          Chip(avatar: Icon(Icons.no_accounts), label: Text("Not activated")),
       ],
       ListType.project => [
         Chip(
@@ -1063,6 +1065,20 @@ class _ListWidgetState extends State<ListWidget> {
         Chip(
           avatar: Icon(Icons.list_alt_outlined),
           label: Text(category?.submissionCount.toString() ?? "–"),
+        ),
+        Chip(
+          avatar: Icon(
+            category == null || category!.canValidate
+                ? Icons.check_circle_outline_outlined
+                : Icons.cancel_outlined,
+          ),
+          label: Text(
+            category != null
+                ? category!.canValidate
+                      ? "Can validate"
+                      : "Cannot validate"
+                : "–",
+          ),
         ),
       ],
     };

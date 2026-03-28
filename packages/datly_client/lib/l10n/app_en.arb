@@ -414,6 +414,11 @@
         "description": "Additional information shown when there are no more items to validate.",
         "context": "validate"
     },
+    "validationAllDoneRecheck": "Recheck",
+    "@validationAllDoneRecheck": {
+        "description": "Button text to recheck for items to validate.",
+        "context": "validate"
+    },
     "validationReportDialogTitle": "Report submission?",
     "@validationReportDialogTitle": {
         "description": "Title for the dialog to confirm reporting of a submission during validation.",

@@ -28,6 +28,33 @@ void define(Router router) {
                 ),
               ),
         );
+        final canValidate =
+            (await (db.select(db.categories).join([
+                        innerJoin(
+                          db.submissions,
+                          db.submissions.category.equalsExp(db.categories.name),
+                        ),
+                        innerJoin(
+                          db.users,
+                          db.users.username.equalsExp(db.submissions.user),
+                        ),
+                      ])
+                      ..where(
+                        db.submissions.projectId.equals(1) &
+                            db.submissions.status.equals(
+                              SubmissionStatus.pending.name,
+                            ) &
+                            db.users.disabled.isNull(),
+                      )
+                      ..groupBy(
+                        [db.categories.name],
+                        having: db.submissions.id.count().isBiggerOrEqualValue(
+                          4,
+                        ),
+                      ))
+                    .get())
+                .map((row) => row.readTable(db.categories).name)
+                .toSet();
 
         return Response.ok(
           jsonEncode(
@@ -36,6 +63,7 @@ void define(Router router) {
                   (c) => c.toJson()
                     ..addAll({
                       "submissionCount": submissionCounts[c.name] ?? 0,
+                      "canValidate": canValidate.contains(c.name),
                     }),
                 )
                 .toList(),
@@ -65,9 +93,37 @@ void define(Router router) {
                 .read(count) ??
             0;
 
+        final canValidate =
+            await (db.select(db.categories).join([
+                    innerJoin(
+                      db.submissions,
+                      db.submissions.category.equalsExp(db.categories.name),
+                    ),
+                    innerJoin(
+                      db.users,
+                      db.users.username.equalsExp(db.submissions.user),
+                    ),
+                  ])
+                  ..where(
+                    db.categories.name.equals(category.name) &
+                        db.submissions.projectId.equals(1) &
+                        db.submissions.status.equals(
+                          SubmissionStatus.pending.name,
+                        ) &
+                        db.users.disabled.isNull(),
+                  )
+                  ..groupBy([
+                    db.categories.name,
+                  ], having: db.submissions.id.count().isBiggerOrEqualValue(4)))
+                .getSingleOrNull() !=
+            null;
+
         return Response.ok(
           jsonEncode(
-            category.toJson()..addAll({"submissionCount": submissionCount}),
+            category.toJson()..addAll({
+              "submissionCount": submissionCount,
+              "canValidate": canValidate,
+            }),
           ),
           headers: {"Content-Type": "application/json"},
         );

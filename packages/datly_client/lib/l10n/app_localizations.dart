@@ -548,6 +548,12 @@ abstract class AppLocalizations {
   /// **'No submissions to review right now — check back soon.'**
   String get validationAllDoneDescription;
 
+  /// Button text to recheck for items to validate.
+  ///
+  /// In en, this message translates to:
+  /// **'Recheck'**
+  String get validationAllDoneRecheck;
+
   /// Title for the dialog to confirm reporting of a submission during validation.
   ///
   /// In en, this message translates to:
