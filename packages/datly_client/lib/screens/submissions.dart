@@ -54,7 +54,7 @@ class SubmissionsPage extends StatefulWidget {
 
 class _SubmissionsPageState extends State<SubmissionsPage> {
   http.Client? client;
-  Stream<List>? stream;
+  Stream<Map<String, Object>>? stream;
   bool error = false;
 
   ProjectData? effectiveProjectData;
@@ -102,35 +102,44 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
     fetch();
   }
 
-  Stream<List> _bufferedJsonStream(Stream<List<int>> byteStream) async* {
+  Stream<Map<String, Object>> _bufferedJsonStream<T>(
+    Stream<List<int>> byteStream,
+  ) async* {
     final buffer = StringBuffer();
 
-    await for (final chunk in byteStream.transform(const Utf8Decoder())) {
-      buffer.write(chunk);
-      final content = buffer.toString();
-      final lines = content.split("\n");
+    try {
+      await for (final chunk in byteStream.transform(const Utf8Decoder())) {
+        buffer.write(chunk);
+        final content = buffer.toString();
+        final lines = content.split("\n");
 
-      for (var i = 0; i < lines.length - 1; i++) {
-        final line = lines[i].trim();
-        if (line.isNotEmpty) {
-          try {
-            yield jsonDecode(line) as List;
-          } catch (e) {
-            if (kDebugMode) {
-              print("Failed to parse JSON line: $e");
+        for (var i = 0; i < lines.length - 1; i++) {
+          final line = lines[i].trim();
+          if (line.isNotEmpty) {
+            try {
+              yield Map<String, Object>.from(jsonDecode(line) as Map);
+            } catch (e) {
+              if (kDebugMode) {
+                print("Failed to parse JSON line: $e");
+              }
             }
           }
         }
-      }
 
-      buffer.clear();
-      buffer.write(lines.last);
+        buffer.clear();
+        buffer.write(lines.last);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error while processing submissions stream: $e");
+      }
+      rethrow;
     }
 
     final remaining = buffer.toString().trim();
     if (remaining.isNotEmpty) {
       try {
-        yield jsonDecode(remaining) as List;
+        yield Map<String, Object>.from(jsonDecode(remaining) as Map);
       } catch (e) {
         if (kDebugMode) {
           print("Failed to parse final JSON: $e");
@@ -166,21 +175,19 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
 
     client = http.Client();
     try {
+      final filterPart = widget.filter != null
+          ? "&filter=${Uri.encodeQueryComponent(widget.filter!)}"
+          : "";
+      final extra = "&includeCount=true"; // TODO: remove when widely adopted
+      final url = effectiveProject != null
+          ? Uri.parse(
+              "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}$filterPart$extra",
+            )
+          : Uri.parse(
+              "${ApiManager.baseUri}/user/$effectiveUser/submissions/live?page=${widget.page.abs()}$filterPart$extra",
+            );
       client!
-          .send(
-            AuthManager.instance.fetchPrepare(
-              http.Request(
-                "GET",
-                effectiveProject != null
-                    ? Uri.parse(
-                        "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}${widget.filter != null ? "&filter=${Uri.encodeQueryComponent(widget.filter!)}" : ""}",
-                      )
-                    : Uri.parse(
-                        "${ApiManager.baseUri}/user/$effectiveUser/submissions/live?page=${widget.page.abs()}${widget.filter != null ? "&filter=${Uri.encodeQueryComponent(widget.filter!)}" : ""}",
-                      ),
-              ),
-            ),
-          )
+          .send(AuthManager.instance.fetchPrepare(http.Request("GET", url)))
           .then((value) {
             if (value.statusCode == 401 || value.statusCode == 403) {
               AuthManager.instance.fourOhOneFourOhThree(value.statusCode);
@@ -249,14 +256,6 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context);
-
-    final submissionCount =
-        effectiveProjectData?.submissionCount ??
-        effectiveUserData?.submissionCount;
-    final availablePages = submissionCount != null
-        ? (submissionCount / 96).ceil()
-        : null;
-
     return Stack(
       children: [
         !error
@@ -281,8 +280,13 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                               return Center(child: CircularProgressIndicator());
                             }
 
-                            List data = snapshot.data ?? [];
-                            if (data.isEmpty) {
+                            final count = snapshot.data?["count"] as int?;
+                            final availablePages = count != null
+                                ? (count / 96).ceil()
+                                : null;
+
+                            List items = snapshot.data?["items"] as List? ?? [];
+                            if (items.isEmpty) {
                               return Text(
                                 widget.page < 1 ||
                                         ((availablePages ?? 0) != 0 &&
@@ -305,9 +309,9 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                                   child: Wrap(
                                     spacing: 8,
                                     runSpacing: 8,
-                                    children: List.generate(data.length, (i) {
+                                    children: List.generate(items.length, (i) {
                                       final submissionData =
-                                          SubmissionData.fromJson(data[i]);
+                                          SubmissionData.fromJson(items[i]);
                                       return SubmissionWidget(
                                         key: ValueKey(submissionData.id),
                                         data: submissionData,
@@ -337,6 +341,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                                           routeParams: (
                                             project: widget.project,
                                             user: widget.user,
+                                            filter: widget.filter,
                                           ),
                                         ),
                                       ],
@@ -1392,7 +1397,7 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
 class SubmissionsPageControl extends StatelessWidget {
   final int page;
   final int availablePages;
-  final ({String? project, String? user}) routeParams;
+  final ({String? project, String? user, String? filter}) routeParams;
   final bool enabled;
 
   const SubmissionsPageControl({
@@ -1409,6 +1414,7 @@ class SubmissionsPageControl extends StatelessWidget {
         project: routeParams.project,
         user: routeParams.user,
         page: targetPage,
+        filter: routeParams.filter,
       ),
     );
   }

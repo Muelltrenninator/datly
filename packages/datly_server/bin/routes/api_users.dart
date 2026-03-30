@@ -621,57 +621,6 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..get(
-      "/user/<username>/submissions", // MARK: [GET] /user/<username>/submissions
-      apiAuthWall((req, auth) async {
-        int? page;
-        if (req.url.queryParameters["page"] != null) {
-          page = int.tryParse(req.url.queryParameters["page"]!);
-          if (page == null || page < 1) {
-            return Response.badRequest(
-              body: jsonEncode({"error": "Invalid page parameter"}),
-              headers: {"Content-Type": "application/json"},
-            );
-          }
-        }
-        final filter = SubmissionListFilter.fromString(
-          req.url.queryParameters["filter"],
-        );
-
-        final user =
-            await (db.select(db.users)
-                  ..where((u) => u.username.equals(req.params["username"]!)))
-                .getSingleOrNull();
-        if (user == null) {
-          return Response.notFound(
-            jsonEncode({"error": "User not found"}),
-            headers: {"Content-Type": "application/json"},
-          );
-        }
-
-        if (auth!.user.role.index < UserRole.admin.index &&
-            auth.user.username != user.username) {
-          return Response.forbidden(
-            jsonEncode({"error": "Insufficient permissions"}),
-            headers: {"Content-Type": "application/json"},
-          );
-        }
-
-        final query = db.select(db.submissions)
-          ..where((s) => s.user.equals(user.username) & filter.filter)
-          ..orderBy([
-            (s) => OrderingTerm.desc(s.submittedAt),
-            (s) => OrderingTerm.desc(s.id),
-          ]);
-        if (page != null) query.limit(96, offset: (page - 1) * 96);
-        final submissions = await query.get();
-
-        return Response.ok(
-          jsonEncode(submissions.map((s) => s.toJson()).toList()),
-          headers: {"Content-Type": "application/json"},
-        );
-      }),
-    )
-    ..get(
       "/user/<username>/submissions/live", // MARK: [GET] /user/<username>/submissions/live
       apiAuthWall((req, auth) async {
         int? page;
@@ -707,19 +656,31 @@ void define(Router router) {
           );
         }
 
+        Expression<bool> queryWhere($SubmissionsTable s) =>
+            s.user.equals(user.username) & filter.filter;
+        List<OrderingTerm Function($SubmissionsTable)> queryOrderBy = [
+          (s) => OrderingTerm.desc(s.submittedAt),
+          (s) => OrderingTerm.desc(s.id),
+        ];
+
         final query = db.select(db.submissions)
-          ..where((s) => s.user.equals(user.username) & filter.filter)
-          ..orderBy([
-            (s) => OrderingTerm.desc(s.submittedAt),
-            (s) => OrderingTerm.desc(s.id),
-          ]);
+          ..where(queryWhere)
+          ..orderBy(queryOrderBy);
         if (page != null) query.limit(96, offset: (page - 1) * 96);
         final submissions = query.watch();
 
+        final queryCount = db.selectOnly(db.submissions)
+          ..addColumns([db.submissions.id.count()])
+          ..where(queryWhere(db.submissions.asDslTable));
+
+        // TODO: remove when widely adopted
+        final includeCount = req.url.queryParameters["includeCount"] == "true";
         return Response.ok(
-          submissions.map(
-            (data) => utf8.encode(
-              "${jsonEncode(data.map((s) => s.toJson()).toList())}\n",
+          submissions.asyncMap(
+            (data) async => utf8.encode(
+              includeCount
+                  ? "${jsonEncode({"count": (await queryCount.getSingleOrNull())?.read(db.submissions.id.count()), "items": data.map((s) => s.toJson()).toList()})}\n"
+                  : "${jsonEncode(data.map((s) => s.toJson()).toList())}\n",
             ),
           ),
           headers: {"Content-Type": "application/jsonl; charset=utf-8"},

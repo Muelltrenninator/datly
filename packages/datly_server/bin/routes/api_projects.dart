@@ -158,55 +158,6 @@ void define(Router router) {
       }, minimumRole: UserRole.admin),
     )
     ..get(
-      "/projects/<id>/submissions", // MARK: [GET] /projects/<id>/submissions
-      apiAuthWall((req, _) async {
-        int? page;
-        if (req.url.queryParameters["page"] != null) {
-          page = int.tryParse(req.url.queryParameters["page"]!);
-          if (page == null || page < 1) {
-            return Response.badRequest(
-              body: jsonEncode({"error": "Invalid page parameter"}),
-              headers: {"Content-Type": "application/json"},
-            );
-          }
-        }
-        final filter = SubmissionListFilter.fromString(
-          req.url.queryParameters["filter"],
-        );
-
-        final project =
-            await (db.select(db.projects)..where(
-                  (u) => u.id.equals(int.tryParse(req.params["id"]!) ?? -1),
-                ))
-                .getSingleOrNull();
-        if (project == null) {
-          return Response.notFound(jsonEncode({"error": "Project not found"}));
-        }
-
-        final query = db.select(db.submissions)
-          ..where((s) => s.projectId.equals(project.id) & filter.filter)
-          ..orderBy([
-            (s) => OrderingTerm.desc(s.submittedAt),
-            (s) => OrderingTerm.desc(s.id),
-          ]);
-        if (page != null) query.limit(96, offset: (page - 1) * 96);
-        final submissions = await query.get();
-        for (var submission in List<Submission>.from(submissions)) {
-          final user = await (db.select(
-            db.users,
-          )..where((u) => u.username.equals(submission.user))).getSingle();
-          if (user.disabled != null) {
-            submissions.remove(submission);
-          }
-        }
-
-        return Response.ok(
-          jsonEncode(submissions.map((s) => s.toJson()).toList()),
-          headers: {"Content-Type": "application/json"},
-        );
-      }, minimumRole: UserRole.admin),
-    )
-    ..get(
       "/projects/<id>/submissions/dump", // MARK: [GET] /projects/<id>/submissions/dump
       apiAuthWall((req, _) async {
         final project =
@@ -410,29 +361,37 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Project not found"}));
         }
 
-        final query =
-            db.select(db.submissions).join([
-                innerJoin(
-                  db.users,
-                  db.users.username.equalsExp(db.submissions.user),
-                ),
-              ])
-              ..where(
-                db.submissions.projectId.equals(project.id) &
-                    filter.filter &
-                    db.users.disabled.isNull(),
-              )
-              ..orderBy([
-                OrderingTerm.desc(db.submissions.submittedAt),
-                OrderingTerm.desc(db.submissions.id),
-              ]);
+        List<Join<HasResultSet, dynamic>> queryJoins = [
+          innerJoin(db.users, db.users.username.equalsExp(db.submissions.user)),
+        ];
+        Expression<bool> queryWhere =
+            db.submissions.projectId.equals(project.id) &
+            filter.filter &
+            db.users.disabled.isNull();
+        List<OrderingTerm> queryOrderBy = [
+          OrderingTerm.desc(db.submissions.submittedAt),
+          OrderingTerm.desc(db.submissions.id),
+        ];
+
+        final query = db.select(db.submissions).join(queryJoins)
+          ..where(queryWhere)
+          ..orderBy(queryOrderBy);
         if (page != null) query.limit(96, offset: (page - 1) * 96);
         final submissions = query.watch();
 
+        final queryCount = db.selectOnly(db.submissions)
+          ..addColumns([db.submissions.id.count()])
+          ..join(queryJoins)
+          ..where(queryWhere);
+
+        // TODO: remove when widely adopted
+        final includeCount = req.url.queryParameters["includeCount"] == "true";
         return Response.ok(
-          submissions.map(
-            (rows) => utf8.encode(
-              "${jsonEncode(rows.map((r) => r.readTable(db.submissions).toJson()).toList())}\n",
+          submissions.asyncMap(
+            (rows) async => utf8.encode(
+              includeCount
+                  ? "${jsonEncode({"count": (await queryCount.getSingleOrNull())?.read(db.submissions.id.count()), "items": rows.map((r) => r.readTable(db.submissions).toJson()).toList()})}\n"
+                  : "${jsonEncode(rows.map((r) => r.readTable(db.submissions).toJson()).toList())}\n",
             ),
           ),
           headers: {"Content-Type": "application/jsonl; charset=utf-8"},

@@ -128,7 +128,7 @@ Future<void> camerasInitialize() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
-  await BrowserContextMenu.disableContextMenu();
+  // await BrowserContextMenu.disableContextMenu();
 
   prefs = await SharedPreferencesWithCache.create(
     cacheOptions: const SharedPreferencesWithCacheOptions(),
