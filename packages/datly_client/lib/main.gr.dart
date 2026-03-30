@@ -311,6 +311,7 @@ class SubmissionsRoute extends _i9.PageRouteInfo<SubmissionsRouteArgs> {
     String? user,
     String? project,
     int page = 1,
+    String? filter,
     List<_i9.PageRouteInfo>? children,
   }) : super(
          SubmissionsRoute.name,
@@ -319,8 +320,14 @@ class SubmissionsRoute extends _i9.PageRouteInfo<SubmissionsRouteArgs> {
            user: user,
            project: project,
            page: page,
+           filter: filter,
          ),
-         rawQueryParams: {'user': user, 'project': project, 'page': page},
+         rawQueryParams: {
+           'user': user,
+           'project': project,
+           'page': page,
+           'filter': filter,
+         },
          initialChildren: children,
        );
 
@@ -335,6 +342,7 @@ class SubmissionsRoute extends _i9.PageRouteInfo<SubmissionsRouteArgs> {
           user: queryParams.optString('user'),
           project: queryParams.optString('project'),
           page: queryParams.getInt('page', 1),
+          filter: queryParams.optString('filter'),
         ),
       );
       return _i6.SubmissionsPage(
@@ -342,6 +350,7 @@ class SubmissionsRoute extends _i9.PageRouteInfo<SubmissionsRouteArgs> {
         user: args.user,
         project: args.project,
         page: args.page,
+        filter: args.filter,
       );
     },
   );
@@ -353,6 +362,7 @@ class SubmissionsRouteArgs {
     this.user,
     this.project,
     this.page = 1,
+    this.filter,
   });
 
   final _i10.Key? key;
@@ -363,9 +373,11 @@ class SubmissionsRouteArgs {
 
   final int page;
 
+  final String? filter;
+
   @override
   String toString() {
-    return 'SubmissionsRouteArgs{key: $key, user: $user, project: $project, page: $page}';
+    return 'SubmissionsRouteArgs{key: $key, user: $user, project: $project, page: $page, filter: $filter}';
   }
 
   @override
@@ -375,12 +387,17 @@ class SubmissionsRouteArgs {
     return key == other.key &&
         user == other.user &&
         project == other.project &&
-        page == other.page;
+        page == other.page &&
+        filter == other.filter;
   }
 
   @override
   int get hashCode =>
-      key.hashCode ^ user.hashCode ^ project.hashCode ^ page.hashCode;
+      key.hashCode ^
+      user.hashCode ^
+      project.hashCode ^
+      page.hashCode ^
+      filter.hashCode;
 }
 
 /// generated route for

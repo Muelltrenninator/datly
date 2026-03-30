@@ -633,6 +633,9 @@ void define(Router router) {
             );
           }
         }
+        final filter = SubmissionListFilter.fromString(
+          req.url.queryParameters["filter"],
+        );
 
         final user =
             await (db.select(db.users)
@@ -654,7 +657,7 @@ void define(Router router) {
         }
 
         final query = db.select(db.submissions)
-          ..where((s) => s.user.equals(user.username))
+          ..where((s) => s.user.equals(user.username) & filter.filter)
           ..orderBy([
             (s) => OrderingTerm.desc(s.submittedAt),
             (s) => OrderingTerm.desc(s.id),
@@ -681,6 +684,9 @@ void define(Router router) {
             );
           }
         }
+        final filter = SubmissionListFilter.fromString(
+          req.url.queryParameters["filter"],
+        );
 
         final user =
             await (db.select(db.users)
@@ -702,7 +708,7 @@ void define(Router router) {
         }
 
         final query = db.select(db.submissions)
-          ..where((s) => s.user.equals(user.username))
+          ..where((s) => s.user.equals(user.username) & filter.filter)
           ..orderBy([
             (s) => OrderingTerm.desc(s.submittedAt),
             (s) => OrderingTerm.desc(s.id),

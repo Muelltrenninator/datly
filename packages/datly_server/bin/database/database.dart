@@ -223,6 +223,39 @@ enum UserRole { external, user, admin }
 
 enum SubmissionStatus { pending, accepted, rejected, reported, censored }
 
-enum ScoreType { unknown, knownPositive, knownNegative }
-
 enum SignatureMethod { typed }
+
+enum SubmissionListFilter {
+  all,
+  pending,
+  accepted,
+  rejected,
+  reported,
+  censored;
+
+  factory SubmissionListFilter.fromString(String? value) {
+    if (value == null) return SubmissionListFilter.all;
+    return SubmissionListFilter.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => SubmissionListFilter.all,
+    );
+  }
+  Expression<bool> get filter => switch (this) {
+    SubmissionListFilter.all => const Constant(true),
+    SubmissionListFilter.pending => db.submissions.status.equals(
+      SubmissionStatus.pending.name,
+    ),
+    SubmissionListFilter.accepted => db.submissions.status.equals(
+      SubmissionStatus.accepted.name,
+    ),
+    SubmissionListFilter.rejected => db.submissions.status.equals(
+      SubmissionStatus.rejected.name,
+    ),
+    SubmissionListFilter.reported => db.submissions.status.equals(
+      SubmissionStatus.reported.name,
+    ),
+    SubmissionListFilter.censored => db.submissions.status.equals(
+      SubmissionStatus.censored.name,
+    ),
+  };
+}

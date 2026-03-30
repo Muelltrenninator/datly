@@ -28,6 +28,24 @@ void define(Router router) {
                 ),
               ),
         );
+        // Calculate acceptedCount per category
+        final acceptedCounts = Map.fromEntries(
+          (await ((db.selectOnly(db.submissions)
+                    ..addColumns([db.submissions.category, count])
+                    ..where(
+                      db.submissions.status.equals(
+                        SubmissionStatus.accepted.name,
+                      ),
+                    )
+                    ..groupBy([db.submissions.category]))
+                  .get()))
+              .map(
+                (row) => MapEntry(
+                  row.read(db.submissions.category),
+                  row.read(count) ?? 0,
+                ),
+              ),
+        );
         final canValidate =
             (await (db.select(db.categories).join([
                         innerJoin(
@@ -63,6 +81,7 @@ void define(Router router) {
                   (c) => c.toJson()
                     ..addAll({
                       "submissionCount": submissionCounts[c.name] ?? 0,
+                      "acceptedCount": acceptedCounts[c.name] ?? 0,
                       "canValidate": canValidate.contains(c.name),
                     }),
                 )
@@ -83,16 +102,27 @@ void define(Router router) {
           return Response.notFound(jsonEncode({"error": "Category not found"}));
         }
 
-        final count = db.submissions.id.count();
         final submissionCount =
             (await (db.selectOnly(db.submissions)
-                      ..addColumns([count])
+                      ..addColumns([db.submissions.id.count()])
                       ..where(db.submissions.category.equals(category.name)))
                     .get())
                 .first
-                .read(count) ??
+                .read(db.submissions.id.count()) ??
             0;
-
+        final acceptedCount =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([db.submissions.id.count()])
+                      ..where(
+                        db.submissions.category.equals(category.name) &
+                            db.submissions.status.equals(
+                              SubmissionStatus.accepted.name,
+                            ),
+                      ))
+                    .get())
+                .first
+                .read(db.submissions.id.count()) ??
+            0;
         final canValidate =
             await (db.select(db.categories).join([
                     innerJoin(
@@ -122,6 +152,7 @@ void define(Router router) {
           jsonEncode(
             category.toJson()..addAll({
               "submissionCount": submissionCount,
+              "acceptedCount": acceptedCount,
               "canValidate": canValidate,
             }),
           ),

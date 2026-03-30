@@ -170,6 +170,9 @@ void define(Router router) {
             );
           }
         }
+        final filter = SubmissionListFilter.fromString(
+          req.url.queryParameters["filter"],
+        );
 
         final project =
             await (db.select(db.projects)..where(
@@ -181,7 +184,7 @@ void define(Router router) {
         }
 
         final query = db.select(db.submissions)
-          ..where((s) => s.projectId.equals(project.id))
+          ..where((s) => s.projectId.equals(project.id) & filter.filter)
           ..orderBy([
             (s) => OrderingTerm.desc(s.submittedAt),
             (s) => OrderingTerm.desc(s.id),
@@ -394,6 +397,9 @@ void define(Router router) {
             );
           }
         }
+        final filter = SubmissionListFilter.fromString(
+          req.url.queryParameters["filter"],
+        );
 
         final project =
             await (db.select(db.projects)..where(
@@ -413,6 +419,7 @@ void define(Router router) {
               ])
               ..where(
                 db.submissions.projectId.equals(project.id) &
+                    filter.filter &
                     db.users.disabled.isNull(),
               )
               ..orderBy([
@@ -751,8 +758,9 @@ void define(Router router) {
               validationWeightPositive: effectiveCategory.present
                   ? const Value(0)
                   : Value.absent(),
-
-              validationReports: Value.absentIfNull(effectiveValidationReports),
+              validationReports: effectiveCategory.present
+                  ? const Value([])
+                  : Value.absentIfNull(effectiveValidationReports),
             ),
           );
 

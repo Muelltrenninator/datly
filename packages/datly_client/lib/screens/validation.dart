@@ -305,6 +305,7 @@ class _ValidationPageState extends State<ValidationPage>
   ]) async {
     if (!isRetry) loadPayload();
     if (payload.clicked.isEmpty) return;
+    confettiController.launch();
 
     final response = await AuthManager.instance.fetch(
       http.Request("POST", Uri.parse("${ApiManager.baseUri}/validation/submit"))
@@ -314,7 +315,6 @@ class _ValidationPageState extends State<ValidationPage>
           "clicked": payload.clicked,
         }),
     );
-    if (mounted) confettiController.launch();
 
     if (response?.statusCode != 200) {
       if (!mounted) return;

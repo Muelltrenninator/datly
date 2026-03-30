@@ -604,6 +604,7 @@ void define(Router router) {
             }
 
             final rejectSubmission =
+                auth.user.role.index >= UserRole.admin.index ||
                 (submission.validationReports.length + 1) >= 3;
             await (db.update(
               db.submissions,

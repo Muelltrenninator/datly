@@ -512,6 +512,8 @@ class _ListWidgetState extends State<ListWidget> {
   final List<ProjectData> userAssignedProjects = [];
   final List<int> allProjectIds = [];
 
+  bool userShowRealValidationWeightNegative = false;
+
   @override
   void initState() {
     super.initState();
@@ -1067,6 +1069,11 @@ class _ListWidgetState extends State<ListWidget> {
           avatar: Icon(Icons.list_alt_outlined),
           label: Text(category?.submissionCount.toString() ?? "–"),
         ),
+        if ((category?.submissionCount ?? 0) != 0)
+          Chip(
+            avatar: Icon(Icons.check_box_outlined),
+            label: Text(category?.acceptedCount.toString() ?? "–"),
+          ),
         Chip(
           avatar: Icon(
             category == null || category!.canValidate
@@ -1117,13 +1124,30 @@ class _ListWidgetState extends State<ListWidget> {
                           ).format(user?.validationWeightPositive ?? 0),
                         ),
                       ),
-                      Chip(
-                        avatar: Icon(Icons.keyboard_arrow_down),
-                        label: Text(
-                          NumberFormat.decimalPatternDigits(
-                            locale: appLocalizations.localeName,
-                            decimalDigits: 0,
-                          ).format(user?.validationWeightNegative ?? 0),
+                      GestureDetector(
+                        onLongPress: (user?.validationWeightNegative ?? 0) != 0
+                            ? () {
+                                userShowRealValidationWeightNegative =
+                                    !userShowRealValidationWeightNegative;
+                                if (mounted) setState(() {});
+                              }
+                            : null,
+                        child: Chip(
+                          avatar: Icon(
+                            userShowRealValidationWeightNegative
+                                ? Icons.keyboard_double_arrow_down
+                                : Icons.keyboard_arrow_down,
+                          ),
+                          label: Text(
+                            NumberFormat.decimalPatternDigits(
+                              locale: appLocalizations.localeName,
+                              decimalDigits: 0,
+                            ).format(
+                              userShowRealValidationWeightNegative
+                                  ? user?.validationWeightNegative ?? 0
+                                  : (user?.validationWeightNegative ?? 0) ~/ 2,
+                            ),
+                          ),
                         ),
                       ),
                     ],

@@ -38,11 +38,14 @@ class SubmissionsPage extends StatefulWidget {
   final String? user;
   final String? project;
   final int page;
+  final String? filter;
+
   const SubmissionsPage({
     super.key,
     @QueryParam() this.user,
     @QueryParam() this.project,
     @QueryParam() this.page = 1,
+    @QueryParam() this.filter,
   });
 
   @override
@@ -57,6 +60,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   ProjectData? effectiveProjectData;
   UserData? effectiveUserData;
 
+  bool fetchLocked = false;
   ValueNotifier<bool> optionLeftAligned = ValueNotifier(false);
 
   int? get effectiveProject =>
@@ -136,6 +140,10 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
   }
 
   void fetch() {
+    if (fetchLocked) return;
+    fetchLocked = true;
+    if (mounted) setState(() {});
+
     client?.close();
     stream = null;
     effectiveProjectData = null;
@@ -151,6 +159,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
           "Non-admin user tried to access another user's or a specific project's submissions.",
         );
       }
+      fetchLocked = false;
       if (mounted) setState(() {});
       return;
     }
@@ -164,10 +173,10 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                 "GET",
                 effectiveProject != null
                     ? Uri.parse(
-                        "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}",
+                        "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}${widget.filter != null ? "&filter=${Uri.encodeQueryComponent(widget.filter!)}" : ""}",
                       )
                     : Uri.parse(
-                        "${ApiManager.baseUri}/user/$effectiveUser/submissions/live?page=${widget.page.abs()}",
+                        "${ApiManager.baseUri}/user/$effectiveUser/submissions/live?page=${widget.page.abs()}${widget.filter != null ? "&filter=${Uri.encodeQueryComponent(widget.filter!)}" : ""}",
                       ),
               ),
             ),
@@ -176,6 +185,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
             if (value.statusCode == 401 || value.statusCode == 403) {
               AuthManager.instance.fourOhOneFourOhThree(value.statusCode);
               error = true;
+              fetchLocked = false;
               if (mounted) setState(() {});
               return;
             }
@@ -190,6 +200,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                   "Failed to fetch submissions stream: ${value.statusCode} ${value.reasonPhrase}",
                 );
               }
+              fetchLocked = false;
               if (mounted) setState(() {});
               return;
             }
@@ -209,6 +220,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
               print("Error while initiating submissions stream (#2). [$e]");
             }
             if (mounted) setState(() {});
+            return;
           });
     } catch (e) {
       error = true;
@@ -216,6 +228,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
         print("Error while initiating submissions stream (#1). [$e]");
       }
       if (mounted) setState(() {});
+      return;
     }
 
     if (effectiveProject != null) {
@@ -228,6 +241,9 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
       effectiveUserData = userData;
       if (mounted) setState(() {});
     });
+
+    fetchLocked = false;
+    if (mounted) setState(() {});
   }
 
   @override
@@ -351,6 +367,8 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
                   effectiveUser: effectiveUser,
                   effectiveUserData: effectiveUserData,
                   optionLeftAligned: optionLeftAligned,
+                  fetchLocked: fetchLocked,
+                  filter: widget.filter,
                 ),
               ),
             ),
@@ -1165,6 +1183,8 @@ class SubmissionTargetWidget extends StatefulWidget {
   final String effectiveUser;
   final UserData? effectiveUserData;
   final ValueNotifier<bool> optionLeftAligned;
+  final bool fetchLocked;
+  final String? filter;
 
   const SubmissionTargetWidget({
     super.key,
@@ -1173,6 +1193,8 @@ class SubmissionTargetWidget extends StatefulWidget {
     required this.effectiveUser,
     required this.effectiveUserData,
     required this.optionLeftAligned,
+    required this.fetchLocked,
+    required this.filter,
   });
 
   @override
@@ -1203,12 +1225,72 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
     final windowSizeClass = WindowSizeClass.of(context);
     final animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOutCubicEmphasized,
       reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
     );
+
+    Widget filterTile({required String key, required String label}) =>
+        ActionChip(
+          avatar: widget.filter == key ? Icon(Icons.check) : null,
+          label: Text(label),
+          onPressed: !widget.fetchLocked
+              ? () {
+                  if (widget.fetchLocked) return;
+                  final newFilter = widget.filter == key ? null : key;
+                  context.navigateTo(
+                    SubmissionsRoute(
+                      project: widget.effectiveProject?.toString(),
+                      user: widget.effectiveProject == null
+                          ? widget.effectiveUser
+                          : null,
+                      filter: newFilter,
+                    ),
+                  );
+                }
+              : null,
+        );
+    final filters = SizedBox(
+      width: windowSizeClass > WindowSizeClass.compact ? 224 : null,
+      child: Card.filled(
+        margin: EdgeInsets.zero,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              spacing: 2,
+              children: [
+                filterTile(
+                  key: "pending",
+                  label: appLocalizations.submissionStatusPending,
+                ),
+                filterTile(
+                  key: "accepted",
+                  label: appLocalizations.submissionStatusAccepted,
+                ),
+                filterTile(
+                  key: "rejected",
+                  label: appLocalizations.submissionStatusRejected,
+                ),
+                filterTile(
+                  key: "reported",
+                  label: appLocalizations.submissionStatusReported,
+                ),
+                filterTile(
+                  key: "censored",
+                  label: appLocalizations.submissionStatusCensored,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
     return Card.outlined(
       margin: EdgeInsets.zero,
       child: IntrinsicWidth(
@@ -1262,6 +1344,8 @@ class _SubmissionTargetWidgetState extends State<SubmissionTargetWidget>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Divider(height: 1),
+                      filters,
                       Divider(height: 1),
                       (widget.effectiveProject == null ||
                                   widget.effectiveProjectData != null) &&
