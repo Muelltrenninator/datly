@@ -385,7 +385,7 @@ void define(Router router) {
           ..where(queryWhere);
 
         // TODO: remove when widely adopted
-        final includeCount = req.url.queryParameters["includeCount"] == "true";
+        final includeCount = req.url.queryParameters["format"] == "v2";
         return Response.ok(
           submissions.asyncMap(
             (rows) async => utf8.encode(
@@ -702,7 +702,10 @@ void define(Router router) {
             SubmissionsCompanion(
               status:
                   effectiveCategory.present &&
-                      submission.status == SubmissionStatus.accepted
+                      [
+                        SubmissionStatus.accepted,
+                        SubmissionStatus.rejected,
+                      ].contains(submission.status)
                   ? Value(SubmissionStatus.pending)
                   : status != null
                   ? Value(SubmissionStatus.values.byName(status))
@@ -740,10 +743,6 @@ void define(Router router) {
               SubmissionsCompanion(
                 assetId: const Value(null),
                 assetMimeType: const Value(null),
-
-                category: Value(null),
-                validationWeightNegative: Value(0),
-                validationWeightPositive: Value(0),
               ),
             ));
           }

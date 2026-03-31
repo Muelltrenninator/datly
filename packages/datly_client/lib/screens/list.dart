@@ -1133,19 +1133,34 @@ class _ListWidgetState extends State<ListWidget> {
                               }
                             : null,
                         child: Chip(
-                          avatar: Icon(
-                            userShowRealValidationWeightNegative
-                                ? Icons.keyboard_double_arrow_down
-                                : Icons.keyboard_arrow_down,
-                          ),
-                          label: Text(
-                            NumberFormat.decimalPatternDigits(
-                              locale: appLocalizations.localeName,
-                              decimalDigits: 0,
-                            ).format(
+                          avatar: AnimatedSwitcher(
+                            duration: Durations.medium1,
+                            switchInCurve: Curves.easeInOutCubicEmphasized,
+                            switchOutCurve:
+                                Curves.easeInOutCubicEmphasized.flipped,
+                            child: Icon(
+                              key: ValueKey(
+                                userShowRealValidationWeightNegative,
+                              ),
                               userShowRealValidationWeightNegative
-                                  ? user?.validationWeightNegative ?? 0
-                                  : (user?.validationWeightNegative ?? 0) ~/ 2,
+                                  ? Icons.keyboard_double_arrow_down
+                                  : Icons.keyboard_arrow_down,
+                            ),
+                          ),
+                          label: AnimatedSize(
+                            duration: Durations.medium1,
+                            curve: Curves.easeInOutCubicEmphasized,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              NumberFormat.decimalPatternDigits(
+                                locale: appLocalizations.localeName,
+                                decimalDigits: 0,
+                              ).format(
+                                userShowRealValidationWeightNegative
+                                    ? user?.validationWeightNegative ?? 0
+                                    : (user?.validationWeightNegative ?? 0) ~/
+                                          2,
+                              ),
                             ),
                           ),
                         ),

@@ -674,7 +674,7 @@ void define(Router router) {
           ..where(queryWhere(db.submissions.asDslTable));
 
         // TODO: remove when widely adopted
-        final includeCount = req.url.queryParameters["includeCount"] == "true";
+        final includeCount = req.url.queryParameters["format"] == "v2";
         return Response.ok(
           submissions.asyncMap(
             (data) async => utf8.encode(

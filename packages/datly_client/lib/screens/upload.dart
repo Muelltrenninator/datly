@@ -447,27 +447,32 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 
     final widget = Stack(
       children: [
-        AnimatedSwitcher(
-          duration: Durations.medium1,
-          switchInCurve: Curves.easeInOutCubicEmphasized,
-          switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
-          child: !error
-              ? controller != null && controller!.value.isInitialized
-                    ? Center(
-                        key: ValueKey("preview"),
-                        heightFactor: 1.2,
-                        child: previewWidget(),
-                      )
-                    : Center(
-                        key: ValueKey("loading"),
-                        child: CircularProgressIndicator(),
-                      )
-              : noCamera
-              ? Center(key: ValueKey("errorCamera"), child: errorWidget())
-              : Center(
-                  key: ValueKey("errorUnspecified"),
-                  child: Icon(Icons.error_outline, size: 48),
-                ),
+        SizedBox.expand(
+          child: AnimatedSwitcher(
+            duration: Durations.medium1,
+            switchInCurve: Curves.easeInOutCubicEmphasized,
+            switchOutCurve: Curves.easeInOutCubicEmphasized.flipped,
+            child: !error
+                ? controller != null && controller!.value.isInitialized
+                      ? Align(
+                          alignment: Alignment.topCenter,
+                          child: Center(
+                            key: ValueKey("preview"),
+                            heightFactor: 1.2,
+                            child: previewWidget(),
+                          ),
+                        )
+                      : Center(
+                          key: ValueKey("loading"),
+                          child: CircularProgressIndicator(),
+                        )
+                : noCamera
+                ? Center(key: ValueKey("errorCamera"), child: errorWidget())
+                : Center(
+                    key: ValueKey("errorUnspecified"),
+                    child: Icon(Icons.error_outline, size: 48),
+                  ),
+          ),
         ),
         projectWidget(),
         Align(

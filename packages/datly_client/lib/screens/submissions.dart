@@ -178,7 +178,7 @@ class _SubmissionsPageState extends State<SubmissionsPage> {
       final filterPart = widget.filter != null
           ? "&filter=${Uri.encodeQueryComponent(widget.filter!)}"
           : "";
-      final extra = "&includeCount=true"; // TODO: remove when widely adopted
+      final extra = "&format=v2"; // TODO: remove when widely adopted
       final url = effectiveProject != null
           ? Uri.parse(
               "${ApiManager.baseUri}/projects/$effectiveProject/submissions/live?page=${widget.page.abs()}$filterPart$extra",
