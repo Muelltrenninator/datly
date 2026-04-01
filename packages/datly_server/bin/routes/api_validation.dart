@@ -203,19 +203,24 @@ void define(Router router) {
             );
             if (jwt.subject == null) throw JWTException("");
           } on JWTExpiredException catch (_) {
-            return Response.unauthorized(
-              jsonEncode({"error": "Validation token expired"}),
+            return Response(
+              409,
+              body: jsonEncode({"error": "Validation token expired"}),
               headers: {"Content-Type": "application/json"},
             );
           } on JWTException catch (_) {
-            return Response.unauthorized(
-              jsonEncode({"error": "Invalid validation token"}),
+            return Response(
+              409,
+              body: jsonEncode({"error": "Invalid validation token"}),
               headers: {"Content-Type": "application/json"},
             );
           }
           if (jwt.subject != auth?.user.username) {
-            return Response.unauthorized(
-              jsonEncode({"error": "Validation token does not match user"}),
+            return Response(
+              409,
+              body: jsonEncode({
+                "error": "Validation token does not match user",
+              }),
               headers: {"Content-Type": "application/json"},
             );
           }
@@ -324,19 +329,24 @@ void define(Router router) {
               );
               if (jwt.subject == null) throw JWTException("");
             } on JWTExpiredException catch (_) {
-              return Response.unauthorized(
-                jsonEncode({"error": "Validation token expired"}),
+              return Response(
+                409,
+                body: jsonEncode({"error": "Validation token expired"}),
                 headers: {"Content-Type": "application/json"},
               );
             } on JWTException catch (_) {
-              return Response.unauthorized(
-                jsonEncode({"error": "Invalid validation token"}),
+              return Response(
+                409,
+                body: jsonEncode({"error": "Invalid validation token"}),
                 headers: {"Content-Type": "application/json"},
               );
             }
             if (jwt.subject != auth?.user.username) {
-              return Response.unauthorized(
-                jsonEncode({"error": "Validation token does not match user"}),
+              return Response(
+                409,
+                body: jsonEncode({
+                  "error": "Validation token does not match user",
+                }),
                 headers: {"Content-Type": "application/json"},
               );
             }
@@ -562,26 +572,34 @@ void define(Router router) {
               );
               if (jwt.subject == null) throw JWTException("");
             } on JWTExpiredException catch (_) {
-              return Response.unauthorized(
-                jsonEncode({"error": "Validation token expired"}),
+              return Response(
+                409,
+                body: jsonEncode({"error": "Validation token expired"}),
                 headers: {"Content-Type": "application/json"},
               );
             } on JWTException catch (_) {
-              return Response.unauthorized(
-                jsonEncode({"error": "Invalid validation token"}),
+              return Response(
+                409,
+                body: jsonEncode({"error": "Invalid validation token"}),
                 headers: {"Content-Type": "application/json"},
               );
             }
             if (jwt.subject != auth?.user.username) {
-              return Response.unauthorized(
-                jsonEncode({"error": "Validation token does not match user"}),
+              return Response(
+                409,
+                body: jsonEncode({
+                  "error": "Validation token does not match user",
+                }),
                 headers: {"Content-Type": "application/json"},
               );
             }
 
             if (!jwt.payload["items"].contains(req.params["asset"])) {
-              return Response.unauthorized(
-                jsonEncode({"error": "Asset not included in validation token"}),
+              return Response(
+                409,
+                body: jsonEncode({
+                  "error": "Asset not included in validation token",
+                }),
                 headers: {"Content-Type": "application/json"},
               );
             }
