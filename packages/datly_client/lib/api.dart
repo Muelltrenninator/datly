@@ -410,6 +410,7 @@ class ProjectData {
   String? description;
   DateTime createdAt;
   int submissionCount;
+  int acceptedCount;
 
   ProjectData({
     required this.id,
@@ -417,6 +418,7 @@ class ProjectData {
     required this.description,
     required this.createdAt,
     required this.submissionCount,
+    required this.acceptedCount,
   });
 
   static Map<String, dynamic> modifying({String? title, String? description}) =>
@@ -431,6 +433,7 @@ class ProjectData {
       isUtc: true,
     ),
     submissionCount: json["submissionCount"],
+    acceptedCount: json["acceptedCount"],
   );
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -438,6 +441,7 @@ class ProjectData {
     "description": description,
     "createdAt": createdAt.millisecondsSinceEpoch,
     "submissionCount": submissionCount,
+    "acceptedCount": acceptedCount,
   };
 }
 

@@ -28,7 +28,6 @@ void define(Router router) {
                 ),
               ),
         );
-        // Calculate acceptedCount per category
         final acceptedCounts = Map.fromEntries(
           (await ((db.selectOnly(db.submissions)
                     ..addColumns([db.submissions.category, count])
@@ -46,7 +45,8 @@ void define(Router router) {
                 ),
               ),
         );
-        final canValidate =
+
+        final pendingCanValidate =
             (await (db.select(db.categories).join([
                         innerJoin(
                           db.submissions,
@@ -73,6 +73,35 @@ void define(Router router) {
                     .get())
                 .map((row) => row.readTable(db.categories).name)
                 .toSet();
+        final acceptedValidationCounts = Map<String?, int>.fromEntries(
+          (await (db.selectOnly(db.submissions)
+                    ..addColumns([db.submissions.category, count])
+                    ..join([
+                      innerJoin(
+                        db.users,
+                        db.users.username.equalsExp(db.submissions.user),
+                      ),
+                    ])
+                    ..where(
+                      db.submissions.projectId.equals(1) &
+                          db.submissions.status.equals(
+                            SubmissionStatus.accepted.name,
+                          ) &
+                          db.users.disabled.isNull(),
+                    )
+                    ..groupBy([db.submissions.category]))
+                  .get())
+              .map(
+                (row) => MapEntry(
+                  row.read(db.submissions.category),
+                  row.read(count) ?? 0,
+                ),
+              ),
+        );
+        final totalAcceptedValidation = acceptedValidationCounts.values.fold(
+          0,
+          (a, b) => a + b,
+        );
 
         return Response.ok(
           jsonEncode(
@@ -82,7 +111,12 @@ void define(Router router) {
                     ..addAll({
                       "submissionCount": submissionCounts[c.name] ?? 0,
                       "acceptedCount": acceptedCounts[c.name] ?? 0,
-                      "canValidate": canValidate.contains(c.name),
+                      "canValidate":
+                          pendingCanValidate.contains(c.name) &&
+                          (acceptedValidationCounts[c.name] ?? 0) >= 8 &&
+                          (totalAcceptedValidation -
+                                  (acceptedValidationCounts[c.name] ?? 0)) >=
+                              8,
                     }),
                 )
                 .toList(),
@@ -123,7 +157,8 @@ void define(Router router) {
                 .first
                 .read(db.submissions.id.count()) ??
             0;
-        final canValidate =
+
+        final hasPending =
             await (db.select(db.categories).join([
                     innerJoin(
                       db.submissions,
@@ -147,6 +182,52 @@ void define(Router router) {
                   ], having: db.submissions.id.count().isBiggerOrEqualValue(4)))
                 .getSingleOrNull() !=
             null;
+        final acceptedInCategory =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([db.submissions.id.count()])
+                      ..join([
+                        innerJoin(
+                          db.users,
+                          db.users.username.equalsExp(db.submissions.user),
+                        ),
+                      ])
+                      ..where(
+                        db.submissions.projectId.equals(1) &
+                            db.submissions.status.equals(
+                              SubmissionStatus.accepted.name,
+                            ) &
+                            db.submissions.category.equals(category.name) &
+                            db.users.disabled.isNull(),
+                      ))
+                    .get())
+                .first
+                .read(db.submissions.id.count()) ??
+            0;
+        final acceptedNotInCategory =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([db.submissions.id.count()])
+                      ..join([
+                        innerJoin(
+                          db.users,
+                          db.users.username.equalsExp(db.submissions.user),
+                        ),
+                      ])
+                      ..where(
+                        db.submissions.projectId.equals(1) &
+                            db.submissions.status.equals(
+                              SubmissionStatus.accepted.name,
+                            ) &
+                            db.submissions.category
+                                .equals(category.name)
+                                .not() &
+                            db.users.disabled.isNull(),
+                      ))
+                    .get())
+                .first
+                .read(db.submissions.id.count()) ??
+            0;
+        final canValidate =
+            hasPending && acceptedInCategory >= 8 && acceptedNotInCategory >= 8;
 
         return Response.ok(
           jsonEncode(

@@ -1045,6 +1045,11 @@ class _ListWidgetState extends State<ListWidget> {
           avatar: Icon(Icons.list_alt_outlined),
           label: Text(project?.submissionCount.toString() ?? "–"),
         ),
+        if ((project?.submissionCount ?? 0) != 0)
+          Chip(
+            avatar: Icon(Icons.check_box_outlined),
+            label: Text(project?.acceptedCount.toString() ?? "–"),
+          ),
       ],
       ListType.category => [
         Chip(
@@ -1083,8 +1088,8 @@ class _ListWidgetState extends State<ListWidget> {
           label: Text(
             category != null
                 ? category!.canValidate
-                      ? "Can validate"
-                      : "Cannot validate"
+                      ? "Validatable"
+                      : "Unvalidatable"
                 : "–",
           ),
         ),

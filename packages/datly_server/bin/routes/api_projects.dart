@@ -40,13 +40,33 @@ void define(Router router) {
                 ),
               ),
         );
+        final acceptedCounts = Map.fromEntries(
+          (await ((db.selectOnly(db.submissions)
+                    ..addColumns([db.submissions.projectId, count])
+                    ..where(
+                      db.submissions.status.equals(
+                        SubmissionStatus.accepted.name,
+                      ),
+                    )
+                    ..groupBy([db.submissions.projectId]))
+                  .get()))
+              .map(
+                (row) => MapEntry(
+                  row.read(db.submissions.projectId),
+                  row.read(count) ?? 0,
+                ),
+              ),
+        );
 
         return Response.ok(
           jsonEncode(
             projects
                 .map(
                   (p) => p.toJson()
-                    ..addAll({"submissionCount": submissionCounts[p.id] ?? 0}),
+                    ..addAll({
+                      "submissionCount": submissionCounts[p.id] ?? 0,
+                      "acceptedCount": acceptedCounts[p.id] ?? 0,
+                    }),
                 )
                 .toList(),
           ),
@@ -75,10 +95,26 @@ void define(Router router) {
                 .first
                 .read(count) ??
             0;
+        final acceptedCount =
+            (await (db.selectOnly(db.submissions)
+                      ..addColumns([count])
+                      ..where(
+                        db.submissions.projectId.equals(project.id) &
+                            db.submissions.status.equals(
+                              SubmissionStatus.accepted.name,
+                            ),
+                      ))
+                    .get())
+                .first
+                .read(count) ??
+            0;
 
         return Response.ok(
           jsonEncode(
-            project.toJson()..addAll({"submissionCount": submissionCount}),
+            project.toJson()..addAll({
+              "submissionCount": submissionCount,
+              "acceptedCount": acceptedCount,
+            }),
           ),
           headers: {"Content-Type": "application/json"},
         );

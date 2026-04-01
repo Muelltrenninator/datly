@@ -28,6 +28,7 @@ typedef PayloadData = ({
 typedef Payload = ({
   Completer<String> payload,
   Completer<PayloadData> payloadData,
+  Completer<void> displayReady,
   List<String> shown,
   List<String> clicked,
   List<List<NetworkImage?>> images,
@@ -72,7 +73,7 @@ class _ValidationPageState extends State<ValidationPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => loadPayload(false));
+    WidgetsBinding.instance.addPostFrameCallback((_) => loadPayload());
   }
 
   NetworkImage _img(BuildContext context, String id) {
@@ -80,26 +81,33 @@ class _ValidationPageState extends State<ValidationPage>
     return NetworkImage("${ApiManager.baseUri}/assets/$id", scale: scale);
   }
 
-  Future<void> loadPayload([bool delay = true]) async {
+  Future<void> loadPayload() async {
     if (_loadLock) return;
     _loadLock = true;
 
     if (payloads.isNotEmpty) {
       payloads.removeAt(0);
       if (mounted) setState(() {});
+      if (payloads.isNotEmpty) {
+        Future.delayed(Durations.medium4, () {
+          if (payloads.isEmpty) return;
+          payloads.first.displayReady.complete();
+          if (mounted) setState(() {});
+        });
+      }
     }
-    for (var i = 0; i < (2 - payloads.length); i++) {
+    for (var i = 0; i < (3 - payloads.length); i++) {
       final payload = Completer<String>();
       final payloadData = Completer<PayloadData>();
+      final displayReady = Completer<void>();
       payloads.add((
         payload: payload,
         payloadData: payloadData,
+        displayReady: displayReady,
         shown: [],
         clicked: [],
         images: List.generate(3, (_) => []),
       ));
-
-      await Future.delayed(delay ? Durations.extralong1 : Durations.medium1);
 
       final data = await _loadPayloadInternal();
       if (data == null) {
@@ -144,9 +152,9 @@ class _ValidationPageState extends State<ValidationPage>
       for (var s in selected) {
         payloads.singleWhere((p) => p.payload == payload).shown.add(s);
       }
-      clickBlocker = Completer()..complete();
       payload.complete(data.payload);
       payloadData.complete(data.payloadData);
+      if (payloads.length == 1) displayReady.complete();
 
       if (mounted) setState(() {});
     }
@@ -206,9 +214,10 @@ class _ValidationPageState extends State<ValidationPage>
   }
 
   Future<void> _fillBacklog() async {
+    final payloadFirst = payloads.first.payload;
     final response = await AuthManager.instance.fetch(
       http.Request("POST", Uri.parse("${ApiManager.baseUri}/validation/extend"))
-        ..body = jsonEncode({"payload": await payloads.first.payload.future}),
+        ..body = jsonEncode({"payload": await payloadFirst.future}),
     );
     if (response?.statusCode != 200) {
       if (response?.statusCode == 409) {
@@ -237,11 +246,15 @@ class _ValidationPageState extends State<ValidationPage>
       }
 
       backlogIsLoadingFor.add(newId);
-      precacheImage(_img(context, newId), context).then((_) {
+      Future.wait([
+        precacheImage(_img(context, newId), context),
+        Future.delayed(Durations.medium1),
+      ]).then((_) {
         backlogIsLoadingFor.remove(newId);
         if (mounted) setState(() {});
       });
 
+      if (payloads.first.payload != payloadFirst) return;
       payloads.first = (
         payload: Completer()..complete(body["payload"]),
         payloadData: Completer()
@@ -254,6 +267,7 @@ class _ValidationPageState extends State<ValidationPage>
               jwt.payload["knownNegatives"] as List,
             ),
           )),
+        displayReady: payloads.first.displayReady,
         shown: payloads.first.shown,
         clicked: payloads.first.clicked,
         images: payloads.first.images,
@@ -304,6 +318,7 @@ class _ValidationPageState extends State<ValidationPage>
     bool isRetry = false,
   ]) async {
     if (!isRetry) loadPayload();
+    clickBlocker = Completer()..complete();
     if (payload.clicked.isEmpty) return;
     confettiController.launch();
 
@@ -360,7 +375,7 @@ class _ValidationPageState extends State<ValidationPage>
             onPressed: () {
               allDone = false;
               if (mounted) setState(() {});
-              loadPayload(false);
+              loadPayload();
             },
             label: Text(AppLocalizations.of(context).validationAllDoneRecheck),
             icon: Icon(Icons.refresh),
@@ -402,7 +417,7 @@ class _ValidationPageState extends State<ValidationPage>
         );
         return Skeletonizer(
           enabled:
-              !(payloads.firstOrNull?.payloadData.isCompleted ?? false) ||
+              !(payloads.firstOrNull?.displayReady.isCompleted ?? false) ||
               backlogIsLoadingFor.contains(
                 payloads.firstOrNull?.images[coordinate.x][coordinate.y]?.url
                     .split("/")
@@ -485,7 +500,7 @@ class _ValidationPageState extends State<ValidationPage>
               builder: (context, snapshot) => Skeletonizer(
                 enabled:
                     snapshot.data?.displayCategory == null ||
-                    !(payloads.firstOrNull?.payloadData.isCompleted ?? false),
+                    !(payloads.firstOrNull?.displayReady.isCompleted ?? false),
                 enableSwitchAnimation: true,
                 switchAnimationConfig: _skeletonOptions,
                 effect: _skeletonEffect(context),
