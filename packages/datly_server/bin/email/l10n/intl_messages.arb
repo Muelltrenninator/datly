@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "@@last_modified": "2026-03-28T09:54:42.718633",
+  "@@last_modified": "2026-04-11T16:23:28.031550",
   "emailWelcomeSubject": "Welcome to Datly",
   "@emailWelcomeSubject": {
     "type": "text",
@@ -435,6 +435,46 @@
   },
   "emailValidationIntroductionContentExtra1": "Start Validating",
   "@emailValidationIntroductionContentExtra1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywhereSubject": "You have been logged out of all devices",
+  "@emailLoggedOutEverywhereSubject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywhereSummary": "You have been logged out of all devices and need to log back in.",
+  "@emailLoggedOutEverywhereSummary": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywherePart1": "for security reasons, you have been logged out of all devices. You will need to log back in to continue using Datly.",
+  "@emailLoggedOutEverywherePart1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywherePart2": "We recommend changing your password if you haven't done so recently. This helps keep your account secure.",
+  "@emailLoggedOutEverywherePart2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywherePart3": "If you did not request this action or have any concerns, please ",
+  "@emailLoggedOutEverywherePart3": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywherePart4": "contact our support team",
+  "@emailLoggedOutEverywherePart4": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywherePart5": " immediately.",
+  "@emailLoggedOutEverywherePart5": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emailLoggedOutEverywhereContentExtra1": "Log in now",
+  "@emailLoggedOutEverywhereContentExtra1": {
     "type": "text",
     "placeholders": {}
   },

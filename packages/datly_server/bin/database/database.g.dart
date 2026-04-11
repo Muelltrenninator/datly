@@ -357,6 +357,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _tokenRollMeta = const VerificationMeta(
+    'tokenRoll',
+  );
+  @override
+  late final GeneratedColumn<int> tokenRoll = GeneratedColumn<int>(
+    'token_roll',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   @override
   late final GeneratedColumnWithTypeConverter<List<int>, String> projects =
       GeneratedColumn<String>(
@@ -444,6 +456,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     password,
     email,
     joinedAt,
+    tokenRoll,
     projects,
     role,
     disabled,
@@ -492,6 +505,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       context.handle(
         _joinedAtMeta,
         joinedAt.isAcceptableOrUnknown(data['joined_at']!, _joinedAtMeta),
+      );
+    }
+    if (data.containsKey('token_roll')) {
+      context.handle(
+        _tokenRollMeta,
+        tokenRoll.isAcceptableOrUnknown(data['token_roll']!, _tokenRollMeta),
       );
     }
     if (data.containsKey('disabled')) {
@@ -555,6 +574,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}joined_at'],
       )!,
+      tokenRoll: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}token_roll'],
+      )!,
       projects: $UsersTable.$converterprojects.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -606,6 +629,7 @@ class User extends DataClass implements Insertable<User> {
   final String password;
   final String email;
   final DateTime joinedAt;
+  final int tokenRoll;
   final List<int> projects;
   final UserRole role;
   final String? disabled;
@@ -618,6 +642,7 @@ class User extends DataClass implements Insertable<User> {
     required this.password,
     required this.email,
     required this.joinedAt,
+    required this.tokenRoll,
     required this.projects,
     required this.role,
     this.disabled,
@@ -633,6 +658,7 @@ class User extends DataClass implements Insertable<User> {
     map['password'] = Variable<String>(password);
     map['email'] = Variable<String>(email);
     map['joined_at'] = Variable<DateTime>(joinedAt);
+    map['token_roll'] = Variable<int>(tokenRoll);
     {
       map['projects'] = Variable<String>(
         $UsersTable.$converterprojects.toSql(projects),
@@ -661,6 +687,7 @@ class User extends DataClass implements Insertable<User> {
       password: Value(password),
       email: Value(email),
       joinedAt: Value(joinedAt),
+      tokenRoll: Value(tokenRoll),
       projects: Value(projects),
       role: Value(role),
       disabled: disabled == null && nullToAbsent
@@ -683,6 +710,7 @@ class User extends DataClass implements Insertable<User> {
       password: serializer.fromJson<String>(json['password']),
       email: serializer.fromJson<String>(json['email']),
       joinedAt: serializer.fromJson<DateTime>(json['joinedAt']),
+      tokenRoll: serializer.fromJson<int>(json['tokenRoll']),
       projects: serializer.fromJson<List<int>>(json['projects']),
       role: $UsersTable.$converterrole.fromJson(
         serializer.fromJson<String>(json['role']),
@@ -706,6 +734,7 @@ class User extends DataClass implements Insertable<User> {
       'password': serializer.toJson<String>(password),
       'email': serializer.toJson<String>(email),
       'joinedAt': serializer.toJson<DateTime>(joinedAt),
+      'tokenRoll': serializer.toJson<int>(tokenRoll),
       'projects': serializer.toJson<List<int>>(projects),
       'role': serializer.toJson<String>(
         $UsersTable.$converterrole.toJson(role),
@@ -727,6 +756,7 @@ class User extends DataClass implements Insertable<User> {
     String? password,
     String? email,
     DateTime? joinedAt,
+    int? tokenRoll,
     List<int>? projects,
     UserRole? role,
     Value<String?> disabled = const Value.absent(),
@@ -739,6 +769,7 @@ class User extends DataClass implements Insertable<User> {
     password: password ?? this.password,
     email: email ?? this.email,
     joinedAt: joinedAt ?? this.joinedAt,
+    tokenRoll: tokenRoll ?? this.tokenRoll,
     projects: projects ?? this.projects,
     role: role ?? this.role,
     disabled: disabled.present ? disabled.value : this.disabled,
@@ -755,6 +786,7 @@ class User extends DataClass implements Insertable<User> {
       password: data.password.present ? data.password.value : this.password,
       email: data.email.present ? data.email.value : this.email,
       joinedAt: data.joinedAt.present ? data.joinedAt.value : this.joinedAt,
+      tokenRoll: data.tokenRoll.present ? data.tokenRoll.value : this.tokenRoll,
       projects: data.projects.present ? data.projects.value : this.projects,
       role: data.role.present ? data.role.value : this.role,
       disabled: data.disabled.present ? data.disabled.value : this.disabled,
@@ -776,6 +808,7 @@ class User extends DataClass implements Insertable<User> {
           ..write('password: $password, ')
           ..write('email: $email, ')
           ..write('joinedAt: $joinedAt, ')
+          ..write('tokenRoll: $tokenRoll, ')
           ..write('projects: $projects, ')
           ..write('role: $role, ')
           ..write('disabled: $disabled, ')
@@ -793,6 +826,7 @@ class User extends DataClass implements Insertable<User> {
     password,
     email,
     joinedAt,
+    tokenRoll,
     projects,
     role,
     disabled,
@@ -809,6 +843,7 @@ class User extends DataClass implements Insertable<User> {
           other.password == this.password &&
           other.email == this.email &&
           other.joinedAt == this.joinedAt &&
+          other.tokenRoll == this.tokenRoll &&
           other.projects == this.projects &&
           other.role == this.role &&
           other.disabled == this.disabled &&
@@ -823,6 +858,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> password;
   final Value<String> email;
   final Value<DateTime> joinedAt;
+  final Value<int> tokenRoll;
   final Value<List<int>> projects;
   final Value<UserRole> role;
   final Value<String?> disabled;
@@ -836,6 +872,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.password = const Value.absent(),
     this.email = const Value.absent(),
     this.joinedAt = const Value.absent(),
+    this.tokenRoll = const Value.absent(),
     this.projects = const Value.absent(),
     this.role = const Value.absent(),
     this.disabled = const Value.absent(),
@@ -850,6 +887,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     required String password,
     required String email,
     this.joinedAt = const Value.absent(),
+    this.tokenRoll = const Value.absent(),
     this.projects = const Value.absent(),
     this.role = const Value.absent(),
     this.disabled = const Value.absent(),
@@ -866,6 +904,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? password,
     Expression<String>? email,
     Expression<DateTime>? joinedAt,
+    Expression<int>? tokenRoll,
     Expression<String>? projects,
     Expression<String>? role,
     Expression<String>? disabled,
@@ -880,6 +919,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (password != null) 'password': password,
       if (email != null) 'email': email,
       if (joinedAt != null) 'joined_at': joinedAt,
+      if (tokenRoll != null) 'token_roll': tokenRoll,
       if (projects != null) 'projects': projects,
       if (role != null) 'role': role,
       if (disabled != null) 'disabled': disabled,
@@ -898,6 +938,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String>? password,
     Value<String>? email,
     Value<DateTime>? joinedAt,
+    Value<int>? tokenRoll,
     Value<List<int>>? projects,
     Value<UserRole>? role,
     Value<String?>? disabled,
@@ -912,6 +953,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       password: password ?? this.password,
       email: email ?? this.email,
       joinedAt: joinedAt ?? this.joinedAt,
+      tokenRoll: tokenRoll ?? this.tokenRoll,
       projects: projects ?? this.projects,
       role: role ?? this.role,
       disabled: disabled ?? this.disabled,
@@ -939,6 +981,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     }
     if (joinedAt.present) {
       map['joined_at'] = Variable<DateTime>(joinedAt.value);
+    }
+    if (tokenRoll.present) {
+      map['token_roll'] = Variable<int>(tokenRoll.value);
     }
     if (projects.present) {
       map['projects'] = Variable<String>(
@@ -982,6 +1027,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('password: $password, ')
           ..write('email: $email, ')
           ..write('joinedAt: $joinedAt, ')
+          ..write('tokenRoll: $tokenRoll, ')
           ..write('projects: $projects, ')
           ..write('role: $role, ')
           ..write('disabled: $disabled, ')
@@ -2102,6 +2148,7 @@ class $SignaturesTable extends Signatures
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _submissionSnapshotMeta =
       const VerificationMeta('submissionSnapshot');
@@ -2735,8 +2782,6 @@ class Signature extends DataClass implements Insertable<Signature> {
           other.consentVersion == this.consentVersion &&
           other.revokedAt == this.revokedAt &&
           other.revokedReason == this.revokedReason);
-
-  void operator +(String other) {}
 }
 
 class SignaturesCompanion extends UpdateCompanion<Signature> {
@@ -3254,6 +3299,7 @@ typedef $$UsersTableCreateCompanionBuilder =
       required String password,
       required String email,
       Value<DateTime> joinedAt,
+      Value<int> tokenRoll,
       Value<List<int>> projects,
       Value<UserRole> role,
       Value<String?> disabled,
@@ -3269,6 +3315,7 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String> password,
       Value<String> email,
       Value<DateTime> joinedAt,
+      Value<int> tokenRoll,
       Value<List<int>> projects,
       Value<UserRole> role,
       Value<String?> disabled,
@@ -3327,6 +3374,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<DateTime> get joinedAt => $composableBuilder(
     column: $table.joinedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tokenRoll => $composableBuilder(
+    column: $table.tokenRoll,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3422,6 +3474,11 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get tokenRoll => $composableBuilder(
+    column: $table.tokenRoll,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get projects => $composableBuilder(
     column: $table.projects,
     builder: (column) => ColumnOrderings(column),
@@ -3478,6 +3535,9 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get joinedAt =>
       $composableBuilder(column: $table.joinedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get tokenRoll =>
+      $composableBuilder(column: $table.tokenRoll, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<List<int>, String> get projects =>
       $composableBuilder(column: $table.projects, builder: (column) => column);
@@ -3562,6 +3622,7 @@ class $$UsersTableTableManager
                 Value<String> password = const Value.absent(),
                 Value<String> email = const Value.absent(),
                 Value<DateTime> joinedAt = const Value.absent(),
+                Value<int> tokenRoll = const Value.absent(),
                 Value<List<int>> projects = const Value.absent(),
                 Value<UserRole> role = const Value.absent(),
                 Value<String?> disabled = const Value.absent(),
@@ -3575,6 +3636,7 @@ class $$UsersTableTableManager
                 password: password,
                 email: email,
                 joinedAt: joinedAt,
+                tokenRoll: tokenRoll,
                 projects: projects,
                 role: role,
                 disabled: disabled,
@@ -3590,6 +3652,7 @@ class $$UsersTableTableManager
                 required String password,
                 required String email,
                 Value<DateTime> joinedAt = const Value.absent(),
+                Value<int> tokenRoll = const Value.absent(),
                 Value<List<int>> projects = const Value.absent(),
                 Value<UserRole> role = const Value.absent(),
                 Value<String?> disabled = const Value.absent(),
@@ -3603,6 +3666,7 @@ class $$UsersTableTableManager
                 password: password,
                 email: email,
                 joinedAt: joinedAt,
+                tokenRoll: tokenRoll,
                 projects: projects,
                 role: role,
                 disabled: disabled,

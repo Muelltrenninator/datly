@@ -962,6 +962,68 @@ class EmailMessagesTemplates {
       ],
     );
   });
+
+  factory EmailMessagesTemplates.loggedOutEverywhere({
+    required User user,
+    required bool byAdmin,
+  }) => Intl.withLocale(user.locale, () {
+    String emailLoggedOutEverywhereSubject() => Intl.message(
+      "You have been logged out of all devices",
+      name: "emailLoggedOutEverywhereSubject",
+    );
+    String emailLoggedOutEverywhereSummary() => Intl.message(
+      "You have been logged out of all devices and need to log back in.",
+      name: "emailLoggedOutEverywhereSummary",
+    );
+
+    String emailLoggedOutEverywherePart1() => Intl.message(
+      "for security reasons, you have been logged out of all devices. You will need to log back in to continue using Datly.",
+      name: "emailLoggedOutEverywherePart1",
+    );
+    String emailLoggedOutEverywherePart2() => Intl.message(
+      "We recommend changing your password if you haven't done so recently. This helps keep your account secure.",
+      name: "emailLoggedOutEverywherePart2",
+    );
+    String emailLoggedOutEverywherePart3() => Intl.message(
+      "If you did not request this action or have any concerns, please ",
+      name: "emailLoggedOutEverywherePart3",
+    );
+    String emailLoggedOutEverywherePart4() => Intl.message(
+      "contact our support team",
+      name: "emailLoggedOutEverywherePart4",
+    );
+    String emailLoggedOutEverywherePart5() =>
+        Intl.message(" immediately.", name: "emailLoggedOutEverywherePart5");
+
+    String emailLoggedOutEverywhereContentExtra1() => Intl.message(
+      "Log in now",
+      name: "emailLoggedOutEverywhereContentExtra1",
+    );
+
+    return EmailMessagesTemplates._(
+      user: user,
+      subject: emailLoggedOutEverywhereSubject(),
+      summary: emailLoggedOutEverywhereSummary(),
+      text:
+          "${emailLoggedOutEverywherePart1()}\n\n${emailLoggedOutEverywherePart2()}\n\n${emailLoggedOutEverywherePart3()}${emailLoggedOutEverywherePart4()} (support@con.bz)${emailLoggedOutEverywherePart5()}\n\n{{canonical}}/login",
+      content: [
+        MessageContentParagraph([emailLoggedOutEverywherePart1()]),
+        MessageContentParagraph([emailLoggedOutEverywherePart2()]),
+        MessageContentButton(
+          [emailLoggedOutEverywhereContentExtra1()],
+          href: "{{canonical}}/login?email=${Uri.encodeComponent(user.email)}",
+        ),
+        if (!byAdmin)
+          MessageContentParagraph([
+            emailLoggedOutEverywherePart3(),
+            MessageContentLink([
+              emailLoggedOutEverywherePart4(),
+            ], href: "mailto:support@con.bz"),
+            emailLoggedOutEverywherePart5(),
+          ]),
+      ],
+    );
+  });
 }
 
 String emailHello(String username) =>

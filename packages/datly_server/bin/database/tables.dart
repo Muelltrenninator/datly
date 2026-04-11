@@ -13,6 +13,7 @@ class Users extends Table {
   TextColumn get password => text()();
   TextColumn get email => text().unique()();
   DateTimeColumn get joinedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get tokenRoll => integer().withDefault(const Constant(1))();
 
   TextColumn get projects =>
       text().map(ListConverter<int>()).withDefault(const Constant("[]"))();

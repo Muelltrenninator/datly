@@ -128,6 +128,7 @@ void define(Router router) {
                     issuer: jwtIssuer(req),
                     audience: jwtAudienceAuth,
                     subject: user.username,
+                    jwtId: user.tokenRoll.toString(),
                   ).sign(
                     jwtPrivateKey,
                     algorithm: JWTAlgorithm.RS256,
@@ -614,6 +615,33 @@ void define(Router router) {
           EmailMessagesTemplates.passwordResetTemporary(
             user: user,
             newPassword: password,
+          ).stylized(),
+        );
+
+        return Response.ok(null);
+      }, minimumRole: UserRole.admin),
+    )
+    ..post(
+      "/user/<username>/logoutEverywhere", // MARK: [POST] /user/<username>/logoutEverywhere
+      apiAuthWall((req, auth) async {
+        final user =
+            await (db.select(db.users)
+                  ..where((u) => u.username.equals(req.params["username"]!)))
+                .getSingleOrNull();
+        if (user == null) {
+          return Response.notFound(
+            jsonEncode({"error": "User not found"}),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
+
+        await (db.update(db.users)
+              ..where((u) => u.username.equals(user.username)))
+            .write(UsersCompanion(tokenRoll: Value(user.tokenRoll + 1)));
+        queueEmail(
+          EmailMessagesTemplates.loggedOutEverywhere(
+            user: user,
+            byAdmin: auth!.user.role.index >= UserRole.admin.index,
           ).stylized(),
         );
 

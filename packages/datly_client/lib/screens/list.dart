@@ -892,6 +892,41 @@ class _ListWidgetState extends State<ListWidget> {
       completer.complete();
     }
 
+    void userLogoutEverywhere() async {
+      if (!await showConfirmationDialog(
+            context: context,
+            title: "Logout everywhere",
+            description:
+                "Are you sure you want to log out this user from all devices? This will invalidate all of the user's current sessions. The user will be notified via email. This action cannot be undone.",
+          ) ||
+          !context.mounted) {
+        return;
+      }
+
+      final completer = Completer<void>();
+      http.Response? response;
+      showStatusModal(
+        context: context,
+        completer: completer,
+        failureDetailsGenerator: () =>
+            responseFailureDetailsGenerator(response),
+      );
+
+      try {
+        response = await AuthManager.instance.fetch(
+          http.Request("POST", Uri.parse("$uri/logoutEverywhere")),
+        );
+        if (response == null || response.statusCode != 200) {
+          completer.completeError("");
+          return;
+        }
+      } catch (_) {
+        completer.completeError("");
+        return;
+      }
+      completer.complete();
+    }
+
     void categorySetDisplayName() async {
       final newDisplayName = await showPromptDialog(
         context: context,
@@ -1410,6 +1445,13 @@ class _ListWidgetState extends State<ListWidget> {
                           avatar: Icon(Icons.upcoming_outlined),
                           label: Text("New password"),
                           onPressed: showDeleteButton ? userSetPassword : null,
+                        ),
+                        ActionChip(
+                          avatar: Icon(Icons.camera_roll_outlined),
+                          label: Text("Logout"),
+                          onPressed: showDeleteButton
+                              ? userLogoutEverywhere
+                              : null,
                         ),
                       ],
                     ],

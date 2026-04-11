@@ -1,3 +1,5 @@
+// ignore_for_file: experimental_member_use
+
 import 'dart:ffi';
 import 'dart:io';
 
@@ -20,7 +22,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   static QueryExecutor _openConnection() => NativeDatabase.createInBackground(
     File("${dataDirectory.path}/datly.db"),
@@ -212,6 +214,11 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 13) {
         await m.alterTable(TableMigration(signatures));
+      }
+      if (from < 14) {
+        await m.alterTable(
+          TableMigration(users, newColumns: [users.tokenRoll]),
+        );
       }
 
       t.info("Database migration completed");

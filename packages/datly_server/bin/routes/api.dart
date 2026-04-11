@@ -149,7 +149,12 @@ Future<Object?> _apiAuthInternal(
     );
   }
 
-  if (user.disabled != null) {
+  if (user.tokenRoll != 1 && user.tokenRoll.toString() != jwt.jwtId) {
+    return Response.unauthorized(
+      jsonEncode({"error": "Token has been invalidated, please log in again"}),
+      headers: {"Content-Type": "application/json"},
+    );
+  } else if (user.disabled != null) {
     return Response.forbidden(
       jsonEncode({"error": "User account is disabled"}),
       headers: {"Content-Type": "application/json"},
