@@ -138,6 +138,10 @@ void shutdown([String signal = "Signal"]) async {
   exit(0);
 }
 
+/// Whether the server is in sunsetting mode; disabling registration, displaying
+/// a message to users etc.
+late final bool sunsetting;
+
 void main(List<String> args) async {
   for (var i in [ProcessSignal.sigint, ProcessSignal.sigterm]) {
     i.watch().listen((e) => shutdown(e.name), onError: (_) {});
@@ -167,6 +171,7 @@ void main(List<String> args) async {
   env = DotEnv(includePlatformEnvironment: true, quiet: true)
     ..load(["${dataDirectory.path}/.env"]);
   initializeSmtpServer();
+  sunsetting = bool.tryParse(env["DATLY_SUNSETTING"] ?? "") ?? false;
   captchaSecretKey = env["DATLY_CAPTCHA_SECRET"];
 
   await generateJwtKeys();

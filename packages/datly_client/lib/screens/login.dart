@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import '../api.dart';
 import '../l10n/app_localizations.dart';
 import '../main.gr.dart';
+import '../widgets/sunset_card.dart';
 import '../widgets/title_bar.dart';
 
 @RoutePage()
@@ -18,7 +19,9 @@ class LoginScreen extends StatefulWidget {
   final String? initialEmail;
   const LoginScreen({super.key, @QueryParam("email") this.initialEmail});
 
-  static ValueNotifier<double> childHeight = ValueNotifier(148);
+  static ValueNotifier<double> childHeight = ValueNotifier(
+    SunsetManager.instance.isSunset ? 321 : 148,
+  );
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -223,7 +226,12 @@ class _LoginScreenState extends State<LoginScreen>
         key: _childHeightKey,
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: 4),
+          if (SunsetManager.instance.isSunset) ...[
+            SizedBox(width: double.infinity, child: SunsetCard()),
+            SizedBox(height: 12),
+          ],
+          if (!SunsetManager.instance.isSunset) SizedBox(height: 4),
+
           textFieldEmail,
           SizedBox(height: 8),
           textFieldPassword,
@@ -669,12 +677,15 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
   @override
   Widget build(BuildContext context) => AutoTabsRouter.builder(
     homeIndex: 0,
-    routes: [LoginRoute(), RegisterRoute()],
+    routes: [
+      LoginRoute(),
+      if (!SunsetManager.instance.isSunset) RegisterRoute(),
+    ],
     builder: (context, children, pageController) {
       final tabsRouter = AutoTabsRouter.of(context);
       final appLocalizations = AppLocalizations.of(context);
 
-      FadeTransition transitionBuilder(child, animation) {
+      Widget transitionBuilder(Widget child, Animation<double> animation) {
         final oldIndex = tabsRouter.previousIndex;
         final newIndex = tabsRouter.activeIndex;
         final isNew = child.key == ValueKey(tabsRouter.activeIndex);
@@ -768,7 +779,9 @@ class _LoginRegisterParentPageState extends State<LoginRegisterParentPage>
                         width: double.infinity,
                         child: tabsRouter.activeIndex == 0
                             ? OutlinedButton.icon(
-                                onPressed: () => tabsRouter.setActiveIndex(1),
+                                onPressed: SunsetManager.instance.isSunset
+                                    ? null
+                                    : () => tabsRouter.setActiveIndex(1),
                                 icon: Icon(Icons.chevron_right),
                                 iconAlignment: IconAlignment.end,
                                 label: Text(appLocalizations.loginRegister),

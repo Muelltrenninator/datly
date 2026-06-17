@@ -72,7 +72,9 @@ class AppRouter extends RootStackRouter {
       guards: [ReverseAuthenticationGuard()],
       children: [
         AutoRoute(page: LoginRoute.page, path: "login"),
-        AutoRoute(page: RegisterRoute.page, path: "register"),
+        SunsetManager.instance.isSunset
+            ? RedirectRoute(path: "register", redirectTo: "login")
+            : AutoRoute(page: RegisterRoute.page, path: "register"),
       ],
     ),
     AutoRoute(page: ErrorRoute.page, path: "*"),
@@ -134,6 +136,7 @@ Future<void> main() async {
     cacheOptions: const SharedPreferencesWithCacheOptions(),
   );
   await AuthManager.instance.initialize();
+  await SunsetManager.instance.initialize();
 
   runApp(const MainApp());
 }
@@ -171,7 +174,10 @@ class _MainAppState extends State<MainApp> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: _appRouter.config(
-        reevaluateListenable: AuthManager.instance,
+        reevaluateListenable: Listenable.merge([
+          AuthManager.instance,
+          SunsetManager.instance,
+        ]),
       ),
     );
   }

@@ -140,6 +140,16 @@
         "description": "Link text for the app's imprint. This string is formatted in MLA title case.",
         "context": "login"
     },
+    "sunsetTitle": "We're saying goodbye to Datly!",
+    "@sunsetTitle": {
+        "description": "Title shown on the sunset page when the app is being discontinued.",
+        "context": "sunset"
+    },
+    "sunsetMessage": "We've accomplished a lot together, but now it's time to say goodbye. Over the next few months, Datly will be gradually phased out. We want to thank you for being part of this journey.",
+    "@sunsetMessage": {
+        "description": "Message shown on the sunset page when the app is being discontinued.",
+        "context": "sunset"
+    },
     "navigationUpload": "Upload",
     "@navigationUpload": {
         "description": "Label for the upload section in the main navigation.",

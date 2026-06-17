@@ -260,6 +260,18 @@ abstract class AppLocalizations {
   /// **'Imprint'**
   String get imprint;
 
+  /// Title shown on the sunset page when the app is being discontinued.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re saying goodbye to Datly!'**
+  String get sunsetTitle;
+
+  /// Message shown on the sunset page when the app is being discontinued.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ve accomplished a lot together, but now it\'s time to say goodbye. Over the next few months, Datly will be gradually phased out. We want to thank you for being part of this journey.'**
+  String get sunsetMessage;
+
   /// Label for the upload section in the main navigation.
   ///
   /// In en, this message translates to:

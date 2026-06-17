@@ -35,6 +35,31 @@ class ApiManager {
       : "0x4AAAAAAChDHJ4ogHeFbGfK";
 }
 
+class SunsetManager extends ChangeNotifier {
+  SunsetManager._();
+  static final SunsetManager _instance = SunsetManager._();
+  static SunsetManager get instance => _instance;
+
+  Future<void> initialize() async {
+    await fetchSunset();
+  }
+
+  bool _isSunset = false;
+  bool get isSunset => _isSunset;
+
+  Future<void> fetchSunset() async {
+    final response = await AuthManager.instance.fetch(
+      http.Request("GET", Uri.parse("${ApiManager.baseUri}/sunset")),
+      ignoreMissingToken: true,
+    );
+    if (response != null && response.statusCode == 200) {
+      final valueBefore = _isSunset;
+      _isSunset = jsonDecode(response.body)["sunsetting"] ?? false;
+      if (valueBefore != _isSunset) notifyListeners();
+    }
+  }
+}
+
 class AuthManager extends ChangeNotifier {
   AuthManager._();
   static final AuthManager _instance = AuthManager._();
@@ -138,8 +163,13 @@ class AuthManager extends ChangeNotifier {
   Future<http.Response?> fetch(
     http.BaseRequest request, {
     String? token,
+    bool? ignoreMissingToken,
   }) async {
-    request = fetchPrepare(request, token: token);
+    request = fetchPrepare(
+      request,
+      token: token,
+      ignoreMissingToken: ignoreMissingToken,
+    );
 
     http.Response response;
     try {
@@ -160,8 +190,13 @@ class AuthManager extends ChangeNotifier {
     return response;
   }
 
-  http.BaseRequest fetchPrepare(http.BaseRequest request, {String? token}) {
+  http.BaseRequest fetchPrepare(
+    http.BaseRequest request, {
+    String? token,
+    bool? ignoreMissingToken,
+  }) {
     final effectiveToken = token ?? authToken;
+    if (effectiveToken == null && (ignoreMissingToken ?? false)) return request;
     assert(
       effectiveToken != null,
       "[AuthManager.fetchPrepare] must never be called with no auth token set.",

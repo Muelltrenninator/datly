@@ -195,6 +195,15 @@ void define(Router router) {
       apiAuthWall((req, auth) async {
         final isAdmin =
             (auth?.user.role ?? UserRole.user).index >= UserRole.admin.index;
+        if (sunsetting && !isAdmin) {
+          return Response.forbidden(
+            jsonEncode({
+              "error":
+                  "Registration is disabled while the server is in sunsetting mode",
+            }),
+            headers: {"Content-Type": "application/json"},
+          );
+        }
         if (auth != null && !isAdmin) {
           return Response.forbidden(
             jsonEncode({"error": "Insufficient permissions"}),

@@ -100,6 +100,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get imprint => 'Impressum';
 
   @override
+  String get sunsetTitle => 'Wir sagen Tschüss zu Datly!';
+
+  @override
+  String get sunsetMessage =>
+      'Wir haben gemeinsam viel erreicht, aber jetzt ist es Zeit, Abschied zu nehmen. In den nächsten Monaten wird Datly schrittweise eingestellt. Wir möchten uns bei dir bedanken, dass du Teil dieser Reise warst.';
+
+  @override
   String get navigationUpload => 'Hochladen';
 
   @override

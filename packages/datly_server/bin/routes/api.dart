@@ -19,12 +19,19 @@ import 'api_validation.dart' as api_validation;
 final jwtAudienceAuth = Audience.one("auth");
 final jwtAudienceValidation = Audience.one("validation");
 
-final apiRouter = Router(
-  notFoundHandler: (request) => Response.notFound(
-    jsonEncode({"error": "Unknown endpoint"}),
-    headers: {"Content-Type": "application/json"},
-  ),
-);
+final apiRouter =
+    Router(
+      notFoundHandler: (request) => Response.notFound(
+        jsonEncode({"error": "Unknown endpoint"}),
+        headers: {"Content-Type": "application/json"},
+      ),
+    )..get(
+      "/sunset",
+      (Request req) => Response.ok(
+        jsonEncode({"sunsetting": sunsetting}),
+        headers: {"Content-Type": "application/json"},
+      ),
+    );
 Handler get apiPipeline => Pipeline()
     .addMiddleware((innerHandler) {
       final authLimiter = shelfLimiter(
